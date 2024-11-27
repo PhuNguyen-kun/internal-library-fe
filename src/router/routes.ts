@@ -4,7 +4,12 @@ import userRoutes from "@/router/routes/user";
 
 const routes: RouteRecordRaw[] = [
   ...adminRoutes,
-  ...userRoutes
+  ...userRoutes,
+  {
+    path: '/demo',
+    name: 'demo',
+    component: () => import("@/components/DemoComponents.vue")
+  }
 ]
 
 export default routes
