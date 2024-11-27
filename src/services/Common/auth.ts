@@ -8,3 +8,7 @@ export const login = (payload: LoginPayload) => {
 export const logout = () => {
   return axiosInstance.post('/auth/logout')
 }
+
+export  const profile = () => {
+  return axiosInstance.get('/auth/profile')
+}
