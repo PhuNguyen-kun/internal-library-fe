@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { ref, defineProps } from 'vue'
 import { listSidebar } from "@/constants";
-import { logout as logoutService } from '@/services/Common/auth'
+import {useAuthStore} from "@/stores/Admin/auth";
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -35,23 +35,13 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const handleMenuClick = async (item: any) => {
   if (item?.action === 'logout') {
-    await logout()
+    await authStore.logout()
   } else if (item?.href) {
     router.push(item.href)
-  }
-}
-
-const logout = async () => {
-  try {
-    await logoutService()
-    console.log('ok')
-    localStorage.removeItem('access_token')
-    await router.push('/login')
-  } catch (error) {
-    console.error('Failed to logout:', error)
   }
 }
 </script>
