@@ -3,6 +3,7 @@ import { login as loginService } from '@/services/Common/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElLoading } from 'element-plus'
+import { logout as logoutService } from '@/services/Common/auth'
 
 const openFullScreen2 = () => {
   const loading = ElLoading.service({
@@ -72,6 +73,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const logout = async () => {
+    try {
+      await logoutService()
+      console.log('ok')
+      localStorage.removeItem('access_token')
+      await router.push('/login')
+    } catch (error) {
+      console.error('Failed to logout:', error)
+    }
+  }
+
   return {
     email,
     password,
@@ -79,6 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     formError,
     loading,
     login,
+    logout,
     validateForm,
     isValidEmail,
   };
