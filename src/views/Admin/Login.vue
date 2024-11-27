@@ -1,52 +1,48 @@
 <template>
   <div class="form-login">
-    <form @submit.prevent="handleSubmit" class="form-login-container" id="form">
+    <form @submit.prevent="authStore.login" class="form-login-container" id="form">
       <div>
         <div class="title">
           <h1 class="heading">Login to Account</h1>
           <p class="desc">Please enter your email and password to continue</p>
         </div>
       </div>
-      <div class="error-message" v-if="formError" style="text-align: center">{{ formError }}</div>
+      <div class="error-message" v-if="authStore.formError" style="text-align: center">{{ authStore.formError }}</div>
 
       <!-- Email -->
       <div class="form-group">
         <div class="label">Email address</div>
         <input
-          v-model="email"
-          type="text"
-          placeholder="Email"
-          class="form-input"
-          :class="{ error: errors.email || formError }"
-          @input="validateEmail"
+            v-model="authStore.email"
+            type="text"
+            placeholder="Email"
+            class="form-input"
+            :class="{ error: authStore.errors.email || authStore.formError }"
+            @input="authStore.validateForm"
         />
-        <div class="error-message" v-if="errors.email">{{ errors.email }}</div>
+        <div class="error-message" v-if="authStore.errors.email">{{ authStore.errors.email }}</div>
       </div>
 
       <!-- Password -->
       <div class="form-group">
         <div class="label">
           <div>Password</div>
-          <a href="#!" class="login-link">Forget Password?</a>
         </div>
         <input
-          v-model="password"
-          type="password"
-          placeholder="Password"
-          class="form-input"
-          :class="{ error: errors.password || formError }"
-          @input="validatePassword"
+            v-model="authStore.password"
+            type="password"
+            placeholder="Password"
+            class="form-input"
+            :class="{ error: authStore.errors.password || authStore.formError }"
+            @input="authStore.validateForm"
         />
-        <div class="error-message" v-if="errors.password">{{ errors.password }}</div>
+        <div class="error-message" v-if="authStore.errors.password">{{ authStore.errors.password }}</div>
       </div>
 
-      <label class="form-checkbox">
-        <input type="checkbox" v-model="remember" />
-        <span class="form-checkbox-label login-link">Remember Password</span>
-      </label>
-
       <div class="btn-group">
-        <button type="submit" class="btn" @click="loginAccount">Sign in</button>
+        <button type="submit" class="btn" v-loading.fullscreen.lock="authStore.fullscreenloading">
+          Sign in
+        </button>
         <div class="link-to-signup">
           <p>Don't have an account?</p>
           <a href="#" style="text-decoration: underline; color: #5a8cff">Create Account</a>
@@ -57,95 +53,11 @@
 </template>
 
 <script lang="ts" setup>
-import { login } from '@/services/Common/auth'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/Admin/auth';
 
-const router = useRouter()
-
-const email = ref<string>('')
-const password = ref<string>('')
-const remember = ref<boolean>(false)
-const errors = ref<{ email?: string; password?: string }>({})
-const formError = ref<string>('');
-
-const handleSubmit = () => {
-  const isValid = checkValidation()
-
-  if (isValid) {
-    console.log('Successfully')
-  } else {
-    console.log('Failed')
-  }
-}
-const loginAccount = async () => {
-  const isValid = checkValidation();
-  if (!isValid) {
-    return;
-  }
-
-  const loginForm = {
-    email: email.value,
-    password: password.value
-  };
-
-  try {
-    const response = await login(loginForm);
-
-    const access_token = response.data.access_token;
-    localStorage.setItem('access_token', access_token);
-
-    router.push('/admin/dashboard');
-  } catch (error) {
-    if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-      formError.value = 'Email or Password is incorrect!';
-    } else {
-      console.error('An unexpected error occurred:', error);
-    }
-  }
-};
-
-const checkValidation = (): boolean => {
-  let isValid = true
-  errors.value = {}
-  formError.value = '';
-
-  if (!isValidEmail(email.value)) {
-    errors.value.email = 'Please enter a valid email'
-    isValid = false
-  }
-
-  if (password.value.length < 6) {
-    errors.value.password = 'Password must be at least 6 characters'
-    isValid = false
-  }
-
-  return isValid
-}
-
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-const validateEmail = () => {
-  if (isValidEmail(email.value)) {
-    removeError('email')
-  }
-}
-
-const validatePassword = () => {
-  if (password.value.length >= 8) {
-    removeError('password')
-  }
-}
-
-const removeError = (field: 'email' | 'password') => {
-  if (errors.value[field]) {
-    errors.value[field] = ''
-  }
-}
+const authStore = useAuthStore();
 </script>
+
 
 <style scoped lang="scss">
 .form-login {
@@ -254,6 +166,7 @@ input:focus {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 14px;
   font-weight: 500;
+  margin-top: 30px;
 }
 
 .btn-group {
