@@ -47,7 +47,6 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits } from "vue";
 
-// Định nghĩa các props
 defineProps({
   visible: {
     type: Boolean,
@@ -71,33 +70,29 @@ defineProps({
   },
 });
 
-// Định nghĩa các sự kiện emit
 const emit = defineEmits(["update:visible", "submit"]);
 
 const formRef = ref();
 
-// Xử lý khi modal đóng
 const handleClose = () => {
-  emit("update:visible", false); // Phát sự kiện update:visible
+  emit("update:visible", false);
 };
 
-// Xử lý khi nhấn nút Cancel
 const handleCancel = () => {
-  emit("update:visible", false); // Đóng modal
+  emit("update:visible", false);
 };
 
-// Xử lý khi nhấn nút Submit
 const handleSubmit = () => {
   formRef.value.validate((valid: boolean) => {
     if (valid) {
-      emit("submit", formData); // Phát sự kiện submit kèm dữ liệu
-      emit("update:visible", false); // Đóng modal
+      emit("submit", formData);
+      emit("update:visible", false);
     }
   });
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 .dialog-footer {
   display: flex;
   justify-content: flex-end;

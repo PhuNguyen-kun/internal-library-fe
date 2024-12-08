@@ -7,19 +7,6 @@
     <a href="#!" class="adjust" @click="$emit('toggleSidebar')">
       <img src="@/assets/img/Admin/toggle-sidebar.svg" alt=""/>
     </a>
-    <div class="search-container">
-      <img src="@/assets/img/Admin/search.svg" alt="" class="search-icon"/>
-      <form action="" class="search-form">
-        <input
-          type="text"
-          name=""
-          id=""
-          placeholder="Search"
-          class="search-input"
-          required="true"
-        />
-      </form>
-    </div>
     <div class="header-right">
       <div class="notification-icon">
         <a href="#!">
@@ -34,7 +21,7 @@
         </a>
       </div>
       <div class="user__profile">
-        <img src="@/assets/img/Admin/user-avatar.svg" alt="User Avatar" class="profile-avatar"/>
+        <img src="@/assets/img/Admin/user-avatar.webp" alt="User Avatar" class="profile-avatar"/>
         <div class="user__infor">
           <span class="user--name" :data-full-name="fullName"
           >{{ fullName }}</span>
@@ -68,9 +55,10 @@ onMounted(async () => {
   align-items: center;
 
   &__action {
+    width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
   }
 }
 
@@ -153,14 +141,14 @@ onMounted(async () => {
     flex-direction: column;
     gap: 5px;
     margin-right: 10px;
-    width: 110px;
+    width: 120px;
   }
 
   &--name {
     display: inline-block;
     font-weight: 700;
     max-height: 20px;
-    max-width: 110px;
+    max-width: 120px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -179,7 +167,7 @@ onMounted(async () => {
 .logo-container {
   width: 200px;
   height: 70px;
-  margin-left: 12px;
+  margin-left: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -207,4 +195,10 @@ onMounted(async () => {
   left: 1440px;
 }
 
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+}
 </style>

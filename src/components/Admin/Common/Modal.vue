@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from "vue";
+import {ref, defineProps, defineEmits} from "vue";
 
-defineProps({
+const props = defineProps({
   visible: {
     type: Boolean,
     required: true,
@@ -30,6 +30,10 @@ defineProps({
     type: String,
     default: "Submit",
   },
+  formRef: {
+    type: Object,
+    required: false,
+  }
 });
 
 const emit = defineEmits(["update:visible", "submit", "reset"]);
@@ -45,23 +49,84 @@ const handleCancel = () => {
 };
 
 const handleSubmit = () => {
-  emit("submit");
-  emit("update:visible", false);
-  emit("reset");
+  if (props.formRef) {
+    props.formRef.validate((valid: boolean) => {
+      if (valid) {
+        emit("submit");
+        emit("update:visible", false);
+        emit("reset");
+      } else {
+        console.log('Form không hợp lệ');
+      }
+    });
+  } else {
+    emit("submit");
+    emit("update:visible", false);
+    emit("reset");
+  }
 };
+
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .dialog-footer {
   display: flex;
   justify-content: center;
+  margin-top: 25px;
+  padding-top: 5px;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 999
 }
-</style>
 
-<style lang="scss">
 .el-dialog__header {
   text-align: center;
   font-weight: 600;
   padding: 5px 0 20px 0;
+}
+
+.el-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+
+  &__header, .dialog-footer {
+    flex-shrink: 0;
+  };
+
+  &__body {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+}
+
+.big-modal {
+  width: 1100px;
+  margin: auto;
+  min-height: 500px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-bottom: 60px;
+
+  .dialog-footer {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+  }
+
+  .el-upload-dragger {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .el-icon--upload {
+    margin-top: 50px;
+  }
 }
 </style>

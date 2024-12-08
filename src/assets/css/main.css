@@ -6,9 +6,8 @@
 }
 
 body {
-    transition:
-            color 0.5s,
-            background-color 0.5s;
+    transition: color 0.5s,
+    background-color 0.5s;
     line-height: 1.6;
     font-family: 'Nunito Sans', sans-serif;
     font-size: 15px;
@@ -25,4 +24,22 @@ body {
 
 a {
     text-decoration: none;
+}
+
+.admin-page-title {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.admin-page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.admin-page-heading--right {
+    display: flex;
+    gap: 10px
 }

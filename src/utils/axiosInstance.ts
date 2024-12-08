@@ -51,11 +51,12 @@ axiosInstance.interceptors.response.use(
       config.onEnd()
     }
 
-    if (error.response && error.response.status === 403) {
-      localStorage.removeItem('authToken')
-      router.push('/login')
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      axiosInstance.post('/logout').finally(() => {
+        localStorage.removeItem('access_token');
+        router.push('/login');
+      });
     }
-
     return Promise.reject(error)
   }
 )
