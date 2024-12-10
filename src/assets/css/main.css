@@ -27,8 +27,9 @@ a {
 }
 
 .admin-page-title {
-    font-size: 22px;
     font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 20px;
 }
 
 .admin-page-heading {
@@ -37,9 +38,27 @@ a {
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
+
+    .admin-search-input {
+        width: 350px;
+        height: 36px;
+        font-size: 14px;
+    }
 }
 
 .admin-page-heading--right {
     display: flex;
     gap: 10px
 }
+
+.admin-search-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.icon--nicer {
+    margin-top: 2px;
+}
+
+

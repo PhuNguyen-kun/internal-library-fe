@@ -79,6 +79,7 @@ export const createEmployee = async (employee: Partial<Employee>): Promise<Emplo
     throw error;
   }
 };
+
 export const updateEmployee = async (id: number, employee: Partial<Employee>): Promise<Employee> => {
   try {
     const response = await axiosInstance.put(`/admin/employees/${id}`, employee);

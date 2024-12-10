@@ -65,7 +65,6 @@ const handleSubmit = () => {
     emit("reset");
   }
 };
-
 </script>
 
 <style lang="scss">

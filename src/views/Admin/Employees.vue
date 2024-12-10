@@ -3,14 +3,21 @@
     <h1 class="admin-page-title">Quản lý nhân viên</h1>
 
     <div class="admin-page-heading">
-      <el-input
-        v-model="searchTerm"
-        placeholder="Tìm kiếm nhân viên theo MSNV và họ tên"
-        class="admin-search-input"
-        @change="handleSearch"
-        clearable
-      />
+      <div class="admin-search-container">
+        <el-input
+          v-model="searchTerm"
+          placeholder="Tìm kiếm nhân viên theo MSNV và họ tên"
+          class="admin-search-input"
+          @change="handleSearch"
+          clearable
+        />
 
+        <Button class=" btn--primary" @click="handleSearch">
+          <el-icon class="icon--nicer">
+            <Search/>
+          </el-icon>
+        </Button>
+      </div>
       <div class="admin-page-heading--right">
         <Button class="btn btn--danger" v-if="selectedRows.length" @click="deleteSelectedEmployees"
         >
@@ -33,7 +40,7 @@
         </Button>
       </div>
     </div>
-    <Table :data="employees" :columns="columns" :loading="fetchLoading" @selection-change="handleSelectionChange" style="height: 581px">
+    <Table :data="employees" :columns="columns" :loading="fetchLoading" @selection-change="handleSelectionChange">
       <template #actions="{ row }">
         <div class="action-buttons">
           <el-button link type="primary" size="small" @click="openEditDialog(row)">
@@ -266,16 +273,20 @@ const editEmployee = ref({
   email: ""
 });
 
-const newEmployee = reactive({
-  employee_code: "",
-  full_name: "",
-  email: ""
-});
+  const newEmployee = reactive({
+    employee_code: "",
+    full_name: "",
+    email: ""
+  });
 
 const formRules = ref({
   employee_code: [
     {required: true, message: "Mã nhân viên không được để trống", trigger: ["blur", "change"]},
-    {pattern: /^K\d{4}$/, message: "Mã nhân viên phải có định dạng K####, không vượt quá K9999", trigger: ["blur", "change"]}
+    {
+      pattern: /^K\d{4}$/,
+      message: "Mã nhân viên phải có định dạng K####, không vượt quá K9999",
+      trigger: ["blur", "change"]
+    }
   ],
   full_name: [
     {required: true, message: "Tên nhân viên không được để trống", trigger: ["blur", "change"]}
@@ -419,6 +430,7 @@ const openCreateModal = () => {
   createFormRef.value?.resetFields();
   createModalVisible.value = true;
 };
+
 const openImportModal = () => {
   fileList.value = [];
   csvData.value = [];
@@ -440,7 +452,7 @@ const openEditDialog = (employee: any) => {
 const openDeleteConfirm = (employeeId: number) => {
   employeeIdToDelete.value = employeeId;
   deleteConfirmVisible.value = true;
-};
+};  
 
 const confirmDelete = async () => {
   if (employeeIdToDelete.value !== null) {
@@ -551,17 +563,6 @@ onMounted(fetchEmployees);
 </script>
 
 <style scoped lang="scss">
-.admin-page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.admin-search-input {
-  width: 350px;
-  height: 35px;
-  font-size: 14px;
-}
-
 .action-buttons {
   display: flex;
   justify-content: space-between;

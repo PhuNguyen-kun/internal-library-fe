@@ -1,6 +1,7 @@
 <template>
-  <el-table :data="data" style="width: 100%; border-radius: 15px; border: 1px solid #ccc" header-row-class-name="table-title" class="table-checkbox"
-  v-loading="loading">
+  <el-table :data="data" style="width: 100%; min-height: calc(100vh - 305px); border-radius: 15px; border: 1px solid #ccc"
+            header-row-class-name="table-title" class="table-checkbox"
+            v-loading="loading" empty-text="Không có bản ghi nào">
     <el-table-column
       type="selection"
       width="65"
@@ -21,7 +22,7 @@
         <el-checkbox v-model="scope.row[column.prop]"/>
       </template>
       <template v-if="$slots[column.prop]" #default="scope">
-        <slot :name="column.prop" :row="scope.row" :index="scope.$index" />
+        <slot :name="column.prop" :row="scope.row" :index="scope.$index"/>
       </template>
       <template v-else #default="scope">
         {{ scope.row[column.prop] }}
@@ -74,19 +75,19 @@ defineProps({
 }
 
 .table-checkbox .el-checkbox__input {
-  border: 1px solid #ccc; /* Viền đậm */
-  border-radius: 2px; /* Bo góc */
+  border: 1px solid #ccc;
+  border-radius: 2px;
   width: 14px;
   height: 14px;
 }
 
 .table-checkbox .el-checkbox__input.is-checked {
-  background-color: #4880ff; /* Màu nền khi được chọn */
+  background-color: #4880ff;
   border-color: #333;
 }
 
 .table-checkbox .el-checkbox__input:hover {
-  border-color: #555; /* Đậm hơn khi hover */
+  border-color: #555;
 }
 
 </style>
