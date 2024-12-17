@@ -1,13 +1,13 @@
 <template>
   <div>
-    <h1 class="admin-page-title">Quản lý danh mục</h1>
+    <h1 class="admin-page__title">Quản lý danh mục</h1>
 
-    <div class="admin-page-heading">
-      <div class="admin-search-container">
+    <div class="admin-page__heading">
+      <div class="admin-page__search-container">
         <el-input
           v-model="searchTerm"
           placeholder="Tìm kiếm nhân viên theo tên danh mục"
-          class="admin-search-input"
+          class="admin-page__search-input"
           @change="handleSearch"
           clearable
         />
@@ -18,7 +18,7 @@
           </el-icon>
         </Button>
       </div>
-      <div class="admin-page-heading--right">
+      <div class="admin-page__heading--right">
         <Button class="btn btn--danger" v-if="selectedRows.length" @click="deleteSelectedCategories"
         >
           <el-icon class="btn--nicer">
@@ -153,8 +153,8 @@ const formRules = {
 };
 
 const searchTerm = ref<string>("");
-const fetchLoading = ref(false);
-const perPage = ref<number>(11);
+const fetchLoading = ref<boolean>(false);
+const perPage = ref<number>(12);
 const pagination = ref({
   current_page: 1,
   total: 0,
@@ -297,7 +297,6 @@ const deleteSelectedCategories = async () => {
 }
 const confirmDeleteSelectedCategories = async () => {
   try {
-
     for (const category of selectedRows.value) {
       await deleteCategory(category.id);
     }
@@ -320,28 +319,3 @@ onMounted(() => {
   fetchCategories();
 });
 </script>
-
-<style scoped lang="scss">
-
-.action-buttons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  width: 100px;
-  height: 32px;
-  padding: 10px 13.5px;
-  background-color: #FAFBFD;
-}
-
-.divider {
-  width: 0.5px;
-  height: 50px;
-  background-color: #ccc;
-}
-
-.error-message {
-  color: red;
-}
-</style>

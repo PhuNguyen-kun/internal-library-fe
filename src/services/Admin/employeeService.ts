@@ -10,7 +10,7 @@ export interface Employee {
   updated_at: string;
 }
 
-export const getEmployees = async (searchTerm: string = '', perPage, page): Promise<Employee[]> => {
+export const getEmployees = async (searchTerm: string = '', perPage: number, page: number): Promise<Employee[]> => {
   try {
     const response = await axiosInstance.get("/admin/employees", {
       params: {

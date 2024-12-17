@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="data" style="width: 100%; min-height: calc(100vh - 305px); border-radius: 15px; border: 1px solid #ccc"
+  <el-table :data="data" style="width: 100%; min-height: calc(100vh - 302px); border-radius: 15px; border: 1px solid #ccc"
             header-row-class-name="table-title" class="table-checkbox"
             v-loading="loading" empty-text="Không có bản ghi nào">
     <el-table-column
@@ -16,7 +16,7 @@
       :label="column.label"
       :width="column.width"
       :align="column.align || 'left'"
-      :fixed="column.fixed ? 'left' : undefined"
+      :fixed="column.fixed ? 'right' : undefined"
     >
       <template #default="scope" v-if="column.type === 'checkbox'">
         <el-checkbox v-model="scope.row[column.prop]"/>
@@ -25,9 +25,8 @@
         <slot :name="column.prop" :row="scope.row" :index="scope.$index"/>
       </template>
       <template v-else #default="scope">
-        {{ scope.row[column.prop] }}
+        <span :class="{'is-line-clamp': column.lineClamp}" :title="scope.row[column.prop]">{{ scope.row[column.prop] }}</span>
       </template>
-
     </el-table-column>
   </el-table>
 </template>
@@ -44,6 +43,7 @@ interface IColumn {
   type: ColumnType,
   align?: "left" | "center" | "right";
   fixed?: boolean;
+  lineClamp?: boolean;
 }
 
 defineProps({
@@ -90,4 +90,15 @@ defineProps({
   border-color: #555;
 }
 
+.is-line-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-table__header, .el-table__body {
+  width: 100%;
+}
 </style>

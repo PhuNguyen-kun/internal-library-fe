@@ -1,15 +1,15 @@
 <template>
   <div>
-    <h1 class="admin-page-title">Quản lý nhân viên</h1>
+    <h1 class="admin-page__title">Quản lý nhân viên</h1>
 
-    <div class="admin-page-heading">
-      <div class="admin-search-container">
+    <div class="admin-page__heading">
+      <div class="admin-page__search-container">
         <el-input
           v-model="searchTerm"
-          placeholder="Tìm kiếm nhân viên theo MSNV và họ tên"
-          class="admin-search-input"
-          @change="handleSearch"
+          class="admin-page__search-input"
           clearable
+          placeholder="Tìm kiếm nhân viên theo MSNV và họ tên"
+          @change="handleSearch"
         />
 
         <Button class=" btn--primary" @click="handleSearch">
@@ -18,8 +18,9 @@
           </el-icon>
         </Button>
       </div>
-      <div class="admin-page-heading--right">
-        <Button class="btn btn--danger" v-if="selectedRows.length" @click="deleteSelectedEmployees"
+
+      <div class="admin-page__heading--right">
+        <Button v-if="selectedRows.length" class="btn btn--danger" @click="deleteSelectedEmployees"
         >
           <el-icon class="btn--nicer">
             <Delete/>
@@ -40,17 +41,18 @@
         </Button>
       </div>
     </div>
-    <Table :data="employees" :columns="columns" :loading="fetchLoading" @selection-change="handleSelectionChange">
+    <Table :columns="columns" :data="employees" :loading="fetchLoading" @selection-change="handleSelectionChange">
       <template #actions="{ row }">
         <div class="action-buttons">
-          <el-button link type="primary" size="small" @click="openEditDialog(row)">
-            <img src="@/assets/img/Admin/edit.svg" alt="Edit"/>
+          <el-button link size="small" type="primary" @click="openEditDialog(row)">
+            <img alt="Edit" src="@/assets/img/Admin/edit.svg"/>
           </el-button>
           <div class="divider"></div>
-          <el-button link type="danger" size="small" @click="openDeleteConfirm(row.id)">
-            <img src="@/assets/img/Admin/delete.svg" alt="Delete"/>
+          <el-button link size="small" type="danger" @click="openDeleteConfirm(row.id)">
+            <img alt="Delete" src="@/assets/img/Admin/delete.svg"/>
           </el-button>
         </div>
+
       </template>
     </Table>
 
@@ -61,41 +63,41 @@
 
     <!-- Delete confirm modal -->
     <Modal
-      :visible="deleteConfirmVisible"
       :title="'Xác nhận xóa'"
-      @update:visible="deleteConfirmVisible = $event"
-      @submit="confirmDelete"
+      :visible="deleteConfirmVisible"
       style="width: 500px"
+      @submit="confirmDelete"
+      @update:visible="deleteConfirmVisible = $event"
     >
       <span>Bạn có chắc chắn muốn xóa nhân viên này?</span>
     </Modal>
 
     <!-- Delete selected confirm modal -->
     <Modal
-      :visible="deleteSelectedConfirmVisible"
       :title="'Xác nhận xóa'"
-      @update:visible="deleteSelectedConfirmVisible = $event"
-      @submit="confirmDeleteSelectedEmployees"
+      :visible="deleteSelectedConfirmVisible"
       style="width: 500px"
+      @submit="confirmDeleteSelectedEmployees"
+      @update:visible="deleteSelectedConfirmVisible = $event"
     >
       <span>Bạn có chắc chắn muốn xóa những nhân viên này?</span>
     </Modal>
 
     <!-- Edit modal -->
     <Modal
-      :visible="editModalVisible"
-      :title="'Chỉnh sửa nhân viên'"
-      @update:visible="editModalVisible = $event"
-      @submit="confirmEdit"
       :formRef="editFormRef"
+      :title="'Chỉnh sửa nhân viên'"
+      :visible="editModalVisible"
       style="width: 600px"
+      @submit="confirmEdit"
+      @update:visible="editModalVisible = $event"
     >
       <el-form
+        ref="editFormRef"
         :model="editEmployee"
         :rules="formRules"
-        ref="editFormRef"
-        require-asterisk-position="right"
         label-position="top"
+        require-asterisk-position="right"
       >
         <el-form-item label="Mã nhân viên" prop="employee_code">
           <el-input v-model="editEmployee.employee_code"></el-input>
@@ -111,20 +113,20 @@
 
     <!--  Add new employee modal  -->
     <Modal
-      :visible="createModalVisible"
-      :title="'Thêm nhân viên'"
-      @update:visible="createModalVisible = $event"
-      @submit="confirmCreate"
-      @close="resetCreateForm"
       :formRef="createFormRef"
+      :title="'Thêm nhân viên'"
+      :visible="createModalVisible"
       style="width: 600px"
+      @close="resetCreateForm"
+      @submit="confirmCreate"
+      @update:visible="createModalVisible = $event"
     >
       <el-form
+        ref="createFormRef"
         :model="newEmployee"
         :rules="formRules"
-        ref="createFormRef"
-        require-asterisk-position="right"
         label-position="top"
+        require-asterisk-position="right"
       >
         <el-form-item label="Mã nhân viên" prop="employee_code">
           <el-input v-model="newEmployee.employee_code"></el-input>
@@ -140,21 +142,21 @@
 
     <!--  Add file Excel import employees -->
     <Modal
-      :visible="importModalVisible"
       :title="'Import danh sách nhân viên'"
-      @update:visible="importModalVisible = $event"
-      @submit="confirmImport"
+      :visible="importModalVisible"
       class="big-modal"
+      @submit="confirmImport"
+      @update:visible="importModalVisible = $event"
     >
       <el-upload
         ref="upload"
-        action=""
         :auto-upload="false"
-        :on-change="handleFileChange"
         :file-list="fileList"
+        :on-change="handleFileChange"
+        action=""
+        class="upload-demo"
         drag
         multiple
-        class="upload-demo"
       >
         <el-icon class="el-icon--upload">
           <upload-filled/>
@@ -171,16 +173,16 @@
       </el-upload>
 
       <!-- Upload summary -->
-      <div class="upload-summary" v-if="csvData.length">
+      <div v-if="csvData.length" class="upload-summary">
         <p>Tổng số nhân viên tạo mới: {{ csvData.length }}</p>
         <p>Tổng số lỗi trong file: {{ totalErrors }}</p>
       </div>
 
       <!-- CSV Preview Table -->
-      <el-table :data="paginatedCsvData" v-if="csvData.length" border class="preview-table">
-        <el-table-column prop="employee_code" label="Mã nhân viên"></el-table-column>
-        <el-table-column prop="full_name" label="Tên nhân viên"></el-table-column>
-        <el-table-column prop="email" label="Email"></el-table-column>
+      <el-table v-if="csvData.length" :data="paginatedCsvData" border class="preview-table">
+        <el-table-column label="Mã nhân viên" prop="employee_code"></el-table-column>
+        <el-table-column label="Tên nhân viên" prop="full_name"></el-table-column>
+        <el-table-column label="Email" prop="email"></el-table-column>
         <el-table-column label="Lỗi">
           <template #default="scope">
             <div v-if="scope.row.errors.length">
@@ -200,16 +202,16 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import {ref, onMounted, reactive, computed} from "vue";
+<script lang="ts" setup>
+import {computed, onMounted, reactive, ref} from "vue";
 import {
-  getEmployees,
-  deleteEmployee,
-  updateEmployee,
   createEmployee,
-  importEmployees,
+  deleteEmployee,
+  getAllEmployeeCodes,
   getAllEmployeesEmails,
-  getAllEmployeeCodes
+  getEmployees,
+  importEmployees,
+  updateEmployee
 } from "@/services/Admin/employeeService";
 import Table from "@/components/Admin/Common/Table.vue";
 import Button from "@/components/Admin/Common/Button.vue";
@@ -234,7 +236,7 @@ const handleError = (error: any, context: string) => {
 };
 
 
-const perPage = ref<number>(11);
+const perPage = ref<number>(12);
 const loading = ref<boolean>(false);
 const employees = ref([]);
 const searchTerm = ref<string>("");
@@ -273,11 +275,11 @@ const editEmployee = ref({
   email: ""
 });
 
-  const newEmployee = reactive({
-    employee_code: "",
-    full_name: "",
-    email: ""
-  });
+const newEmployee = reactive({
+  employee_code: "",
+  full_name: "",
+  email: ""
+});
 
 const formRules = ref({
   employee_code: [
@@ -317,7 +319,6 @@ const handleModalPageChange = async (page: number) => {
   modalPagination.value.total = csvData.value.length;
   modalPagination.value.total_pages = Math.ceil(modalPagination.value.total / modalPagination.value.per_page);
   paginatedCsvData.value = csvData.value.slice(start, end);
-  console.log("Modal pagination:", modalPagination.value);
 };
 
 const handleFileChange = (file) => {
@@ -452,7 +453,7 @@ const openEditDialog = (employee: any) => {
 const openDeleteConfirm = (employeeId: number) => {
   employeeIdToDelete.value = employeeId;
   deleteConfirmVisible.value = true;
-};  
+};
 
 const confirmDelete = async () => {
   if (employeeIdToDelete.value !== null) {
@@ -533,7 +534,6 @@ const confirmImport = async () => {
 // Delete selected employees
 const handleSelectionChange = (selection) => {
   selectedRows.value = selection;
-  console.log(selectedRows.value);
 };
 
 const deleteSelectedEmployees = () => {
@@ -561,30 +561,6 @@ const confirmDeleteSelectedEmployees = async () => {
 
 onMounted(fetchEmployees);
 </script>
-
-<style scoped lang="scss">
-.action-buttons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  width: 100px;
-  height: 32px;
-  padding: 10px 13.5px;
-  background-color: #FAFBFD;
-}
-
-.divider {
-  width: 0.5px;
-  height: 50px;
-  background-color: #ccc;
-}
-
-.error-message {
-  color: red;
-}
-</style>
 
 <style lang="scss">
 .el-upload-list__item {

@@ -37,10 +37,12 @@
       </el-form-item>
     </el-form>
 
-    <div slot="footer" class="dialog-footer">
+    <template v-slot:footer>
+<div  class="dialog-footer">
       <el-button @click="handleCancel">Cancel</el-button>
       <el-button type="primary" @click="handleSubmit">Submit</el-button>
     </div>
+</template>
   </el-dialog>
 </template>
 

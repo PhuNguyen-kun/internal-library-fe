@@ -4,18 +4,21 @@
     :title="title"
     @close="handleClose"
     @update:model-value="updateVisible"
+    destroy-on-close
   >
     <slot></slot>
 
-    <div slot="footer" class="dialog-footer">
-      <el-button @click="handleCancel">Cancel</el-button>
-      <el-button type="primary" @click="handleSubmit">{{ confirmText }}</el-button>
-    </div>
+    <template v-slot:footer>
+      <div class="dialog-footer">
+        <el-button @click="handleCancel">Cancel</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ confirmText }}</el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
 
-<script setup lang="ts">
-import {ref, defineProps, defineEmits} from "vue";
+<script lang="ts" setup>
+import {defineEmits, defineProps} from "vue";
 
 const props = defineProps({
   visible: {
@@ -46,6 +49,7 @@ const handleClose = () => {
 const handleCancel = () => {
   emit("update:visible", false);
   emit("reset");
+  console.log(1)
 };
 
 const handleSubmit = () => {
@@ -71,7 +75,6 @@ const handleSubmit = () => {
 .dialog-footer {
   display: flex;
   justify-content: center;
-  margin-top: 25px;
   padding-top: 5px;
   position: sticky;
   bottom: 0;
@@ -93,7 +96,8 @@ const handleSubmit = () => {
 
   &__header, .dialog-footer {
     flex-shrink: 0;
-  };
+  }
+;
 
   &__body {
     flex-grow: 1;

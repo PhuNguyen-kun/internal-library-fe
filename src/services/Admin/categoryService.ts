@@ -8,7 +8,7 @@ export interface Category {
   updatedAt: string;
 }
 
-export const getCategories = async (searchTerm: string = '', perPage, page): Promise<Category[]> => {
+export const getCategories = async (searchTerm: string = '', perPage: number, page: number) => {
   try {
     const response = await axiosInstance.get("/admin/categories", {
       params: {
@@ -43,13 +43,9 @@ export const updateCategory = async (id: number, category: Partial<Category>): P
     const response = await axiosInstance.put(`/admin/categories/${id}`, category);
     return response.data;
   } catch (error) {
-    if (error.response && error.response.status === 422) {
-      console.error('Failed to update employee', error.response.data);
-    } else {
-      console.error('Failed to update employee');
-    }
+      console.error('Failed to update employee', error);
     throw error;
-  }
+    }
 };
 
 export const deleteCategory = async (id: number): Promise<void> => {

@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/Admin/auth';
+import { useAuthStore } from '@/stores/Admin/auth.store';
 
 const authStore = useAuthStore();
 </script>

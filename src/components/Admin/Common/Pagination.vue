@@ -9,7 +9,7 @@
       layout="prev, pager, next"
       :total="pagination.total"
       :page-size="pagination.per_page"
-      :current-page.sync="pagination.current_page"
+      v-model:current-page="pagination.current_page"
       @current-change="handlePageChange"
     />
   </div>
