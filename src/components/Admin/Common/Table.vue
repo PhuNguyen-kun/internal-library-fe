@@ -1,6 +1,6 @@
 <template>
-  <el-table :data="data" style="width: 100%; min-height: calc(100vh - 302px); border-radius: 15px; border: 1px solid #ccc"
-            header-row-class-name="table-title" class="table-checkbox"
+  <el-table :data="data" style="width: 100%; height: calc(100vh - 302px); border-radius: 15px; border: 1px solid #ccc"
+            header-row-class-name="table-title" class="table-checkbox custom-table"
             v-loading="loading" empty-text="Không có bản ghi nào">
     <el-table-column
       type="selection"
@@ -99,6 +99,6 @@ defineProps({
 }
 
 .el-table__header, .el-table__body {
-  width: 100%;
+  width: 100% !important;
 }
 </style>
