@@ -16,7 +16,7 @@
       :label="column.label"
       :width="column.width"
       :align="column.align || 'left'"
-      :fixed="column.fixed ? 'right' : undefined"
+      :fixed="column.fixed"
     >
       <template #default="scope" v-if="column.type === 'checkbox'">
         <el-checkbox v-model="scope.row[column.prop]"/>
@@ -24,8 +24,8 @@
       <template v-if="$slots[column.prop]" #default="scope">
         <slot :name="column.prop" :row="scope.row" :index="scope.$index"/>
       </template>
-      <template v-else #default="scope">
-        <span :class="{'is-line-clamp': column.lineClamp}" :title="scope.row[column.prop]">{{ scope.row[column.prop] }}</span>
+      <template v-else #default="scope" >
+        <span :class="{'is-line-clamp': column.lineClamp}" :title="scope.row[column.prop]" style="white-space: pre-wrap;" >{{ scope.row[column.prop] }}</span>
       </template>
     </el-table-column>
   </el-table>
@@ -43,7 +43,7 @@ interface IColumn {
   type: ColumnType,
   align?: "left" | "center" | "right";
   fixed?: boolean;
-  lineClamp?: boolean;
+  lineClamp?: number;
 }
 
 defineProps({
@@ -93,7 +93,7 @@ defineProps({
 .is-line-clamp {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
 }

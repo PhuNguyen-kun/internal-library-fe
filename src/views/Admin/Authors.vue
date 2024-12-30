@@ -139,7 +139,7 @@ const handleSearch = async () => {
   try {
     await authorStore.fetchAuthors()
   } catch (error) {
-    console.error("Failed to search categories", error);
+    console.error("Failed to search authors", error);
   } finally {
     fetchLoading.value = false;
   }

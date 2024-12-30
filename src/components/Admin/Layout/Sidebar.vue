@@ -59,6 +59,7 @@ const handleMenuClick = async (item: any) => {
   align-items: start;
   border-right: 1px solid #ebebeb;
   margin-top: 10px;
+  gap: 3px;
 }
 
 .menu-items {

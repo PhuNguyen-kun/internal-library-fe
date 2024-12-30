@@ -86,7 +86,7 @@ export const useOrderStore = defineStore('order', () => {
       for (const id of ids) {
         await orderService.deleteOrder(id);
       }
-      notifySuccess("Đã xóa nhà xuất bản được chọn");
+      notifySuccess("Đã xóa đơn hàng được chọn");
       await fetchOrders();
     } catch (error) {
       handleError(error, 'Failed to delete selected orders');
