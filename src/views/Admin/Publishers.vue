@@ -30,7 +30,7 @@
           <el-icon class="btn--nicer" style="margin-top: -3px;">
             <Plus/>
           </el-icon>
-          <span>Thêm danh mục</span>
+          <span>Thêm nhà xuất bản</span>
         </Button>
       </div>
     </div>
