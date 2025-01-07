@@ -30,7 +30,7 @@
     <Table :columns="columns" :data="userStore.users" :loading="fetchLoading"
            @selection-change="handleSelectionChange">
       <template #status="{ row }">
-        <el-tag :type="getStatusTagType(row.status).type" :effect="getStatusTagType(row.status).effect">
+        <el-tag :type="getStatusTagType(row.status).type" :effect="getStatusTagType(row.status).effect" round>
           {{ row.status }}
         </el-tag>
       </template>
@@ -70,26 +70,26 @@
         require-asterisk-position="right"
       >
         <el-form-item label="Tên người dùng" prop="full_name">
-          <el-input v-model="user.full_name" placeholder="Nhập tên người dùng"></el-input>
+          <el-input v-model="user.full_name" placeholder="Nhập tên người dùng" disabled></el-input>
         </el-form-item>
         <el-form-item label="Email" prop="email">
-          <el-input v-model="user.email" placeholder="Nhập email"></el-input>
+          <el-input v-model="user.email" placeholder="Nhập email" disabled></el-input>
         </el-form-item>
         <el-form-item label="Số điện thoại" prop="phone_number">
-          <el-input v-model="user.phone_number" placeholder="Nhập số điện thoại"></el-input>
+          <el-input v-model="user.phone_number" placeholder="Nhập số điện thoại" disabled></el-input>
         </el-form-item>
-        <el-form-item label="Giới tính" prop="gender">
-          <el-radio-group v-model="user.gender">
+        <el-form-item label="Giới tính" prop="gender" >
+          <el-radio-group v-model="user.gender" disabled>
             <el-radio label="Nam">Nam</el-radio>
             <el-radio label="Nữ">Nữ</el-radio>
             <el-radio label="Khác">Khác</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="Ngày sinh" prop="birth_date">
-          <el-date-picker v-model="user.birth_date" type="date" placeholder="Chọn ngày sinh"></el-date-picker>
+          <el-date-picker v-model="user.birth_date" type="date" placeholder="Chọn ngày sinh" disabled></el-date-picker>
         </el-form-item>
         <el-form-item label="Địa chỉ" prop="address">
-          <el-input v-model="user.address" placeholder="Nhập địa chỉ"></el-input>
+          <el-input v-model="user.address" placeholder="Nhập địa chỉ" disabled></el-input>
         </el-form-item>
         <el-form-item label="Trạng thái" prop="status">
           <el-radio-group v-model="user.status">
@@ -190,7 +190,7 @@ const user = reactive({
 
 const getStatusTagType = (status: string): { type: string, effect: string } => {
   const statusTagTypes: { [key: string]: { type: string, effect: string } } = {
-    'In active': { type: 'danger', effect: 'dark' },
+    'In active': { type: 'danger', effect: 'dark'},
     'Active': { type: 'success', effect: 'dark' },
   };
   return statusTagTypes[status] ?? { type: 'info', effect: 'dark' };
@@ -229,7 +229,7 @@ const openEditModal = (selectedUser: User) => {
     status: selectedUser.status
   });
 
-  modalTitle.value = "Chỉnh sửa người dùng";
+  modalTitle.value = "Thông tin người dùng";
   isModalVisible.value = true;
 };
 

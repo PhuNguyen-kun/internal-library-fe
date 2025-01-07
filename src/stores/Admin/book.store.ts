@@ -12,19 +12,26 @@ export const useBookStore = defineStore('book', () => {
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,
-    per_page: 6,
+    per_page: 5,
   });
 
   const searchTerm = ref<string>('');
   const loading = ref<boolean>(false);
   const selectedBook = ref<Book | null>(null);
 
-  const formRef = ref();
-  const modalTitle = ref<string>("");
-  const resetForm = () => {
-    formRef.value?.resetFields();
-    selectedBook.value = null;
-  }
+  const columns = [
+    {prop: "title", label: "Tên sách", width: 200, type: "string", fixed: "left"},
+    {prop: "image_url", label: "Ảnh", width: 180, align: "center"},
+    {prop: "author", label: "Tác giả", width: 300, type: "string"},
+    {prop: "publisher", label: "Nhà xuất bản", width: 210},
+    {prop: "category", label: "Danh mục", width: 200},
+    {prop: "stock_quantity", label: "Số lượng", width: 100, align: "center"},
+    {prop: "page", label: "Số trang", width: 170, align: "center"},
+    {prop: "short_description", label: "Mô tả ngắn", width: 300, lineClamp: 2},
+    {prop: "description", label: "Mô tả đầy đủ", width: 400, lineClamp: 2},
+    {prop: "actions", label: "Hành động", width: 125, align: "center", fixed: "right"}
+  ];
+
   const fetchBooks = async () => {
     try {
       loading.value = true;
@@ -34,7 +41,7 @@ export const useBookStore = defineStore('book', () => {
       pagination.total_pages = response.pagination.total_pages;
       loading.value=false;
     } catch (error) {
-      notifyError('Failed to fetch authors', error as string);
+      handleError(error, 'Failed to fetch books');
     }
   }
 
@@ -155,12 +162,10 @@ export const useBookStore = defineStore('book', () => {
     authors,
     publishers,
     categories,
-    formRef,
-    modalTitle,
-    resetForm,
     pagination,
     searchTerm,
     loading,
+    columns,
     selectedBook,
     fetchBooks,
     handlePageChange,

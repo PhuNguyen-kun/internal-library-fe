@@ -57,11 +57,11 @@
   </div>
 
   <Modal
-    :formRef="publisherStore.formRef"
-    :title="publisherStore.modalTitle"
+    :formRef="publisherFormRef"
+    :title="modalTitle"
     :visible="isModalVisible"
     style="width: 600px"
-    @close="publisherStore.resetForm"
+    @close="resetPublisherForm"
     @submit="handleSubmit"
     @update:visible="isModalVisible = $event"
   >
@@ -114,7 +114,6 @@ import { usePublisherStore} from "@/stores/Admin/publisher.store";
 
 const publisherStore = usePublisherStore();
 const fetchLoading = ref<boolean>(false);
-const isModalVisible = ref<boolean>(false);
 const columns = [
   {prop: "name", label: "Tên nhà xuất bản", width: 350, type: "string"},
   {prop: "description", label: "Mô tả", width: 770, type: "string", lineClamp: 1},
@@ -122,10 +121,10 @@ const columns = [
 ]
 const formRules = {
   name: [
-    {required: true, message: "Tên nhà xuất bản không được để trống", trigger: "blur"}
+    {required: true, message: "Tên nhà xuất bản không được để trống", trigger: "blur, change"}
   ],
   description: [
-    {required: true, message: "Mô tả không được để trống", trigger: "blur"}
+    {required: true, message: "Mô tả không được để trống", trigger: "blur, change"}
   ]
 };
 
@@ -136,8 +135,15 @@ const publisher = reactive({
 })
 
 // Modal
+const modalTitle = ref<string>("");
+const publisherFormRef = ref();
+const isModalVisible = ref<boolean>(false);
+const resetPublisherForm = () => {
+  publisherFormRef.value?.resetFields();
+  publisherStore.selectedPublisher = null;
+};
 const openCreateModal = () => {
-  publisherStore.modalTitle = "Thêm nhà xuất bản";
+  modalTitle.value = "Thêm nhà xuất bản";
   isModalVisible.value = true;
 };
 
@@ -150,7 +156,7 @@ const openEditModal = (selectedPublisher: Publisher) => {
     description: selectedPublisher.description
   });
 
-  publisherStore.modalTitle = "Chỉnh sửa tác giả";
+  modalTitle.value = "Chỉnh sửa nhà xuất bản";
   isModalVisible.value = true;
 };
 
@@ -198,7 +204,7 @@ const handleSubmit = async () => {
   } else {
     await publisherStore.createPublisher(publisher);
   }
-  publisherStore.resetForm();
+  resetPublisherForm();
   isModalVisible.value = false;
 };
 
@@ -216,7 +222,7 @@ watch(isModalVisible, (value) => {
       });
     }
   } else {
-    publisherStore.resetForm();
+    resetPublisherForm();
   }
 });
 

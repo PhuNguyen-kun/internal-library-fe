@@ -121,10 +121,20 @@ const columns = [
 
 const formRules = {
   name: [
-    {required: true, message: "Tên tác giả không được để trống", trigger: "blur"}
+    {required: true, message: "Tên tác giả không được để trống", trigger: "blur"},
+    {
+      max: 255,
+      message: 'Tên tác giả không vượt quá 255 ký tự',
+      trigger: 'blur'
+    }
   ],
   description: [
-    {required: true, message: "Mô tả không được để trống", trigger: "blur"}
+    {required: true, message: "Mô tả không được để trống", trigger: "blur"},
+    {
+      max: 255,
+      message: 'Mô tả không vượt quá 255 ký tự',
+      trigger: 'blur'
+    }
   ]
 };
 

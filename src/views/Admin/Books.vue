@@ -35,10 +35,12 @@
       </div>
     </div>
 
-    <Table :columns="columns" :data="bookStore.books" :loading="fetchLoading"
+    <Table :columns="bookStore.columns" :data="bookStore.books" :loading="fetchLoading"
            @selection-change="handleSelectionChange">
       <template #image_url="{ row }">
-        <img :src="row.image_url" alt="Book Image" style="width: 98px; height: auto; object-fit: cover">
+        <div style="width: 98px; height: 98px; margin: 0 auto">
+          <img :src="row.image_url" alt="Book Image" style="width: 80px; height: 100px; object-fit: cover">
+        </div>
       </template>
 
       <template #author="{ row }">
@@ -83,12 +85,12 @@
   </div>
 
   <Modal
-    :formRef="bookStore.formRef"
-    :title="bookStore.modalTitle"
+    :formRef="bookFormRef"
+    :title="modalTitle"
     :visible="isModalVisible"
     class="big-modal"
-    style="width: 700px"
-    @close="bookStore.resetForm"
+    style="width: 830px"
+    @close="resetBookForm"
     @submit="handleSubmit"
     @update:visible="isModalVisible = $event"
   >
@@ -102,7 +104,7 @@
       <el-form-item label="Tên sách" prop="title">
         <el-input v-model="book.title" placeholder="Nhập tên sách"></el-input>
       </el-form-item>
-      <el-form-item label="Avatar" prop="image">
+      <el-form-item label="Avatar" prop="image_url">
         <el-upload
           :auto-upload="false"
           :file-list="uploadFileList"
@@ -131,13 +133,6 @@
                 <span
                   v-if="!disabled"
                   class="el-upload-list__item-delete"
-                  @click="handleDownload(file)"
-                >
-                  <el-icon><Download/></el-icon>
-                </span>
-                <span
-                  v-if="!disabled"
-                  class="el-upload-list__item-delete"
                   @click="handleRemove(file)"
                 >
                   <el-icon><Delete/></el-icon>
@@ -145,16 +140,32 @@
               </span>
             </div>
           </template>
-
         </el-upload>
-
         <el-dialog v-model="dialogVisible">
           <img :src="dialogImageUrl" alt="Preview Image" w-full/>
         </el-dialog>
       </el-form-item>
+
+      <el-form-item label="Ảnh phụ" prop="additional_images">
+        <el-upload
+          multiple
+          :limit="4"
+          :file-list="uploadAdditionalFileList"
+          list-type="picture-card"
+          :on-change="handleAdditionalFileChange"
+          :on-remove="handleAdditionalFileRemove"
+          :on-exceed="handleAdditionalFileExceed"
+          action="#"
+          :auto-upload="false"
+          :show-file-list="true"
+        >
+          <el-icon><Plus/></el-icon>
+        </el-upload>
+      </el-form-item>
       <el-form-item label="Tác giả" prop="author">
         <el-select
           v-model="book.author"
+          filterable
           multiple
           placeholder="Chọn tác giả"
           style="width: 100%;"
@@ -169,6 +180,7 @@
       </el-form-item>
       <el-form-item label="Nhà xuất bản" prop="publisher">
         <el-select
+          filterable
           v-model="book.publisher"
           placeholder="Chọn nhà xuất bản"
           style="width: 100%;"
@@ -185,6 +197,7 @@
         <el-select
           v-model="book.category"
           multiple
+          filterable
           placeholder="Chọn danh mục"
           style="width: 100%;"
         >
@@ -199,7 +212,7 @@
       <el-form-item label="Số lượng" prop="stock_quantity">
         <el-input-number
           v-model="book.stock_quantity"
-          :min="0"
+          :min="1"
           placeholder="Nhập số lượng"
           controls-position="right"
         />
@@ -251,25 +264,26 @@ import Pagination from "@/components/Admin/Common/Pagination.vue";
 import type {Book} from "@/types/Admin/book";
 import Modal from "@/components/Admin/Common/Modal.vue";
 import {useBookStore} from "@/stores/Admin/book.store";
-import {Delete, Download, Plus, ZoomIn} from '@element-plus/icons-vue'
+import {Delete, Plus, ZoomIn} from '@element-plus/icons-vue'
 import type {UploadFile} from 'element-plus'
 import {notifyError} from "@/composables/notifications";
 
 const bookStore = useBookStore();
 const fetchLoading = ref<boolean>(false);
-const isModalVisible = ref<boolean>(false);
-const columns = [
-  {prop: "title", label: "Tên sách", width: 200, type: "string", fixed: "left"},
-  {prop: "image_url", label: "Ảnh", width: 200, align: "center"},
-  {prop: "author", label: "Tác giả", width: 300, type: "string"},
-  {prop: "publisher", label: "Nhà xuất bản", width: 210},
-  {prop: "category", label: "Danh mục", width: 200},
-  {prop: "stock_quantity", label: "Số lượng", width: 100, align: "center"},
-  {prop: "page", label: "Số trang", width: 170, align: "center"},
-  {prop: "short_description", label: "Mô tả ngắn", width: 300, lineClamp: 2},
-  {prop: "description", label: "Mô tả đầy đủ", width: 400, lineClamp: 2},
-  {prop: "actions", label: "Hành động", width: 125, align: "center", fixed: "right"}
-];
+
+const book = reactive({
+  id: 0,
+  title: "",
+  author: "",
+  publisher: "",
+  category: "",
+  stock_quantity: 0,
+  page: 0,
+  short_description: "",
+  description: "",
+  image_url: "",
+  additional_images: "",
+})
 
 const formRules = {
   title: [
@@ -280,7 +294,19 @@ const formRules = {
       trigger: 'blur'
     }
   ],
-  image: [{required: true, message: 'Không được để trống ánh', trigger: 'change'}],
+  image_url: [{required: true, message: 'Không được để trống ảnh', trigger: 'change'}],
+  additional_images: [{required: true, message: 'Không được để trống ảnh phụ', trigger: 'change'},
+    {
+      validator: (rule, value, callback) => {
+        if (!uploadAdditionalFileList.value || uploadAdditionalFileList.value.length !== 4) {
+          callback(new Error("Upload đủ 4 ảnh phụ."));
+        } else {
+          callback();
+        }
+      },
+      trigger: "change",
+    },
+  ],
   author: [
     {required: true, message: 'Tác giả không được để trống', trigger: 'blur'},
   ],
@@ -308,20 +334,7 @@ const formRules = {
   ]
 }
 
-const book = reactive({
-  id: 0,
-  title: "",
-  author: "",
-  publisher: "",
-  category: "",
-  stock_quantity: 0,
-  page: 0,
-  short_description: "",
-  description: "",
-  image_url: "",
-})
-
-// Preview image
+// Upload avatar
 const uploadFileList = ref<UploadFile[]>([]);
 const dialogImageUrl = ref('')
 const dialogVisible = ref(false)
@@ -330,6 +343,7 @@ const disabled = ref(false)
 const handleRemove = (file: UploadFile) => {
   console.log("Removed file:", file);
   uploadFileList.value = [];
+  book.image_url = "";
 };
 
 const handlePictureCardPreview = (file: UploadFile) => {
@@ -337,12 +351,9 @@ const handlePictureCardPreview = (file: UploadFile) => {
   dialogVisible.value = true
 }
 
-const handleDownload = (file: UploadFile) => {
-  console.log(file)
-}
-
 const handleFileChange = (file, fileList) => {
   uploadFileList.value = fileList;
+  book.image_url = fileList[0]?.url || "";
   console.log('File list updated:', uploadFileList.value);
 };
 
@@ -350,13 +361,48 @@ const handleExceed = () => {
   notifyError("Chỉ được tải lên 1 avatar"!);
 };
 
+// Upload additional images
+const uploadAdditionalFileList = ref<UploadFile[]>([]);
+
+const handleAdditionalFileChange = (file, fileList) => {
+  uploadAdditionalFileList.value = fileList;
+  book.additional_images = fileList.map(f => f.url || f.raw);
+};
+
+const deletedImageIds = ref<number[]>([]);
+
+const handleAdditionalFileRemove = (file) => {
+  if (!file.raw) {
+    deletedImageIds.value.push(parseInt(file.uid));
+  }
+  uploadAdditionalFileList.value = uploadAdditionalFileList.value.filter((f) => f.uid !== file.uid);
+};
+
+const handleAdditionalFileExceed = () => {
+  notifyError("Chỉ được tải lên tối đa 4 ảnh phụ!");
+};
+
+// Reset file list
+const resetAdditionalUploadFileList = () => {
+  uploadAdditionalFileList.value = [];
+};
+
+
 // Modal
+const modalTitle = ref<string>("");
+const bookFormRef = ref();
+const isModalVisible = ref<boolean>(false);
+const resetBookForm = () => {
+  bookFormRef.value?.resetFields();
+  bookStore.selectedBook = null;
+};
+
 const resetUploadFileList = () => {
   uploadFileList.value = [];
 };
 
 const openCreateModal = () => {
-  bookStore.modalTitle = "Thêm sách";
+  modalTitle.value = "Thêm sách";
   isModalVisible.value = true;
 
   Object.assign(book, {
@@ -370,9 +416,11 @@ const openCreateModal = () => {
     short_description: "",
     description: "",
     image_url: "",
+    additional_images: "",
   });
 
   resetUploadFileList();
+  resetAdditionalUploadFileList();
 };
 
 const openEditModal = (selectedBook: Book) => {
@@ -389,7 +437,8 @@ const openEditModal = (selectedBook: Book) => {
     stock_quantity: selectedBook.stock_quantity,
     page: selectedBook.page,
     short_description: selectedBook.short_description,
-    description: selectedBook.description
+    description: selectedBook.description,
+    additional_images: selectedBook.additional_images,
   });
 
   uploadFileList.value = [
@@ -399,7 +448,14 @@ const openEditModal = (selectedBook: Book) => {
     },
   ];
 
-  bookStore.modalTitle = "Chỉnh sửa sách";
+  uploadAdditionalFileList.value = selectedBook.additional_images.map((img) => ({
+    uid: String(img.id),
+    url: img.url,
+    name: `Additional Image #${img.id}`,
+    status: "done"
+  }));
+
+  modalTitle.value = "Chỉnh sửa sách";
   isModalVisible.value = true;
 };
 
@@ -451,6 +507,7 @@ const handleSubmit = async () => {
   formData.append('page', book.page);
   formData.append('short_description', book.short_description);
   formData.append('description', book.description);
+  formData.append('deleted_image_ids', JSON.stringify(deletedImageIds.value));
 
   console.log('Upload File List:', uploadFileList.value);
 
@@ -463,22 +520,31 @@ const handleSubmit = async () => {
     console.log('Không có file avatar mới để upload.');
   }
 
+  // Existing image IDs
+  const existingImageIds = uploadAdditionalFileList.value
+    .filter(file => !file.raw)
+    .map(file => file.uid); // Assuming `uid` is the image ID from the server
+  formData.append('existing_images', JSON.stringify(existingImageIds));
+
+  if (uploadAdditionalFileList.value.length > 0) {
+    uploadAdditionalFileList.value.forEach(file => {
+      if (file.raw) {
+        formData.append('additional_images[]', file.raw);
+      }
+    });
+  }
 
   for (const [key, value] of formData.entries()) {
     console.log(`${key}:`, value);
   }
 
-  try {
-    if (bookStore.selectedBook) {
-      await bookStore.updateBook(book.id, formData); // Gửi payload
-    } else {
-      await bookStore.createBook(formData);
-    }
-    bookStore.resetForm();
-    isModalVisible.value = false;
-  } catch (error) {
-    notifyError('Có lỗi xảy ra khi lưu dữ liệu.');
+  if (bookStore.selectedBook) {
+    await bookStore.updateBook(book.id, formData);
+  } else {
+    await bookStore.createBook(formData);
   }
+  resetBookForm();
+  isModalVisible.value = false;
 };
 
 onMounted( () => {
@@ -500,11 +566,18 @@ watch(isModalVisible, (value) => {
         short_description: "",
         description: "",
         image_url: "",
+        additional_images: "",
       });
     }
   } else {
-    bookStore.resetForm();
+    resetBookForm();
   }
 });
-
 </script>
+
+<style lang="scss">
+.el-upload-list__item {
+  display: flex;
+  justify-content: center;
+}
+</style>

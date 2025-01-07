@@ -9,6 +9,7 @@ export interface Book {
   short_description: string;
   description: string;
   image_url: string;
+  additional_images: string;
 }
 
 export interface Option {

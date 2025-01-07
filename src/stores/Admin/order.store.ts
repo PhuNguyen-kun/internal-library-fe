@@ -1,74 +1,94 @@
-import {defineStore} from "pinia";
-import type {Order} from "@/types/Admin/order";
-import {ref, reactive} from 'vue';
-import {defaultPagination} from '@/constants/Admin/pagination';
-import {notifyError, notifySuccess} from "@/composables/notifications";
-import {handleError} from "@/utils/Admin/handleError";
+import { defineStore } from "pinia";
+import type { Order } from "@/types/Admin/order";
+import { ref, reactive } from "vue";
+import { defaultPagination } from "@/constants/Admin/pagination";
+import { handleError } from "@/utils/Admin/handleError";
+import { notifyError, notifySuccess } from "@/composables/notifications";
 import * as orderService from "@/services/Admin/orderService";
-export const useOrderStore = defineStore('order', () => {
+
+export const useOrderStore = defineStore("order", () => {
   const orders = ref<Order[]>([]);
   const pagination = reactive({
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,
-    per_page: defaultPagination.per_page
+    per_page: defaultPagination.per_page,
   });
 
-  const searchTerm = ref<string>('');
+  const searchTerm = ref<string>("");
   const loading = ref<boolean>(false);
   const selectedOrder = ref<Order | null>(null);
 
   const formRef = ref();
   const modalTitle = ref<string>("");
+
   const resetForm = () => {
     formRef.value?.resetFields();
     selectedOrder.value = null;
-  }
+  };
+
+  // Lấy danh sách orders từ DB (status do DB trả về)
   const fetchOrders = async () => {
     try {
       loading.value = true;
-      const response = await orderService.fetchOrders(searchTerm.value.trim(), pagination.per_page, pagination.current_page);
-      orders.value = response.data;
+      const response = await orderService.fetchOrders(
+        searchTerm.value.trim(),
+        pagination.per_page,
+        pagination.current_page
+      );
+      orders.value = response.data; // Mảng orders
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
-      loading.value=false;
+      loading.value = false;
     } catch (error) {
-      notifyError('Failed to fetch authors', error as string);
+      handleError(error, "Failed to fetch orders");
     }
-  }
+  };
 
   const handlePageChange = (page: number) => {
     pagination.current_page = page;
     fetchOrders();
-  }
+  };
 
-  const createOrder = async (order: Order) => {
+  // Lấy 1 order (DB trả status, details)
+  const fetchOrderWithDetails = async (id: number) => {
     try {
-      loading.value=true;
-      await orderService.createOrder(order);
-      notifySuccess("Đơn mượn đã được tạo thành công");
+      loading.value = true;
+      const response = await orderService.fetchOrderWithDetails(id);
+      selectedOrder.value = response.data; // DB trả { id, full_name, status, details, ... }
+    } catch (error) {
+      handleError(error, "Failed to fetch order with details");
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const createOrder = async (newOrder: Order) => {
+    try {
+      loading.value = true;
+      await orderService.createOrder(newOrder);
+      notifySuccess("Đơn mượn được tạo thành công");
       await fetchOrders();
+    } catch (error) {
+      handleError(error, "Failed to create order");
+    } finally {
+      loading.value = false;
     }
-    catch (error) {
-      handleError(error, 'Failed to create author');
-    }
-    finally {
-      loading.value=false;
-    }
-  }
+  };
 
-  const updateOrder = async (id: number, order: Order) => {
+  // Update: user gửi payload => server lưu
+  const updateOrder = async (id: number, updatedOrder: Order) => {
     try {
-      loading.value=true;
-      await orderService.updateOrder(id, order);
+      loading.value = true;
+      await orderService.updateOrder(id, updatedOrder);
       notifySuccess("Đơn mượn đã được cập nhật thành công");
       await fetchOrders();
     } catch (error) {
-      handleError(error, 'Failed to update order');
+      handleError(error, "Failed to update order");
     } finally {
-      loading.value=false;
+      loading.value = false;
     }
-  }
+  };
 
   const deleteOrder = async (id: number) => {
     try {
@@ -76,9 +96,9 @@ export const useOrderStore = defineStore('order', () => {
       notifySuccess("Đơn mượn đã được xóa thành công");
       await fetchOrders();
     } catch (error) {
-      handleError(error, 'Failed to delete order');
+      handleError(error, "Failed to delete order");
     }
-  }
+  };
 
   const deleteSelectedOrders = async (ids: number[]) => {
     try {
@@ -86,29 +106,30 @@ export const useOrderStore = defineStore('order', () => {
       for (const id of ids) {
         await orderService.deleteOrder(id);
       }
-      notifySuccess("Đã xóa đơn hàng được chọn");
+      notifySuccess("Đã xóa các đơn mượn được chọn");
       await fetchOrders();
     } catch (error) {
-      handleError(error, 'Failed to delete selected orders');
+      handleError(error, "Failed to delete selected orders");
     } finally {
       loading.value = false;
     }
-  }
+  };
 
   return {
     orders,
-    formRef,
-    modalTitle,
-    resetForm,
     pagination,
     searchTerm,
     loading,
     selectedOrder,
+    formRef,
+    modalTitle,
+    resetForm,
     fetchOrders,
     handlePageChange,
+    fetchOrderWithDetails,
     createOrder,
     updateOrder,
     deleteOrder,
-    deleteSelectedOrders
-  }
+    deleteSelectedOrders,
+  };
 });

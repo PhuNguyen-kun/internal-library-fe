@@ -28,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
       pagination.total_pages = response.pagination.total_pages;
       loading.value=false;
     } catch (error) {
-      notifyError('Failed to fetch users', error as string);
+      handleError(error, 'Failed to fetch users');
     }
   }
 

@@ -19,6 +19,16 @@ export const fetchOrders = async (searchTerm: string = '', perPage: number, page
   }
 }
 
+export const fetchOrderWithDetails = async (id: number) => {
+  try {
+    const response = await axiosInstance.get(`/admin/orders/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch order with details', error);
+    throw error;
+  }
+}
+
 export const createOrder = async (order: Order) => {
   try {
     const response = await axiosInstance.post("/admin/orders", order);
@@ -31,13 +41,22 @@ export const createOrder = async (order: Order) => {
 
 export const updateOrder = async (id: number, order: Order) => {
   try {
-    const response = await axiosInstance.put(`/admin/orders/${id}`, order);
+    const payload = {
+      status: order.status,
+      details: order.details?.map((detail) => ({
+        id: detail.id,
+        status: detail.status,
+        return_date_real: detail.return_date_real,
+      })),
+    };
+
+    const response = await axiosInstance.put(`/admin/orders/${id}`, payload);
     return response.data;
   } catch (error) {
     console.error('Failed to update order', error);
     throw error;
   }
-}
+};
 
 export const deleteOrder = async (id: number) => {
   try {

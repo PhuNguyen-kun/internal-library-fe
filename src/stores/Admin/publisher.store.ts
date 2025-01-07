@@ -11,19 +11,13 @@ export const usePublisherStore = defineStore('publisher', () => {
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,
-    per_page: defaultPagination.per_page
+    per_page: 10
   });
 
   const searchTerm = ref<string>('');
   const loading = ref<boolean>(false);
   const selectedPublisher = ref<Publisher | null>(null);
 
-  const formRef = ref();
-  const modalTitle = ref<string>("");
-  const resetForm = () => {
-    formRef.value?.resetFields();
-    selectedPublisher.value = null;
-  }
   const fetchPublishers = async () => {
     try {
       loading.value = true;
@@ -97,9 +91,6 @@ export const usePublisherStore = defineStore('publisher', () => {
 
   return {
     publishers,
-    formRef,
-    modalTitle,
-    resetForm,
     pagination,
     searchTerm,
     loading,
