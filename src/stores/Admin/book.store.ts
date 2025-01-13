@@ -32,10 +32,12 @@ export const useBookStore = defineStore('book', () => {
     {prop: "actions", label: "Hành động", width: 125, align: "center", fixed: "right"}
   ];
 
+  const includeDeleted = ref<boolean>(false);
+
   const fetchBooks = async () => {
     try {
       loading.value = true;
-      const response = await bookService.fetchBooks(searchTerm.value.trim(), pagination.per_page, pagination.current_page);
+      const response = await bookService.fetchBooks(searchTerm.value.trim(), pagination.per_page, pagination.current_page, includeDeleted.value);
       books.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
@@ -156,10 +158,25 @@ export const useBookStore = defineStore('book', () => {
     }
   };
 
+  const restoreBook = async (id: number) => {
+    try {
+      loading.value = true;
+      await bookService.restoreBook(id);
+      notifySuccess("Sách đã được khôi phục thành công.");
+      await fetchBooks();
+    } catch (error) {
+      handleError(error, "Không thể khôi phục sách");
+    } finally {
+      loading.value = false;
+    }
+  };
+
+
 
   return {
     books,
     authors,
+    includeDeleted,
     publishers,
     categories,
     pagination,
@@ -174,5 +191,6 @@ export const useBookStore = defineStore('book', () => {
     deleteBook,
     deleteSelectedBooks,
     fetchAuthorsCategoriesPublishers,
+    restoreBook
   }
 });

@@ -10,6 +10,7 @@ export interface Book {
   description: string;
   image_url: string;
   additional_images: string;
+  deleted_at?: string;
 }
 
 export interface Option {

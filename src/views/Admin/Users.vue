@@ -21,7 +21,7 @@
       <div class="admin-page__heading--right">
         <Button v-if="selectedRows.length" class="btn btn--danger" @click="openBlockSelectedConfirm"
         >
-          <el-icon><Flag /></el-icon>
+          <el-icon class="btn--nicer"><Flag /></el-icon>
           <span>Chặn người dùng đã chọn</span>
         </Button>
       </div>

@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <Table :columns="columns" :data="orderStore.orders" :loading="fetchLoading">
+    <Table :columns="columns" :data="orderStore.orders" :loading="fetchLoading" >
       <template #status="{ row }">
         <el-tag :type="getStatusTagType(row.status)" effect="dark" round>
           {{ row.status }}

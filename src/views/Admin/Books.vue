@@ -3,7 +3,7 @@
     <h1 class="admin-page__title">Quản lý sách</h1>
 
     <div class="admin-page__heading">
-      <div class="admin-page__search-container" style="width: 550px">
+      <div class="admin-page__search-container" style="width: 750px">
         <el-input
           v-model="bookStore.searchTerm"
           class="admin-page__search-input"
@@ -17,6 +17,16 @@
             <Search/>
           </el-icon>
         </Button>
+
+        <el-checkbox
+          v-model="bookStore.includeDeleted"
+          @change="handleSearch"
+          style="margin-left: 15px"
+          size="default" border
+        >
+          Bao gồm sách đã xóa
+        </el-checkbox>
+
       </div>
       <div class="admin-page__heading--right">
         <Button v-if="selectedRows.length" class="btn btn--danger" @click="openDeleteSelectedConfirm"
@@ -36,7 +46,7 @@
     </div>
 
     <Table :columns="bookStore.columns" :data="bookStore.books" :loading="fetchLoading"
-           @selection-change="handleSelectionChange">
+           @selection-change="handleSelectionChange" :row-class-name="getRowClass">
       <template #image_url="{ row }">
         <div style="width: 98px; height: 98px; margin: 0 auto">
           <img :src="row.image_url" alt="Book Image" style="width: 80px; height: 100px; object-fit: cover">
@@ -67,13 +77,23 @@
       </template>
       <template #actions="{ row }">
         <div class="action-buttons">
-          <el-button link size="small" type="primary" @click="openEditModal(row)">
-            <img alt="Edit" src="@/assets/img/Admin/edit.svg"/>
+          <el-button
+            v-if="row.deleted_at"
+            type="text"
+            size="small"
+            @click="bookStore.restoreBook(row.id)"
+          >
+            Khôi phục
           </el-button>
-          <div class="divider"></div>
-          <el-button link size="small" type="danger" @click="openDeleteConfirm(row.id)">
-            <img alt="Delete" src="@/assets/img/Admin/delete.svg"/>
-          </el-button>
+          <template v-else>
+            <el-button link size="small" type="primary" @click="openEditModal(row)">
+              <img alt="Edit" src="@/assets/img/Admin/edit.svg"/>
+            </el-button>
+            <div class="divider"></div>
+            <el-button link size="small" type="danger" @click="openDeleteConfirm(row.id)">
+              <img alt="Delete" src="@/assets/img/Admin/delete.svg"/>
+            </el-button>
+          </template>
         </div>
       </template>
     </Table>
@@ -116,7 +136,7 @@
           list-type="picture-card"
           :limit="1"
           :show-file-list="true"
-        >
+          accept="image/png, image/jpeg">
           <el-icon>
             <Plus/>
           </el-icon>
@@ -158,7 +178,7 @@
           action="#"
           :auto-upload="false"
           :show-file-list="true"
-        >
+          accept="image/png, image/jpeg"        >
           <el-icon><Plus/></el-icon>
         </el-upload>
       </el-form-item>
@@ -271,6 +291,9 @@ import {notifyError} from "@/composables/notifications";
 const bookStore = useBookStore();
 const fetchLoading = ref<boolean>(false);
 
+const isAllDeleted = ref(false);
+const isAllNotDeleted = ref(false);
+
 const book = reactive({
   id: 0,
   title: "",
@@ -333,6 +356,11 @@ const formRules = {
     {max: 255, message: 'Mô tả đầy đủ không vượt quá 255 ký tự'}
   ]
 }
+
+// Fetch deleted books
+const getRowClass = ({ row }: { row: Book }) => {
+  return row.deleted_at ? "row-deleted" : "";
+};
 
 // Upload avatar
 const uploadFileList = ref<UploadFile[]>([]);
@@ -579,5 +607,12 @@ watch(isModalVisible, (value) => {
 .el-upload-list__item {
   display: flex;
   justify-content: center;
+}
+</style>
+
+<style scoped lang="scss">
+.row-deleted {
+  color: #b2b2b2;
+  background-color: #f9f9f9;
 }
 </style>

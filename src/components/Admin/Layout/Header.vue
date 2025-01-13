@@ -16,9 +16,9 @@
       <div class="language-switcher">
         <img src="@/assets/img/Admin/language.svg" alt="Language" class="language-icon"/>
         <span class="language">English</span>
-        <a href="#!">
-          <img src="@/assets/img/Admin/dropdown-icon-1.svg" alt="" style="margin-bottom: 2px"/>
-        </a>
+<!--        <a href="#!">-->
+<!--          <img src="@/assets/img/Admin/dropdown-icon-1.svg" alt="" style="margin-bottom: 2px"/>-->
+<!--        </a>-->
       </div>
       <div class="user__profile">
         <img src="@/assets/img/Admin/user-avatar.webp" alt="User Avatar" class="profile-avatar"/>
@@ -27,9 +27,9 @@
           >{{ fullName }}</span>
           <span class="user--role">Admin</span>
         </div>
-        <a href="#!">
-          <img src="@/assets/img/Admin/dropdown-icon-2.svg" alt="" class="dropdown-icon"/>
-        </a>
+<!--        <a href="#!">-->
+<!--          <img src="@/assets/img/Admin/dropdown-icon-2.svg" alt="" class="dropdown-icon"/>-->
+<!--        </a>-->
       </div>
     </div>
   </div>

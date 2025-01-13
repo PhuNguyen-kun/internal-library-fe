@@ -1,13 +1,14 @@
 import axiosInstance from "@/utils/axiosInstance";
 import type {Book} from "@/types/Admin/book";
 
-export const fetchBooks = async (searchTerm: string = '', perPage: number, page: number) => {
+export const fetchBooks = async (searchTerm: string = '', perPage: number, page: number, includeDeleted: boolean = false) => {
   try {
     const response = await axiosInstance.get('/admin/books', {
       params: {
         search_term: searchTerm,
         per_page: perPage,
-        page: page
+        page: page,
+        include_deleted: includeDeleted ? 1 : 0,
       }
     });
     return {
@@ -85,4 +86,13 @@ export const fetchPublishers = async (page: number = 1) => {
     throw error;
   }
 };
+
+export const restoreBook = async (id: number) => {
+  try {
+    await axiosInstance.patch(`/admin/books/${id}/restore`);
+  } catch (error) {
+    console.error(`Failed to restore book with id ${id}`, error);
+    throw error;
+  }
+}
 
