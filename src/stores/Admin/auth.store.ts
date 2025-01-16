@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
       return;
     }
 
-    openFullScreen2()
+    loading.value = true;
 
     try {
       const response = await loginService({ email: email.value, password: password.value });
@@ -65,11 +65,19 @@ export const useAuthStore = defineStore('auth', () => {
       formError.value = '';
       router.push('/admin/dashboard');
     } catch (error: any) {
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        formError.value = 'Email or Password is incorrect!';
+      if (error.response) {
+        if (error.response.status === 404) {
+          formError.value = 'Email or Password is incorrect!';
+        } else if (error.response.status === 401) {
+          formError.value = 'Email or Password is incorrect!';
+        } else {
+          formError.value = 'Email or Password is incorrect!';
+        }
       } else {
         console.error('An unexpected error occurred:', error);
       }
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -78,7 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
       await logoutService()
       console.log('ok')
       localStorage.removeItem('access_token')
-      await router.push('/login')
+      await router.push('/admin/login')
     } catch (error) {
       console.error('Failed to logout:', error)
     }

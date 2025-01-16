@@ -40,8 +40,16 @@
       </div>
 
       <div class="btn-group">
-        <button type="submit" class="btn" v-loading.fullscreen.lock="authStore.fullscreenloading">
-          Sign in
+        <button type="submit" class="btn" :disabled="authStore.loading">
+          <template v-if="authStore.loading">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px">
+              <span>Signing in...</span>
+              <span class="loading-spinner"></span>
+            </div>
+          </template>
+          <template v-else>
+            Sign in
+          </template>
         </button>
         <div class="link-to-signup">
           <p>Don't have an account?</p>
@@ -199,5 +207,25 @@ input:focus {
   font-weight: 500;
   color: red;
   margin-bottom: 10px;
+}
+
+.loading-spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4880ff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

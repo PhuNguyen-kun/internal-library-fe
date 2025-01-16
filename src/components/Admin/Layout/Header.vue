@@ -8,18 +8,18 @@
       <img src="@/assets/img/Admin/toggle-sidebar.svg" alt=""/>
     </a>
     <div class="header-right">
-      <div class="notification-icon">
-        <a href="#!">
-          <img src="@/assets/img/Admin/noti.svg" alt="Notifications"/>
-        </a>
-      </div>
-      <div class="language-switcher">
-        <img src="@/assets/img/Admin/language.svg" alt="Language" class="language-icon"/>
-        <span class="language">English</span>
+<!--      <div class="notification-icon">-->
+<!--        <a href="#!">-->
+<!--          <img src="@/assets/img/Admin/noti.svg" alt="Notifications"/>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--      <div class="language-switcher">-->
+<!--        <img src="@/assets/img/Admin/language.svg" alt="Language" class="language-icon"/>-->
+<!--        <span class="language">English</span>-->
 <!--        <a href="#!">-->
 <!--          <img src="@/assets/img/Admin/dropdown-icon-1.svg" alt="" style="margin-bottom: 2px"/>-->
 <!--        </a>-->
-      </div>
+<!--      </div>-->
       <div class="user__profile">
         <img src="@/assets/img/Admin/user-avatar.webp" alt="User Avatar" class="profile-avatar"/>
         <div class="user__infor">

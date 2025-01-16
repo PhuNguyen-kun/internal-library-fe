@@ -8,12 +8,19 @@
 body {
     transition: color 0.5s,
     background-color 0.5s;
-    line-height: 1.6;
-    font-family: 'Nunito Sans', sans-serif;
     font-size: 15px;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+body.user-theme {
+    font-family: 'Poppins', sans-serif;
+}
+
+body.admin-theme {
+    line-height: 1.6;
+    font-family: 'Nunito Sans', sans-serif;
 }
 
 :root {
@@ -24,6 +31,18 @@ body {
 
 a {
     text-decoration: none;
+}
+
+.no-text-decoration {
+    a {
+        text-decoration: none;
+        color: #000;
+
+        &:hover {
+            text-decoration: underline;
+        }
+
+    }
 }
 
 .admin-page {
@@ -89,6 +108,25 @@ a {
 
 label {
     user-select: none;
+}
+
+// Users
+.user-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--user-theme-color);
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.user-btn:hover {
+    background-color: rgba(227, 64, 0, 0.78);
+    cursor: pointer;
 }
 
 

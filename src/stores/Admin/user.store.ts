@@ -8,7 +8,7 @@ import {handleError} from "@/utils/Admin/handleError";
 
 export const useUserStore = defineStore('user', () => {
   const users = ref<User[]>([]);
-  const pagination = reactive({
+    const pagination = reactive({
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,

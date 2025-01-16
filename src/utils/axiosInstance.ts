@@ -52,10 +52,10 @@ axiosInstance.interceptors.response.use(
     }
 
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      axiosInstance.post('/logout').finally(() => {
-        localStorage.removeItem('access_token');
-        router.push('/login');
-      });
+      window.alert('Your session has expired. Please log in again.');
+
+      localStorage.removeItem('access_token');
+      location.reload();
     }
     return Promise.reject(error)
   }

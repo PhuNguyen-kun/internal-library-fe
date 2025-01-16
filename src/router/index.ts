@@ -16,7 +16,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('access_token')
 
-  if (to.name !== 'login' && !isAuthenticated) {
+  if (to.path.startsWith('/admin') && to.name !== 'login' && !isAuthenticated) {
     next({ name: 'login' })
   } else if (to.name === 'login' && isAuthenticated) {
     next({ path: '/admin/dashboard' })
@@ -24,5 +24,23 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+router.beforeEach((to, from, next) => {
+  if (to.path.startsWith('/admin')) {
+    document.title = 'Admin Kiai Library';
+  } else {
+    document.title = 'Kiai Library';
+  }
+  next();
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.path.startsWith('/admin')) {
+    document.body.className = 'admin-theme';
+  } else {
+    document.body.className = 'user-theme';
+  }
+  next();
+});
 
 export default router
