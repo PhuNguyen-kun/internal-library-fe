@@ -7,12 +7,13 @@ import { logout as logoutService } from '@/services/Common/auth'
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
 
+  const name = ref<string>('');
   const email = ref<string>('');
   const password = ref<string>('');
   const errors = ref<{ email?: string; password?: string }>({});
   const formError = ref<string>('');
   const loading = ref<boolean>(false);
-
+  const isLoggedIn = ref<boolean>(!!localStorage.getItem('access_token'));
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -49,9 +50,10 @@ export const useAuthStore = defineStore('auth', () => {
 
       const access_token = response.data.access_token;
       localStorage.setItem('access_token', access_token);
+      isLoggedIn.value = true;
 
       formError.value = '';
-      router.push('/admin/dashboard');
+      router.push('/homepage');
     } catch (error: any) {
       if (error.response) {
         if (error.response.status === 404) {
@@ -71,16 +73,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      await logoutService()
-      console.log('ok')
-      localStorage.removeItem('access_token')
-      await router.push('/admin/login')
-    } catch (error) {
-      console.error('Failed to logout:', error)
+      await logoutService();
+      localStorage.removeItem('access_token');
+      isLoggedIn.value = false;
+      router.push('/homepage');
+    } catch (error: any) {
+      console.log(error);
     }
-  }
+  };
 
   return {
+    name,
     email,
     password,
     errors,
@@ -90,5 +93,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     validateForm,
     isValidEmail,
+    isLoggedIn,
   };
 });

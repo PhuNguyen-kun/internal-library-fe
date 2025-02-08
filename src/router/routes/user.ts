@@ -16,6 +16,16 @@ const userRoutes: RouteRecordRaw[] = [
         path: '/about',
         name: 'about',
         component: () => import('@/views/User/About.vue')
+      },
+      {
+        path: '/signup',
+        name: 'signup',
+        component: () => import('@/views/User/Signup.vue')
+      },
+      {
+        path: '/login',
+        name: 'user/login',
+        component: () => import('@/views/User/Login.vue')
       }
     ]
   },

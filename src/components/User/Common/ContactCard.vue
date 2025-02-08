@@ -26,7 +26,7 @@ defineProps({
   text-align: center;
   transition: all linear 0.35s;
   border-radius: 0.25rem;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
   cursor: pointer;
   flex: 1;
 

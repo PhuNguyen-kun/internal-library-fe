@@ -13,10 +13,10 @@
           </div>
 
           <nav class="header__nav">
-            <router-link to="/">Home</router-link>
-            <router-link to="/contact">Contact</router-link>
-            <router-link to="/about">About</router-link>
-            <router-link to="/signup">Sign up</router-link>
+            <router-link exact-active-class="active-link" to="/homepage">Home</router-link>
+            <router-link exact-active-class="active-link" to="/contact">Contact</router-link>
+            <router-link exact-active-class="active-link" to="/about">About</router-link>
+            <router-link v-if="!authStore.isLoggedIn" exact-active-class="active-link" to="/signup">Sign up</router-link>
           </nav>
 
           <div class="header__search">
@@ -29,8 +29,36 @@
               <img src="@/assets/img/User/search-icon.svg" alt="">
             </div>
 
-            <img src="@/assets/img/User/wishlist-icon.svg" alt="">
-            <img src="@/assets/img/User/cart-icon.svg" alt="">
+            <div class="header__action" v-if="authStore.isLoggedIn && !['/signup', '/login'].includes(route.path)">
+              <div class="header__action--icon">
+                <img src="@/assets/img/User/wishlist-icon.svg" alt="">
+              </div>
+              <div class="header__action--icon">
+                <img src="@/assets/img/User/cart-icon.svg" alt="">
+              </div>
+              <div class="header__action--icon user-icon"
+                   :class="{ active: isDropdownActive }"
+                    @click="toggleDropdown"
+              >
+                <img src="@/assets/img/User/user-icon.svg" alt="" class="user-icon__img">
+                <div class="dropdown-menu" v-if="isDropdownActive">
+                  <ul>
+                    <li>
+                      <img src="@/assets/img/User/user-icon-white.svg" alt="">
+                      <a href="#">Quản lý tài khoản</a>
+                    </li>
+                    <li>
+                      <img src="@/assets/img/User/borrow-history-icon.svg" alt="">
+                      <a href="#">Lịch sử mượn</a>
+                    </li>
+                    <li @click="logout">
+                      <img src="@/assets/img/User/logout-icon.svg" alt="">
+                      <a href="#">Đăng xuất</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </el-header>
@@ -115,7 +143,32 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue';
 import SendIcon from "@/components/User/Icons/SendIcon.vue";
+import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/User/auth.store';
+
+const authStore = useAuthStore();
+const route = useRoute();
+const isDropdownActive = ref(false);
+
+const toggleDropdown = (event: MouseEvent) => {
+  event.stopPropagation();
+  isDropdownActive.value = !isDropdownActive.value;
+};
+
+const closeDropdown = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.user-icon')) {
+    isDropdownActive.value = false;
+  }
+};
+
+const logout = () => {
+  authStore.logout();
+};
+
+document.addEventListener('click', closeDropdown);
 </script>
 
 <style lang="scss" scoped>
@@ -125,6 +178,91 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
 }
 
 .header {
+  &__action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    &--icon {
+      cursor: pointer;
+    }
+
+    .user-icon {
+      position: relative;
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(15px);
+        border-radius: 10px;
+        padding: 15px;
+        width: 200px;
+        z-index: 100;
+
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            padding: 12px 0;
+            display: flex;
+
+            &:hover {
+              color: #ffffff;
+              text-decoration: underline;
+              text-underline-offset: 4px;
+            }
+
+            img {
+              width: 23px;
+              margin-right: 10px;
+            }
+
+            a {
+              text-decoration: none;
+              font-size: 14px;
+              font-weight: 400;
+              color: #ffffff;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            }
+          }
+        }
+      }
+
+      &.active, &:hover {
+        border-radius: 999px;
+        background-color: var(--user-theme-color);
+        transition: 0.3s;
+
+        .user-icon__img {
+          width: 22px;
+          padding: 5px;
+          filter: invert(1);
+        }
+        .dropdown-menu {
+          display: block;
+          animation: fadeIn 0.3s ease-in-out;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
   &__container {
     height: auto;
     padding: 0;
@@ -180,7 +318,13 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
 
       &:hover {
         text-decoration: underline;
+        text-underline-offset: 5px;
       }
+    }
+
+    .active-link {
+      text-decoration: underline;
+      text-underline-offset: 5px;
     }
   }
 
@@ -234,27 +378,29 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
   .container {
     display: flex;
     justify-content: space-between;
-    gap: 5.438rem;
-    padding-top: 5rem;
-    padding-bottom: 3.75rem;
+    gap: 87px;
+    padding-top: 80px;
+    padding-bottom: 60px;
   }
 
   h3 {
-    font-size: 20px;
+    font-size: 18px;
     font-style: normal;
     font-weight: 500;
     line-height: 28px;
     color: #fff;
     white-space: nowrap;
-    padding-bottom: 1.5rem;
+    padding-bottom: 24px;
   }
+
   ul {
     list-style-type: none;
     padding: 0;
+
     li {
-      padding-bottom: 1rem;
+      padding-bottom: 16px;
       a {
-        font-size: 16px;
+        font-size: 14px;
         font-style: normal;
         font-weight: 400;
         line-height: 24px;
@@ -264,37 +410,40 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
       }
     }
   }
+
   ul li:nth-child(5) {
     padding-bottom: 0;
   }
 }
+
 .logo p:nth-child(1) {
   color: #fff;
-  font-size: 24px;
+  font-size: 22px;
   font-style: normal;
   font-weight: 700;
   line-height: 24px;
-  letter-spacing: 0.72px;
+  letter-spacing: 1.15px;
 }
 
 .logo p:nth-child(2) {
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-style: normal;
   font-weight: 500;
   line-height: 28px;
-  padding-top: 1.5rem;
+  padding-top: 24px;
 }
 
 .logo p:nth-child(3) {
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 24px;
-  padding-top: 1.5rem;
-  padding-bottom: 1rem;
+  padding-top: 24px;
+  padding-bottom: 16px;
 }
+
 :deep(.el-input__wrapper) {
   background: var(--user-theme-color);
   background-color: transparent;
@@ -308,33 +457,38 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
     line-height: 18px;
     color: #fff;
   }
+
   .download {
     padding-top: 10px;
     display: flex;
     gap: 8px;
   }
 }
+
 .input-email {
   :deep(.el-input__wrapper) {
     display: flex;
-    width: 13.5625rem;
-    padding: 0.75rem 0rem 0.75rem 1rem;
+    width: 217px;
+    padding: 12px 0 12px 16px;
     align-items: center;
-    padding-right: 1.2rem;
+    padding-right: 19px;
   }
 }
+
 .icon-socials {
   display: flex;
-  gap: 1.5rem;
-  padding-top: 1.5rem;
+  gap: 24px;
+  padding-top: 24px;
 }
-.input-email ::placeholder {
+
+.input-email::placeholder {
   color: #fff;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: 24px;
 }
+
 .icon-app {
   width: min-content;
 }
@@ -342,101 +496,125 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
 @media (max-width: 1024px) {
   .container {
     flex-wrap: wrap;
+
     .logo {
       width: 50%;
       flex: 1;
     }
+
     .support {
       width: 50%;
       flex: 1;
     }
+
     .account {
       width: 50%;
       flex: 1;
     }
+
     .quick-link {
       width: 30%;
       flex: 1;
       max-width: fit-content;
-      padding-right: 7rem;
+      padding-right: 112px;
     }
+
     .download-app {
       width: 50%;
       flex: 1;
     }
   }
+
   .logo p:nth-child(1) {
-    font-size: 20px;
+    font-size: 18px;
   }
+
   .logo p:nth-child(2) {
-    font-size: 16px;
+    font-size: 14px;
   }
+
   .logo p:nth-child(3) {
-    font-size: 12px;
-  }
-  .download-app span {
     font-size: 10px;
   }
-  .icon-socials {
-    gap: 1rem;
+
+  .download-app span {
+    font-size: 8px;
   }
+
+  .icon-socials {
+    gap: 16px;
+  }
+
   .input-email {
     :deep(.el-input__wrapper) {
       display: flex;
-      width: 13.5625rem;
-      padding: 0.75rem 0rem 0.75rem 1rem;
+      width: 217px;
+      padding: 12px 0 12px 16px;
       align-items: center;
-      gap: 2rem;
+      gap: 32px;
     }
   }
+
   .download {
     gap: 4px;
   }
+
   .icon-app {
     gap: 4px;
   }
+
   .icon-socials {
-    gap: 1rem;
+    gap: 16px;
   }
+
   .subscribe-box {
-    padding-top: 1rem;
+    padding-top: 16px;
   }
+
   :deep(.el-input) {
     width: 150px;
   }
 }
+
 @media (max-width: 480px) {
   .container {
     flex-direction: column;
-    gap: 2rem;
+    gap: 32px;
+
     .logo {
       width: 100%;
       flex: 1;
     }
+
     .support {
       width: 100%;
       flex: 1;
     }
+
     .account {
       width: 100%;
       flex: 1;
     }
+
     .quick-link {
       width: 100%;
       flex: 1;
       max-width: fit-content;
       padding-right: 0;
     }
+
     .download-app {
       width: 100%;
       flex: 1;
     }
   }
+
   .input-email {
     :deep(.el-input__wrapper) {
       padding: 12px;
     }
   }
+
   .footer-noti {
     font-size: 12px;
   }

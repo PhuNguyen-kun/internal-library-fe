@@ -1,5 +1,5 @@
 import axiosInstance from '@/utils/axiosInstance'
-import type { LoginPayload } from '@/types/auth.d.ts'
+import type { LoginPayload } from '@/types/Common/auth'
 
 export const login = (payload: LoginPayload) => {
   return axiosInstance.post('/auth/login', payload)
@@ -12,3 +12,4 @@ export const logout = () => {
 export  const profile = () => {
   return axiosInstance.get('/auth/profile')
 }
+
