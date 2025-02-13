@@ -12,7 +12,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useBookStore} from "@/stores/User/book.store";
+import { ref, watch } from 'vue'
 
+const bookStore = useBookStore();
+const bookTitle = ref("");
 const routeToVietnameseMap: Record<string, string> = {
   user: 'Trang chủ',
   login: 'Đăng nhập',
@@ -35,31 +39,34 @@ function capitalizeWords(str: string) {
   return str.replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
-const bookTitle = computed(() => {
-  if (route.name === 'book-detail' && route.params.slug) {
-    return capitalizeWords(decodeURIComponent(route.params.slug as string).replace(/-/g, ' '))
-  }
-  return null
-})
+watch(
+  () => bookStore.book,
+  (book) => {
+    if (book) {
+      bookTitle.value = book.title;
+    }
+  },
+  { immediate: true }
+);
 
 const breadcrumbItems = computed(() => {
   return route.matched.map((matchedRoute) => {
-    const routeName = matchedRoute.name as string
-    const translatedText = routeToVietnameseMap[routeName] || capitalizeWords(routeName)
+    const routeName = matchedRoute.name as string;
+    const translatedText = routeToVietnameseMap[routeName] || capitalizeWords(routeName);
 
-    if (routeName === 'book-detail' && bookTitle.value) {
+    if (routeName === "book-detail" && bookTitle.value) {
       return {
         text: bookTitle.value,
-        link: null
-      }
+        link: null,
+      };
     }
 
     return {
       text: translatedText,
-      link: matchedRoute.path !== route.path ? matchedRoute.path : null
-    }
-  })
-})
+      link: matchedRoute.path !== route.path ? matchedRoute.path : null,
+    };
+  });
+});
 </script>
 
 <style lang="scss" scoped>
@@ -69,7 +76,7 @@ const breadcrumbItems = computed(() => {
 }
 a {
   &:hover {
-    color: var(--primary-color);
+    color: var(--user-theme-color);
   }
 }
 :deep(.el-breadcrumb__inner) {
@@ -77,5 +84,8 @@ a {
   font-style: normal;
   font-weight: 400;
   line-height: 1.3125rem;
+  a {
+    font-weight: 400;
+  }
 }
 </style>

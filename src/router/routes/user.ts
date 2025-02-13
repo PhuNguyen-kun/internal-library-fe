@@ -2,7 +2,7 @@ import type {RouteRecordRaw} from "vue-router";
 
 const userRoutes: RouteRecordRaw[] = [
   {
-    path: '',
+    path: '/',
     name: 'user',
     component: () => import('@/components/User/Layout/Layout.vue'),
     redirect: '/homepage',
@@ -26,6 +26,11 @@ const userRoutes: RouteRecordRaw[] = [
         path: '/login',
         name: 'user/login',
         component: () => import('@/views/User/Login.vue')
+      },
+      {
+        path: '/book/:slug',
+        name: 'book-detail',
+        component: () => import('@/views/User/BookDetail.vue')
       }
     ]
   },

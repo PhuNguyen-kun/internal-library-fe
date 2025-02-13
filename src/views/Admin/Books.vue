@@ -353,7 +353,7 @@ const formRules = {
   ],
   description: [
     {required: true, message: 'Không để trống mô tả đầy đủ', trigger: 'blur'},
-    {max: 255, message: 'Mô tả đầy đủ không vượt quá 255 ký tự'}
+    {max: 1000, message: 'Mô tả đầy đủ không vượt quá 1000 ký tự'}
   ]
 }
 

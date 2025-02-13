@@ -43,7 +43,7 @@
           <button type="submit" class="user-btn" :disabled="authStore.loading">
             <template v-if="authStore.loading">
               <div style="display: flex; align-items: center; justify-content: center; gap: 10px">
-                <span>Signing up...</span>
+                <span>Logging in...</span>
                 <span class="loading-spinner"></span>
               </div>
             </template>
