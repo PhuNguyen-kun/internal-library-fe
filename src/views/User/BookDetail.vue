@@ -111,7 +111,7 @@
       <el-carousel ref="carouselRef" arrow="never" class="">
         <el-carousel-item v-for="(group, index) in relatedBooksGroup" :key="index" class="no-text-decoration">
           <div class="product-section__category">
-            <router-link :to="'/book/' + book.slug" class="product-card" v-for="book in group" :key="book.id">
+            <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in group" :key="book.id">
               <div class="product-card__image">
                 <img :src="book.image_url" alt="Book Image" class="img">
                 <div class="product-card__add-to-cart">
@@ -137,7 +137,6 @@
         </el-carousel-item>
       </el-carousel>
     </div>
-
   </div>
 </template>
 
@@ -363,8 +362,6 @@ watchEffect(async () => {
 
       .review-input {
         padding: 30px 20px;
-        border-top: 1px solid #ccc;
-        margin-top: 20px;
 
         &__title {
           font-size: 16px;
@@ -386,6 +383,10 @@ watchEffect(async () => {
         display: flex;
         gap: 15px;
         padding: 23px 20px;
+      }
+
+      .container:last-of-type {
+        border-bottom: 1px solid #ccc;
       }
 
       img {

@@ -24,6 +24,8 @@
               type="text"
               class="search-bar"
               placeholder="Bạn cần tìm gì hôm nay?"
+              v-model="searchTerm"
+              @keyup.enter="handleSearch"
             />
             <div class="search-icon">
               <img src="@/assets/img/User/search-icon.svg" alt="">
@@ -145,12 +147,32 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import SendIcon from "@/components/User/Icons/SendIcon.vue";
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/User/auth.store';
 
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 const isDropdownActive = ref(false);
+const searchTerm = ref("");
+
+// const performSearch = () => {
+//   if (searchTerm.value.trim()) {
+//     router.push({ path: "/books", query: { search_term: searchTerm.value.trim() } });
+//   }
+// };
+
+const handleSearch = () => {
+  const newQuery = { ...route.query };
+
+  if (searchTerm.value.trim() === "") {
+    delete newQuery.search_term;
+  } else {
+    newQuery.search_term = searchTerm.value.trim();
+  }
+
+  router.push({ query: newQuery });
+};
 
 const toggleDropdown = (event: MouseEvent) => {
   event.stopPropagation();

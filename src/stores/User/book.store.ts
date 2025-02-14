@@ -1,7 +1,9 @@
 import {defineStore} from "pinia";
-import {ref} from "vue";
+import {reactive, ref} from "vue";
 import * as bookService from "@/services/User/bookService";
 import type {Book} from "@/types/Admin/book";
+import * as homepageService from "@/services/User/homepageService";
+import {defaultPagination} from "@/constants/Admin/pagination";
 
 export const useBookStore = defineStore("book", () => {
   const books = ref([]);
@@ -9,11 +11,34 @@ export const useBookStore = defineStore("book", () => {
   const topBorrowedBooks = ref([]);
   const relatedBooks = ref([]);
   const reviews = ref([]);
+  const categories = ref([]);
+  const authors = ref([]);
+  const publishers = ref([]);
+  const searchTerm = ref<string>('');
 
-  const fetchBooks = async () => {
+  const pagination = reactive({
+    current_page: defaultPagination.current_page,
+    total: defaultPagination.total,
+    total_pages: defaultPagination.total_pages,
+    per_page: 12,
+  });
+
+  const handlePageChange = (page: number) => {
+    pagination.current_page = page;
+    fetchBooks();
+  }
+
+  const fetchBooks = async (filters = {}) => {
     try {
-      const response = await bookService.getBooks();
+      const response = await bookService.getBooks({
+        search_term: searchTerm.value.trim(),
+        per_page: pagination.per_page,
+        page: pagination.current_page,
+        ...filters
+      });
       books.value = response.data;
+      pagination.total = response.pagination.total;
+      pagination.total_pages = response.pagination.total_pages;
       console.log(books.value);
     } catch (error) {
       console.error("Failed to fetch books", error);
@@ -64,6 +89,16 @@ export const useBookStore = defineStore("book", () => {
       throw error;
     }
   }
+  const fetchCategories = async () => {
+    try {
+      const response = await homepageService.getCategories();
+      categories.value = response.data;
+      console.log(categories.value);
+    } catch (error) {
+      console.error('Failed to fetch categories', error);
+      throw error;
+    }
+  };
 
   const fetchRelatedBooks = async (slug: string) => {
     try {
@@ -76,17 +111,47 @@ export const useBookStore = defineStore("book", () => {
     }
   }
 
+  const fetchAuthors = async () => {
+    try {
+      const response = await bookService.getAuthors();
+      authors.value = response.data;
+      console.log(authors.value);
+    } catch (error) {
+      console.error("Failed to fetch authors", error);
+      throw error;
+    }
+  }
+
+  const fetchPublishers = async () => {
+    try {
+      const response = await bookService.getPublishers();
+      publishers.value = response.data;
+      console.log(publishers.value);
+    } catch (error) {
+      console.error("Failed to fetch publishers", error);
+      throw error;
+    }
+  }
+
   return {
     books,
     book,
     reviews,
+    categories,
+    authors,
+    publishers,
     topBorrowedBooks,
     relatedBooks,
+    pagination,
     fetchBooks,
     fetchBook,
     fetchTopBorrowedBooks,
     fetchBookBySlug,
     fetchReviews,
-    fetchRelatedBooks
+    fetchCategories,
+    fetchRelatedBooks,
+    fetchAuthors,
+    fetchPublishers,
+    handlePageChange
   };
 });

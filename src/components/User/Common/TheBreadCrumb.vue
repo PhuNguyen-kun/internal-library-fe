@@ -24,7 +24,7 @@ const routeToVietnameseMap: Record<string, string> = {
   cart: 'Giỏ mua',
   checkout: 'Xác nhận mua hàng',
   register: 'Đăng ký',
-  booklist: 'Tất cả mặt hàng',
+  books: 'Sách',
   wishlist: 'Danh sách yêu thích',
   'account-manage': 'Quản lý tài khoản',
   'edit-profile': 'Chỉnh sửa hồ sơ',
@@ -50,7 +50,7 @@ watch(
 );
 
 const breadcrumbItems = computed(() => {
-  return route.matched.map((matchedRoute) => {
+  const items = route.matched.map((matchedRoute) => {
     const routeName = matchedRoute.name as string;
     const translatedText = routeToVietnameseMap[routeName] || capitalizeWords(routeName);
 
@@ -66,6 +66,12 @@ const breadcrumbItems = computed(() => {
       link: matchedRoute.path !== route.path ? matchedRoute.path : null,
     };
   });
+
+  if (route.name === "book-detail" && !items.some(item => item.text === "Sách")) {
+    items.splice(items.length - 1, 0, { text: "Sách", link: "/books" });
+  }
+
+  return items;
 });
 </script>
 

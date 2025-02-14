@@ -28,9 +28,14 @@ const userRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/User/Login.vue')
       },
       {
-        path: '/book/:slug',
+        path: '/books/:slug',
         name: 'book-detail',
         component: () => import('@/views/User/BookDetail.vue')
+      },
+      {
+        path: '/books',
+        name: 'books',
+        component: () => import('@/views/User/BookList.vue')
       }
     ]
   },

@@ -27,12 +27,12 @@
       </div>
       <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
         <h2 class="product-section__title">Top các sách được mượn nhiều nhất</h2>
-        <button class="user-btn">Xem tất cả</button>
+        <router-link to="/books?sort=most_borrowed" class="user-btn">Xem tất cả</router-link>
       </div>
     </div>
 
     <div class="product-section__items">
-      <router-link :to="'/book/' + book.slug" class="product-card" v-for="book in bookStore.topBorrowedBooks" :key="book.id">
+      <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in bookStore.topBorrowedBooks" :key="book.id">
         <div class="product-card__image">
           <img :src="book.image_url" alt="Book Image" class="img">
           <div class="product-card__add-to-cart">
@@ -76,7 +76,7 @@
     <el-carousel ref="carouselRef" arrow="never">
       <el-carousel-item v-for="(group, index) in categoryGroups" :key="index" class="no-text-decoration">
         <div class="product-section__category">
-          <router-link to="" class="category-card" v-for="(category, idx) in group" :key="category.id">
+          <router-link :to="'/books?category=' + category.slug" class="category-card" v-for="(category, idx) in group" :key="category.id">
             <img :src="categoryImages[idx % categoryImages.length]" alt="Category image" class="category-image">
             <span>{{ category.name }}</span>
           </router-link>
@@ -97,12 +97,12 @@
       </div>
       <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
         <h2 class="product-section__title">Khám phá tất cả sản phẩm</h2>
-        <button class="user-btn">Xem tất cả</button>
+        <router-link :to="'/books'" class="user-btn">Xem tất cả</router-link>
       </div>
     </div>
 
       <div class="product-section__items">
-        <router-link :to="'/book/' + book.slug" class="product-card" v-for="book in firstRows" :key="book.id">
+        <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in firstRows" :key="book.id">
           <div class="product-card__image">
             <img :src="book.image_url" alt="Book Image" class="img">
             <div class="product-card__add-to-cart">
@@ -126,7 +126,7 @@
         </router-link>
       </div>
     <div class="product-section__items">
-      <router-link :to="'/book/' + book.slug" class="product-card" v-for="book in secondRows" :key="book.id">
+      <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in secondRows" :key="book.id">
         <div class="product-card__image">
           <img :src="book.image_url" alt="Book Image" class="img">
           <div class="product-card__add-to-cart">

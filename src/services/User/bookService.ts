@@ -1,16 +1,21 @@
 import axiosInstance from "@/utils/axiosInstance";
 
-export const getBooks = async () => {
+export const getBooks = async (params = {}) => {
+  console.log("Sending request with params:", params);
+
   try {
-    const response = await axiosInstance.get("/user/books");
+    const response = await axiosInstance.get("/user/books", { params });
+
+    console.log("✅ Received response:", response.data);
     return {
-      data: response.data.data
+      data: response.data.data,
+      pagination: response.data.pagination
     };
   } catch (error) {
     console.error("Failed to fetch books", error);
     throw error;
   }
-}
+};
 
 export const getBookBySlug = async (slug: string) => {
   try {
@@ -68,6 +73,34 @@ export const getRelatedBooks = async (slug: string) => {
     };
   } catch (error) {
     console.error("Failed to fetch related books", error);
+    throw error;
+  }
+}
+
+export const getAuthors = async ()=> {
+  try {
+    const response = await axiosInstance.get(`/admin/authors`, {
+      params: { per_page: 100 },
+    });
+    return {
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error("Failed to fetch authors", error);
+    throw error;
+  }
+}
+
+export const getPublishers = async ()=> {
+  try {
+    const response = await axiosInstance.get(`/admin/publishers`, {
+      params: { per_page: 100 },
+    });
+    return {
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error("Failed to fetch publishers", error);
     throw error;
   }
 }
