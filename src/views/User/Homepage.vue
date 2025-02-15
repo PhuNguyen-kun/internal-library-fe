@@ -4,7 +4,7 @@
       <el-scrollbar>
       <ul>
         <li v-for="category in homepageStore.categories" :key="category.id" class="homepage__hero--items no-text-decoration">
-         <router-link to=""> {{ category.name }}</router-link>
+         <router-link :to="'books?category=' + category.slug"> {{ category.name }}</router-link>
         </li>
       </ul>
       </el-scrollbar>

@@ -7,10 +7,17 @@
         <span>Danh mục</span>
       </div>
       <div class="sidebar__item--content">
-        <ul>
-          <el-scrollbar height="400px">
-            <li v-for="category in bookStore.categories" :key="category.id">
-              <label :class="{ 'active': selectedCategory === category.slug }">
+        <el-scrollbar ref="scrollbarRef" height="400px">
+          <ul>
+            <li
+              v-for="category in bookStore.categories"
+              :key="category.id"
+              ref="categoryRefs"
+            >
+              <label
+                :class="{ 'active': selectedCategory === category.slug }"
+                :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+              >
                 <input
                   type="checkbox"
                   :value="category.slug"
@@ -20,8 +27,8 @@
                 {{ category.name }}
               </label>
             </li>
-          </el-scrollbar>
-        </ul>
+          </ul>
+        </el-scrollbar>
       </div>
     </div>
 
@@ -32,8 +39,8 @@
         <span>Tác giả</span>
       </div>
       <div class="sidebar__item--content">
-        <ul>
-          <el-scrollbar height="400px">
+        <el-scrollbar height="400px">
+          <ul>
             <li v-for="author in bookStore.authors" :key="author.id">
               <label :class="{ 'active': selectedAuthor === author.slug }">
                 <input
@@ -45,8 +52,8 @@
                 {{ author.name }}
               </label>
             </li>
-          </el-scrollbar>
-        </ul>
+          </ul>
+        </el-scrollbar>
       </div>
     </div>
 
@@ -57,8 +64,8 @@
         <span>Nhà xuất bản</span>
       </div>
       <div class="sidebar__item--content">
-        <ul>
-          <el-scrollbar height="400px">
+        <el-scrollbar height="400px">
+          <ul>
             <li v-for="publisher in bookStore.publishers" :key="publisher.id">
               <label :class="{ 'active': selectedPublisher === publisher.slug }">
                 <input
@@ -70,15 +77,15 @@
                 {{ publisher.name }}
               </label>
             </li>
-          </el-scrollbar>
-        </ul>
+          </ul>
+        </el-scrollbar>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect, onMounted } from "vue";
+import { ref, watchEffect, onMounted, nextTick, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useBookStore } from "@/stores/User/book.store";
 
@@ -89,6 +96,10 @@ const bookStore = useBookStore();
 const selectedCategory = ref<string | null>(null);
 const selectedAuthor = ref<string | null>(null);
 const selectedPublisher = ref<string | null>(null);
+
+const scrollbarRef = ref<HTMLElement | null>(null);
+const activeCategoryRef = ref<HTMLElement | null>(null);
+const firstLoad = ref(true);
 
 const toggleFilter = (type: string, value: string) => {
   const newQuery = { ...route.query };
@@ -108,12 +119,35 @@ watchEffect(() => {
   selectedPublisher.value = route.query.publisher ? route.query.publisher.toString() : null;
 });
 
-onMounted(() => {
-  bookStore.fetchCategories();
-  bookStore.fetchAuthors();
-  bookStore.fetchPublishers();
+const scrollToActiveCategory = () => {
+  nextTick(() => {
+    if (firstLoad.value && scrollbarRef.value && activeCategoryRef.value) {
+      const container = scrollbarRef.value.$el.querySelector('.el-scrollbar__wrap');
+      const activeElement = activeCategoryRef.value;
+
+      if (container && activeElement) {
+        container.scrollTo({
+          top: activeElement.offsetTop - container.offsetTop - 50,
+          behavior: "smooth"
+        });
+      }
+      firstLoad.value = false;
+    }
+  });
+};
+
+onMounted(async () => {
+  await bookStore.fetchCategories();
+  await bookStore.fetchAuthors();
+  await bookStore.fetchPublishers();
+  scrollToActiveCategory();
+});
+
+watch(selectedCategory, () => {
+  scrollToActiveCategory();
 });
 </script>
+
 
 <style lang="scss" scoped>
 .sidebar {
