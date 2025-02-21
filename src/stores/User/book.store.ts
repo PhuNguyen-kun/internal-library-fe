@@ -15,6 +15,7 @@ export const useBookStore = defineStore("book", () => {
   const authors = ref([]);
   const publishers = ref([]);
   const searchTerm = ref<string>('');
+  const borrowedBooks = ref([]);
 
   const pagination = reactive({
     current_page: defaultPagination.current_page,
@@ -133,6 +134,17 @@ export const useBookStore = defineStore("book", () => {
     }
   }
 
+  const fetchBorrowedBooks = async (filters = {}) => {
+    try {
+      const response = await bookService.getBorrowedBooks(filters);
+      borrowedBooks.value = response.data;
+      console.log(borrowedBooks.value);
+    } catch (error) {
+      console.error("Failed to fetch borrowed books", error);
+      throw error;
+    }
+  };
+
   return {
     books,
     book,
@@ -143,6 +155,8 @@ export const useBookStore = defineStore("book", () => {
     topBorrowedBooks,
     relatedBooks,
     pagination,
+    searchTerm,
+    borrowedBooks,
     fetchBooks,
     fetchBook,
     fetchTopBorrowedBooks,
@@ -152,6 +166,7 @@ export const useBookStore = defineStore("book", () => {
     fetchRelatedBooks,
     fetchAuthors,
     fetchPublishers,
-    handlePageChange
+    handlePageChange,
+    fetchBorrowedBooks,
   };
 });

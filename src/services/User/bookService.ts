@@ -105,4 +105,15 @@ export const getPublishers = async ()=> {
   }
 }
 
-
+export const getBorrowedBooks = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get("/admin/orders/history", { params });
+    return {
+      data: response.data.data,
+      pagination: response.data.pagination
+    };
+  } catch (error) {
+    console.error("Failed to fetch borrowed books", error);
+    throw error;
+  }
+};

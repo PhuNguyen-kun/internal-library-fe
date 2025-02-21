@@ -54,6 +54,7 @@ const handleCancel = () => {
 
 const handleSubmit = () => {
   if (props.formRef) {
+
     props.formRef.validate((valid: boolean) => {
       if (valid) {
         emit("submit");

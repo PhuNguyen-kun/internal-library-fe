@@ -133,9 +133,12 @@
                 </div>
               </div>
             </router-link>
+
+<!--            <ProductList :books="bookStore.relatedBooks" />-->
           </div>
         </el-carousel-item>
       </el-carousel>
+
     </div>
   </div>
 </template>
@@ -145,6 +148,7 @@ import TheBreadCrumb from '@/components/User/Common/TheBreadCrumb.vue'
 import { onMounted, ref, computed, watchEffect } from 'vue'
 import { useBookStore} from "@/stores/User/book.store";
 import { useRoute } from 'vue-router'
+import ProductList from "@/components/User/Common/ProductList.vue";
 
 const route = useRoute()
 const bookStore = useBookStore()
@@ -167,7 +171,7 @@ const nextSlide = () => {
 }
 
 watchEffect(async () => {
-  const slug = route.params.slug;
+  const slug = route.params.slug as string;
 
   try {
     await bookStore.fetchBooks();

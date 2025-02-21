@@ -23,7 +23,7 @@
             <input
               type="text"
               class="search-bar"
-              placeholder="Bạn cần tìm gì hôm nay?"
+              placeholder="Tìm kiếm sách theo tiêu đề"
               v-model="searchTerm"
               @keyup.enter="handleSearch"
             />
@@ -35,9 +35,9 @@
               <div class="header__action--icon">
                 <img src="@/assets/img/User/wishlist-icon.svg" alt="">
               </div>
-              <div class="header__action--icon">
-                <img src="@/assets/img/User/cart-icon.svg" alt="">
-              </div>
+              <el-badge :value="cartTotal" :offset="[-3, 6]" color="#FF4500C7" class="header__action--icon" >
+                <router-link to="/cart"><img src="@/assets/img/User/cart-icon.svg" alt=""></router-link>
+              </el-badge>
               <div class="header__action--icon user-icon"
                    :class="{ active: isDropdownActive }"
                     @click="toggleDropdown"
@@ -49,7 +49,7 @@
                       <img src="@/assets/img/User/user-icon-white.svg" alt="">
                       <a href="#">Quản lý tài khoản</a>
                     </li>
-                    <li>
+                    <li @click="toBorrowingHistory">
                       <img src="@/assets/img/User/borrow-history-icon.svg" alt="">
                       <a href="#">Lịch sử mượn</a>
                     </li>
@@ -145,22 +145,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import SendIcon from "@/components/User/Icons/SendIcon.vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/User/auth.store';
+import { useCartStore } from '@/stores/User/cart.store';
 
 const authStore = useAuthStore();
+const cartStore = useCartStore();
 const route = useRoute();
 const router = useRouter();
 const isDropdownActive = ref(false);
 const searchTerm = ref("");
 
-// const performSearch = () => {
-//   if (searchTerm.value.trim()) {
-//     router.push({ path: "/books", query: { search_term: searchTerm.value.trim() } });
-//   }
-// };
+const cartTotal = computed(() => {
+  return cartStore.cart.reduce((acc, item) => acc + item.quantity, 0);
+});
 
 const handleSearch = () => {
   const newQuery = { ...route.query };
@@ -171,7 +171,7 @@ const handleSearch = () => {
     newQuery.search_term = searchTerm.value.trim();
   }
 
-  router.push({ query: newQuery });
+  router.push({ path: "/books", query: newQuery });
 };
 
 const toggleDropdown = (event: MouseEvent) => {
@@ -186,11 +186,19 @@ const closeDropdown = (event: MouseEvent) => {
   }
 };
 
+const toBorrowingHistory = () => {
+  router.push({ path: "/borrowing-history" });
+};
+
 const logout = () => {
   authStore.logout();
 };
 
 document.addEventListener('click', closeDropdown);
+
+onMounted(async () => {
+  await cartStore.fetchCart();
+});
 </script>
 
 <style lang="scss" scoped>

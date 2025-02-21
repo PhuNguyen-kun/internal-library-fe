@@ -14,6 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   const formError = ref<string>('');
   const loading = ref<boolean>(false);
   const isLoggedIn = ref<boolean>(!!localStorage.getItem('access_token'));
+
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

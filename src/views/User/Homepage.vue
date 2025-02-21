@@ -31,30 +31,7 @@
       </div>
     </div>
 
-    <div class="product-section__items">
-      <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in bookStore.topBorrowedBooks" :key="book.id">
-        <div class="product-card__image">
-          <img :src="book.image_url" alt="Book Image" class="img">
-          <div class="product-card__add-to-cart">
-            <button @click="addToCart(book)">
-              <img src="@/assets/img/User/card-icon-white.svg" alt="">
-              Thêm vào giỏ hàng
-            </button>
-          </div>
-        </div>
-        <div class="product-card__actions">
-          <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
-          <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
-        </div>
-        <div class="product-card__info">
-          <h3 class="product-card__info--title no-text-decoration">{{ book.title }}</h3>
-          <div class="product-card__info--review">
-            <el-rate v-model="book.average_star" disabled disabled-void-color="#E5E5E5"></el-rate>
-            <div class="review-count">({{book.review_count}})</div>
-          </div>
-        </div>
-      </router-link>
-    </div>
+    <ProductList :books="bookStore.topBorrowedBooks" />
   </div>
 
   <!-- Category row -->
@@ -106,7 +83,7 @@
           <div class="product-card__image">
             <img :src="book.image_url" alt="Book Image" class="img">
             <div class="product-card__add-to-cart">
-              <button @click="addToCart(book)">
+              <button @click.prevent.stop="addToCart(book)">
                 <img src="@/assets/img/User/card-icon-white.svg" alt="">
                 Thêm vào giỏ hàng
               </button>
@@ -130,7 +107,7 @@
         <div class="product-card__image">
           <img :src="book.image_url" alt="Book Image" class="img">
           <div class="product-card__add-to-cart">
-            <button @click="addToCart(book)">
+            <button @click.prevent.stop="addToCart(book)">
               <img src="@/assets/img/User/card-icon-white.svg" alt="">
               Thêm vào giỏ hàng
             </button>
@@ -159,8 +136,12 @@
 import { onMounted, computed, ref } from 'vue';
 import { useHomepageStore } from '@/stores/User/homepage.store';
 import { useBookStore} from "@/stores/User/book.store";
+import ProductList from "@/components/User/Common/ProductList.vue";
+import {notifySuccess} from "@/composables/notifications";
+import {useCartStore} from "@/stores/User/cart.store";
 
 const homepageStore = useHomepageStore();
+const cartStore = useCartStore();
 const bookStore = useBookStore();
 const categoriesPerPage = 6
 const carouselRef = ref()
@@ -198,6 +179,12 @@ const prevSlide = () => {
 const nextSlide = () => {
   carouselRef.value?.next()
 }
+
+const addToCart = async (book: any) => {
+  console.log('Book id:', book.id);
+  await cartStore.addToCart(book.id);
+  notifySuccess('Thêm vào giỏ hàng thành công');
+};
 
 onMounted( () => {
   homepageStore.fetchCategories();

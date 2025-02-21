@@ -45,30 +45,31 @@
 
         <div class="book-list__section">
           <div class="product-section">
-            <div class="product-section__items">
-              <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in bookStore.books" :key="book.id">
-                <div class="product-card__image">
-                  <img :src="book.image_url" alt="Book Image" class="img">
-                  <div class="product-card__add-to-cart">
-                    <button @click="addToCart(book)">
-                      <img src="@/assets/img/User/card-icon-white.svg" alt="">
-                      Thêm vào giỏ hàng
-                    </button>
-                  </div>
-                </div>
-                <div class="product-card__actions">
-                  <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
-                  <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
-                </div>
-                <div class="product-card__info">
-                  <h3 class="product-card__info--title no-text-decoration">{{ book.title }}</h3>
-                  <div class="product-card__info--review">
-                    <el-rate v-model="book.average_star" disabled disabled-void-color="#E5E5E5"></el-rate>
-                    <div class="review-count">({{book.review_count}})</div>
-                  </div>
-                </div>
-              </router-link>
-            </div>
+<!--            <div class="product-section__items">-->
+<!--              <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in bookStore.books" :key="book.id">-->
+<!--                <div class="product-card__image">-->
+<!--                  <img :src="book.image_url" alt="Book Image" class="img">-->
+<!--                  <div class="product-card__add-to-cart">-->
+<!--                    <button @click="addToCart(book)">-->
+<!--                      <img src="@/assets/img/User/card-icon-white.svg" alt="">-->
+<!--                      Thêm vào giỏ hàng-->
+<!--                    </button>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--                <div class="product-card__actions">-->
+<!--                  <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>-->
+<!--                  <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>-->
+<!--                </div>-->
+<!--                <div class="product-card__info">-->
+<!--                  <h3 class="product-card__info&#45;&#45;title no-text-decoration">{{ book.title }}</h3>-->
+<!--                  <div class="product-card__info&#45;&#45;review">-->
+<!--                    <el-rate v-model="book.average_star" disabled disabled-void-color="#E5E5E5"></el-rate>-->
+<!--                    <div class="review-count">({{book.review_count}})</div>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </router-link>-->
+<!--            </div>-->
+            <ProductList :books="bookStore.books" custom-class="product-section__items"/>
           </div>
           </div>
 
@@ -88,25 +89,26 @@ import { useBookStore } from "@/stores/User/book.store";
 import {onMounted, watchEffect, ref} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Pagination from "@/components/User/Common/Pagination.vue";
+import ProductList from "@/components/User/Common/ProductList.vue";
 
 const bookStore = useBookStore();
 const route = useRoute();
 const router = useRouter();
-const selectedSort = ref<string | null>(null);
+const selectedSort = ref<string>();
 
 const toggleSort = (sortType: string) => {
-  selectedSort.value = selectedSort.value === sortType ? null : sortType;
+  selectedSort.value = selectedSort.value === sortType ? undefined : sortType;
   updateFilters();
 };
 
 const updateFilters = () => {
   const newQuery = { ...route.query };
-  newQuery.sort = selectedSort.value || undefined;
+  newQuery.sort = selectedSort.value as string;
   router.push({ query: newQuery });
 };
 
 watchEffect(() => {
-  selectedSort.value = route.query.sort || null;
+  selectedSort.value = route.query.sort as string;
 });
 
 onMounted(() => {
@@ -216,6 +218,7 @@ watchEffect(() => {
 
 .product-section {
   margin-top: 0;
+
   &__items {
     gap: 40px;
     display: flex;
@@ -223,38 +226,36 @@ watchEffect(() => {
     justify-content: flex-start;
   }
 
-  .product-card {
+  :deep(.product-card) {
     width: calc(32% - 20px);
+  }
 
-    &__image {
-      height: 250px;
+  :deep(.product-card__image) {
+    height: 250px;
+
+    img {
+      width: 65%;
+      height: 86%;
+      object-fit: cover;
+    }
+  }
+
+  :deep(.product-card__actions) {
+    top: 6px;
+    right: 6px;
+
+    .action-buttons {
+      width: 5px;
+      height: 12px;
 
       img {
-        width: 65%;
-        height: 86%;
-        object-fit: cover;
+        width: 17px;
       }
     }
+  }
 
-    &__actions {
-      top: 6px;
-      right: 6px;
-
-      .action-buttons {
-        width: 5px;
-        height: 12px;
-
-        img {
-          width: 17px;
-        }
-      }
-    }
-
-    &__add-to-cart {
-      img {
-        width: 25px;
-      }
-    }
+  :deep(.product-card__add-to-cart img) {
+    width: 25px;
   }
 }
 </style>

@@ -36,7 +36,22 @@ const userRoutes: RouteRecordRaw[] = [
         path: '/books',
         name: 'books',
         component: () => import('@/views/User/BookList.vue')
-      }
+      },
+      {
+        path: '/cart',
+        name: 'cart',
+        component: () => import('@/views/User/Cart.vue')
+      },
+      {
+        path: '/checkout',
+        name: 'checkout',
+        component: () => import('@/views/User/Checkout.vue')
+      },
+      {
+        path: '/borrowing-history',
+        name: 'borrowing-history',
+        component: () => import('@/views/User/BorrowingHistory.vue')
+      },
     ]
   },
 

@@ -122,7 +122,7 @@
       require-asterisk-position="right"
     >
       <el-form-item label="Tên sách" prop="title">
-        <el-input v-model="book.title" placeholder="Nhập tên sách"></el-input>
+        <el-input @input="book.title=book.title.trimStart()" v-model="book.title" placeholder="Nhập tên sách"></el-input>
       </el-form-item>
       <el-form-item label="Avatar" prop="image_url">
         <el-upload
@@ -230,7 +230,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="Số lượng" prop="stock_quantity">
-        <el-input-number
+        <epl-input-number
           v-model="book.stock_quantity"
           :min="1"
           placeholder="Nhập số lượng"
