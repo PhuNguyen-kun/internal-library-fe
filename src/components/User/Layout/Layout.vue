@@ -32,9 +32,9 @@
             </div>
 
             <div class="header__action" v-if="authStore.isLoggedIn && !['/signup', '/login'].includes(route.path)">
-              <div class="header__action--icon">
-                <img src="@/assets/img/User/wishlist-icon.svg" alt="">
-              </div>
+              <el-badge :value="wishlistTotal" color="#FF4500C7" class="header__action--icon">
+                <router-link to="/wishlist"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></router-link>
+              </el-badge>
               <el-badge :value="cartTotal" :offset="[-3, 6]" color="#FF4500C7" class="header__action--icon" >
                 <router-link to="/cart"><img src="@/assets/img/User/cart-icon.svg" alt=""></router-link>
               </el-badge>
@@ -49,9 +49,9 @@
                       <img src="@/assets/img/User/user-icon-white.svg" alt="">
                       <a href="#">Quản lý tài khoản</a>
                     </li>
-                    <li @click="toBorrowingHistory">
+                    <li>
                       <img src="@/assets/img/User/borrow-history-icon.svg" alt="">
-                      <a href="#">Lịch sử mượn</a>
+                      <router-link to="/borrowing-history">Lịch sử mượn</router-link>
                     </li>
                     <li @click="logout">
                       <img src="@/assets/img/User/logout-icon.svg" alt="">
@@ -150,9 +150,11 @@ import SendIcon from "@/components/User/Icons/SendIcon.vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/User/auth.store';
 import { useCartStore } from '@/stores/User/cart.store';
+import {useWishlistStore} from "@/stores/User/wishlist.store";
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
+const wishlistStore = useWishlistStore();
 const route = useRoute();
 const router = useRouter();
 const isDropdownActive = ref(false);
@@ -160,6 +162,10 @@ const searchTerm = ref("");
 
 const cartTotal = computed(() => {
   return cartStore.cart.reduce((acc, item) => acc + item.quantity, 0);
+});
+
+const wishlistTotal = computed(() => {
+  return wishlistStore.wishlists.length;
 });
 
 const handleSearch = () => {
@@ -186,10 +192,6 @@ const closeDropdown = (event: MouseEvent) => {
   }
 };
 
-const toBorrowingHistory = () => {
-  router.push({ path: "/borrowing-history" });
-};
-
 const logout = () => {
   authStore.logout();
 };
@@ -198,6 +200,7 @@ document.addEventListener('click', closeDropdown);
 
 onMounted(async () => {
   await cartStore.fetchCart();
+  await wishlistStore.fetchWishlists();
 });
 </script>
 

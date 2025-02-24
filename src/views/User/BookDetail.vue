@@ -29,8 +29,8 @@
         <p class="book-detail__info--short-desc">{{ bookStore.book.short_description }}</p>
         <div class="book-detail__info--function">
           <el-input-number class="custom-input-quantity function__quantity" v-model="num" :min="1" :max="10" @change="handleChange" />
-          <button class="user-btn">Mượn ngay</button>
-          <button class="wishlist-btn"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></button>
+          <button class="user-btn" @click="addToCart">Mượn ngay</button>
+          <button class="wishlist-btn" @click="addToWishlist"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></button>
         </div>
         <div class="book-detail__info--delivery">
           <div class="delivery-details">
@@ -77,18 +77,23 @@
             <div class="date">{{ review.created_at }}</div>
           </div>
         </div>
-      <div class="review-input">
-        <p class="review-input__title">Bình luận và đánh giá của bạn</p>
-        <el-rate v-model="bookStore.reviews.star" size="large" class="star"></el-rate>
-        <el-input
-          v-model="bookStore.reviews.comment"
-          class="review-input__content"
-          :rows="4"
-          type="textarea"
-          placeholder="Nhập bình luận của bạn"
+        <Pagination
+          :pagination="bookStore.reviewPagination"
+          @changePage="(page: number) => bookStore.handleReviewPageChange(page)"
         />
-        <button class="user-btn">Gửi</button>
-      </div>
+
+        <div class="review-input">
+          <p class="review-input__title">Bình luận và đánh giá của bạn</p>
+          <el-rate v-model="userReview.star" size="large" class="star"></el-rate>
+          <el-input
+            v-model="userReview.comment"
+            class="review-input__content"
+            :rows="4"
+            type="textarea"
+            placeholder="Nhập bình luận của bạn"
+          />
+          <button class="user-btn" @click="handleSubmitReview">Gửi</button>
+        </div>
       </div>
     </div>
 
@@ -145,14 +150,60 @@
 
 <script setup lang="ts">
 import TheBreadCrumb from '@/components/User/Common/TheBreadCrumb.vue'
-import { onMounted, ref, computed, watchEffect } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useBookStore} from "@/stores/User/book.store";
-import { useRoute } from 'vue-router'
-import ProductList from "@/components/User/Common/ProductList.vue";
+import {useWishlistStore} from "@/stores/User/wishlist.store";
+import { useRoute, useRouter } from 'vue-router'
+import {useCartStore} from "@/stores/User/cart.store";
+import {notifyError, notifySuccess} from "@/composables/notifications";
+import Pagination from "@/components/User/Common/Pagination.vue";
 
 const route = useRoute()
 const bookStore = useBookStore()
+const wishlistStore = useWishlistStore()
+const cartStore = useCartStore()
 const carouselRef = ref()
+const num = ref(1);
+const router = useRouter()
+const handleChange = (value: number) => {
+  num.value = value;
+};
+
+const addToCart = async () => {
+  if (!bookStore.book) return;
+  await cartStore.addToCart(bookStore.book.id, num.value);
+  notifySuccess("Thêm vào giỏ hàng thành công!");
+  await router.push('/cart')
+};
+
+const addToWishlist = async () => {
+  if (!bookStore.book) return;
+  await wishlistStore.addToWishlist(bookStore.book.id);
+};
+
+const userReview = ref({
+  star: 0,
+  comment: "",
+});
+
+const handleSubmitReview = async () => {
+  if (!userReview.value.star) {
+    notifyError("Vui lòng chọn số sao!");
+    return;
+  }
+
+  if (!userReview.value.comment.trim()) {
+    notifyError("Vui lòng nhập bình luận!");
+    return;
+  }
+
+  await bookStore.submitReview(bookStore.book.id, userReview.value.star, userReview.value.comment);
+
+  userReview.value.star = 0;
+  userReview.value.comment = "";
+  notifySuccess("Cảm ơn bạn! Đánh giá sẽ hiển thị sau khi được Admin duyệt.");
+};
+
 const booksPerSlide = 4
 const relatedBooksGroup = computed(() => {
   const groups = []
@@ -170,25 +221,12 @@ const nextSlide = () => {
   carouselRef.value?.next()
 }
 
-watchEffect(async () => {
+onMounted(async () => {
   const slug = route.params.slug as string;
-
-  try {
-    await bookStore.fetchBooks();
-    const book = bookStore.books.find((b) => b.slug === slug);
-
-    if (!book) {
-      console.log("Fetching book by slug:", slug);
-      await bookStore.fetchBookBySlug(slug);
-      await bookStore.fetchReviews(slug);
-      await bookStore.fetchRelatedBooks(slug);
-    } else {
-      await bookStore.fetchBook(book.id);
-    }
-  } catch (error) {
-    console.error("Error fetching book:", error);
-  }
-});
+  await bookStore.fetchBookBySlug(slug);
+  await bookStore.fetchReviews(slug);
+  await bookStore.fetchRelatedBooks(slug);
+})
 </script>
 
 <style scoped lang="scss">
@@ -270,7 +308,8 @@ watchEffect(async () => {
       margin-top: 30px;
 
       .user-btn {
-        width: 190px;
+        width: 200px;
+        height: 40px;
         justify-content: center;
       }
 
@@ -279,7 +318,9 @@ watchEffect(async () => {
         border: 1px solid #969696;
         display: flex;
         align-items: center;
-        padding: 8.5px;
+        justify-content: center;
+        height: 40px;
+        width: 40px;
         background-color: #fff;
         cursor: pointer;
 
@@ -371,6 +412,7 @@ watchEffect(async () => {
           font-size: 16px;
           font-weight: 500;
           margin-bottom: 10px;
+          margin-top: 30px;
         }
         &__content {
           width: 100%;
@@ -442,6 +484,14 @@ watchEffect(async () => {
 
 :deep(.el-carousel__container) {
   height: 370px;
+}
+
+.product-section__category {
+  justify-content: flex-start;
+}
+
+.pagination-container {
+  margin-top: 10px;
 }
 </style>
 

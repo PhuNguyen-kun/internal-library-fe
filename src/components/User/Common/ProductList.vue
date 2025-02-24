@@ -11,7 +11,7 @@
         </div>
       </div>
       <div class="product-card__actions">
-        <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
+        <div class="action-buttons" @click.prevent.stop="wishlistStore.addToWishlist(book.id)"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
         <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
       </div>
       <div class="product-card__info">
@@ -29,8 +29,10 @@
 import { defineProps, type PropType } from 'vue';
 import {useCartStore} from "@/stores/User/cart.store";
 import {notifySuccess} from "@/composables/notifications";
+import {useWishlistStore} from "@/stores/User/wishlist.store";
 
 const cartStore = useCartStore();
+const wishlistStore = useWishlistStore();
 
 defineProps({
   books: { type: Array as PropType<any[]>, required: true },

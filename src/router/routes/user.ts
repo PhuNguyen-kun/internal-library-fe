@@ -52,6 +52,11 @@ const userRoutes: RouteRecordRaw[] = [
         name: 'borrowing-history',
         component: () => import('@/views/User/BorrowingHistory.vue')
       },
+      {
+        path: '/wishlist',
+        name: 'wishlist',
+        component: () => import('@/views/User/Wishlist.vue')
+      },
     ]
   },
 

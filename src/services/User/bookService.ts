@@ -117,3 +117,17 @@ export const getBorrowedBooks = async (params = {}) => {
     throw error;
   }
 };
+
+export const submitReview = async (bookId: number, star: number, comment: string) => {
+  try {
+    const response = await axiosInstance.post("/admin/reviews", {
+      book_id: bookId,
+      star: star,
+      comment: comment,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to submit review", error);
+    throw error;
+  }
+};

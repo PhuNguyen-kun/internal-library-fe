@@ -114,7 +114,7 @@
           </div>
         </div>
         <div class="product-card__actions">
-          <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
+          <div class="action-buttons" @click.prevent.stop="wishlistStore.addToWishlist(book.id)"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
           <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
         </div>
         <div class="product-card__info">
@@ -126,7 +126,6 @@
         </div>
       </router-link>
     </div>
-
   </div>
 
   <!-- Benefits -->
@@ -139,10 +138,12 @@ import { useBookStore} from "@/stores/User/book.store";
 import ProductList from "@/components/User/Common/ProductList.vue";
 import {notifySuccess} from "@/composables/notifications";
 import {useCartStore} from "@/stores/User/cart.store";
+import {useWishlistStore} from "@/stores/User/wishlist.store";
 
 const homepageStore = useHomepageStore();
 const cartStore = useCartStore();
 const bookStore = useBookStore();
+const wishlistStore = useWishlistStore();
 const categoriesPerPage = 6
 const carouselRef = ref()
 const first8Books = computed(() => bookStore.books.slice(0, 8))

@@ -4,10 +4,11 @@ import * as bookService from "@/services/User/bookService";
 import type {Book} from "@/types/Admin/book";
 import * as homepageService from "@/services/User/homepageService";
 import {defaultPagination} from "@/constants/Admin/pagination";
+import {notifyError, notifySuccess} from "@/composables/notifications";
 
 export const useBookStore = defineStore("book", () => {
   const books = ref([]);
-  const book = ref(null);
+  const book = ref();
   const topBorrowedBooks = ref([]);
   const relatedBooks = ref([]);
   const reviews = ref([]);
@@ -24,9 +25,21 @@ export const useBookStore = defineStore("book", () => {
     per_page: 12,
   });
 
+  const reviewPagination = reactive({
+    current_page: defaultPagination.current_page,
+    total: defaultPagination.total,
+    total_pages: defaultPagination.total_pages,
+    per_page: 1,
+  });
+
   const handlePageChange = (page: number) => {
     pagination.current_page = page;
     fetchBooks();
+  }
+
+  const handleReviewPageChange = (page: number) => {
+    reviewPagination.current_page = page;
+    fetchReviews(book.value.slug);
   }
 
   const fetchBooks = async (filters = {}) => {
@@ -83,7 +96,7 @@ export const useBookStore = defineStore("book", () => {
   const fetchReviews = async (slug: string) => {
     try {
       const response = await bookService.getReviews(slug);
-      reviews.value = response.data;
+      reviews.value = response.data.filter((review: any) => review.status === "Approved");
       console.log(reviews.value);
     } catch (error) {
       console.error("Failed to fetch reviews", error);
@@ -145,6 +158,16 @@ export const useBookStore = defineStore("book", () => {
     }
   };
 
+  const submitReview = async (bookId: number, star: number, comment: string) => {
+    try {
+      const response = await bookService.submitReview(bookId, star, comment);
+      console.log(response);
+    } catch (error) {
+      console.error("Lỗi khi gửi đánh giá:", error);
+      notifyError("Lỗi khi gửi đánh giá. Vui lòng thử lại!");
+    }
+  };
+
   return {
     books,
     book,
@@ -157,6 +180,7 @@ export const useBookStore = defineStore("book", () => {
     pagination,
     searchTerm,
     borrowedBooks,
+    reviewPagination,
     fetchBooks,
     fetchBook,
     fetchTopBorrowedBooks,
@@ -168,5 +192,7 @@ export const useBookStore = defineStore("book", () => {
     fetchPublishers,
     handlePageChange,
     fetchBorrowedBooks,
+    submitReview,
+    handleReviewPageChange
   };
 });

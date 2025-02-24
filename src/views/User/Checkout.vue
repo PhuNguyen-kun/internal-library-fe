@@ -22,7 +22,7 @@
         <el-form-item label="Số điện thoại" prop="phone_number">
           <el-input v-model="userStore.userInfo.phone_number"/>
         </el-form-item>
-        <el-form-item label="Tỉnh">
+        <el-form-item label="Tỉnh" prop="province">
           <el-select v-model="userStore.userInfo.province_id" @change="handleProvinceChange" placeholder="Chọn tỉnh">
             <el-option
               v-for="province in userStore.provinces"
@@ -32,7 +32,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Quận/Huyện">
+        <el-form-item label="Quận/Huyện" prop="district">
           <el-select v-model="userStore.userInfo.district_id" @change="handleDistrictChange" placeholder="Chọn quận/huyện">
             <el-option
               v-for="district in userStore.districts"
@@ -42,7 +42,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Phường/Xã">
+        <el-form-item label="Phường/Xã" prop="ward">
           <el-select v-model="userStore.userInfo.ward_id" placeholder="Chọn phường/xã">
             <el-option
               v-for="ward in userStore.wards"
@@ -52,7 +52,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Địa chỉ">
+        <el-form-item label="Địa chỉ" prop="address">
           <el-input v-model="userStore.userInfo.address" type="textarea"/>
         </el-form-item>
 
@@ -117,12 +117,15 @@ const handleSaveUserInfo = () => {
 const formRules = {
   full_name: [{ required: true, message: "Họ và tên không được để trống", trigger: "blur" }],
   email: [{ required: true, message: "Email không được để trống", trigger: "blur" }],
-  phone_number: [{ required: true, message: "Số điện thoại không được để trống", trigger: "blur" }],
-  province: [{ required: true, message: "Vui lòng chọn tỉnh", trigger: "change" }],
-  district: [{ required: true, message: "Vui lòng chọn quận/huyện", trigger: "change" }],
-  ward: [{ required: true, message: "Vui lòng chọn phường/xã", trigger: "change" }],
+  phone_number: [
+    { required: true, message: "Số điện thoại không được để trống", trigger: "blur" },
+    { pattern: /^0\d{9}$/, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", trigger: "blur" }
+  ],
+  province_id: [{ required: true, message: "Vui lòng chọn tỉnh", trigger: "change" }],
+  district_id: [{ required: true, message: "Vui lòng chọn quận/huyện", trigger: "change" }],
+  ward_id: [{ required: true, message: "Vui lòng chọn phường/xã", trigger: "change" }],
   address: [{ required: true, message: "Địa chỉ không được để trống", trigger: "blur" }],
-}
+};
 
 const total = computed(() => {
   return cartStore.cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -305,7 +308,6 @@ onMounted(async () => {
       width: 370px;
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
     }
 
     &--stock {

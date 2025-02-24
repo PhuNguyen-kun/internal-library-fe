@@ -197,7 +197,6 @@ onMounted(() => {
       width: 400px;
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
     }
 
     &--stock {
