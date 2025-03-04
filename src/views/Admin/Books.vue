@@ -248,7 +248,13 @@
         />
       </el-form-item>
       <el-form-item label="Mô tả ngắn" prop="short_description">
-        <el-input v-model="book.short_description" placeholder="Nhập mô tả ngắn" rows="4" type="textarea"></el-input>
+<!--        <el-input v-model="book.short_description" placeholder="Nhập mô tả ngắn" rows="4" type="textarea"></el-input>-->
+        <ckeditor
+          v-model="book.short_description"
+          :editor="editor"
+          :config="config"
+        />
+
       </el-form-item>
       <el-form-item label="Mô tả đầy đủ" prop="description">
         <el-input v-model="book.description" placeholder="Nhập mô tả đầy đủ" rows="6" type="textarea"></el-input>
@@ -289,12 +295,27 @@ import {useBookStore} from "@/stores/Admin/book.store";
 import {Delete, Plus, ZoomIn} from '@element-plus/icons-vue'
 import type {UploadFile} from 'element-plus'
 import {notifyError} from "@/composables/notifications";
+import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
+const editor = ref(ClassicEditor)
 const bookStore = useBookStore();
 const fetchLoading = ref<boolean>(false);
-
 const isAllDeleted = ref(false);
 const isAllNotDeleted = ref(false);
+
+const config = {
+  toolbar: [
+    'heading',
+    '|',
+    'bold',
+    'italic',
+    'link',
+    'bulletedList',
+    'numberedList',
+    'blockQuote'
+  ]
+}
 
 const book = reactive({
   id: 0,
