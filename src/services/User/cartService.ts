@@ -59,3 +59,35 @@ export const checkoutCart = async (orderData: any) => {
     throw error;
   }
 };
+
+export const checkStock = async (bookId: number, quantity: number) => {
+  try {
+    const response = await axiosInstance.get(`/user/books/${bookId}`);
+    const stockQuantity = response.data.data.stock_quantity;
+    console.log("Stock quantity:", stockQuantity);
+    return stockQuantity >= quantity;
+  } catch (error) {
+    console.error("Failed to check stock", error);
+    throw error;
+  }
+};
+
+// cartService.ts
+export const checkStocks = async (
+  items: { bookId: number; quantity: number }[]
+): Promise<boolean> => {
+  try {
+    // Gọi API kiểm tra stock cho nhiều sách
+    const promises = items.map(async (item) => {
+      const response = await axiosInstance.get(`/user/books/${item.bookId}`);
+      return response.data.data.stock_quantity >= item.quantity;
+    });
+
+    // Kiểm tra tất cả kết quả
+    const results = await Promise.all(promises);
+    return results.every((isAvailable) => isAvailable);
+  } catch (error) {
+    console.error("Failed to check stock", error);
+    throw error;
+  }
+};

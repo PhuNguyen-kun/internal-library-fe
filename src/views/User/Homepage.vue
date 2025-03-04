@@ -90,7 +90,9 @@
             </div>
           </div>
           <div class="product-card__actions">
-            <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
+            <div class="action-buttons" :class="{ 'active': wishlistStore.isInWishlist(book.id) }" @click.prevent.stop="handleWishlistClick(book.id, $event)">
+              <img src="@/assets/img/User/wishlist-icon.svg" alt="">
+            </div>
             <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
           </div>
           <div class="product-card__info">
@@ -114,7 +116,8 @@
           </div>
         </div>
         <div class="product-card__actions">
-          <div class="action-buttons" @click.prevent.stop="wishlistStore.addToWishlist(book.id)"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
+          <div class="action-buttons" :class="{ 'active': wishlistStore.isInWishlist(book.id) }" @click.prevent.stop="handleWishlistClick(book.id, $event)"
+          ><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
           <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
         </div>
         <div class="product-card__info">
@@ -184,7 +187,59 @@ const nextSlide = () => {
 const addToCart = async (book: any) => {
   console.log('Book id:', book.id);
   await cartStore.addToCart(book.id);
-  notifySuccess('Thêm vào giỏ hàng thành công');
+};
+
+const handleWishlistClick = async (bookId: number, event: MouseEvent) => {
+  const isCurrentlyInWishlist = wishlistStore.isInWishlist(bookId);
+
+  if (!isCurrentlyInWishlist) {
+    const buttonRect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const startX = buttonRect.left + buttonRect.width / 2;
+    const startY = buttonRect.top + buttonRect.height / 2;
+
+    // Tính toán chính xác vị trí wishlist icon
+    const wishlistIcon = document.querySelector('.header__action--icon [href="/wishlist"]');
+    if (wishlistIcon) {
+      const iconRect = wishlistIcon.getBoundingClientRect();
+      const endX = iconRect.left + iconRect.width / 2;
+      const endY = iconRect.top + iconRect.height / 2;
+
+      createFlyingHeart(startX, startY, endX, endY);
+    }
+  }
+
+  await wishlistStore.toggleWishlist(bookId);
+};
+
+const createFlyingHeart = (startX: number, startY: number, endX: number, endY: number) => {
+  const flyingHeart = document.createElement('div');
+  flyingHeart.classList.add('flying-heart');
+  flyingHeart.innerHTML = '❤️';
+
+  Object.assign(flyingHeart.style, {
+    left: `${startX}px`,
+    top: `${startY}px`,
+    position: 'fixed',
+    fontSize: '24px',
+    transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+    opacity: '1',
+    pointerEvents: 'none',
+    zIndex: '9999'
+  });
+
+  document.body.appendChild(flyingHeart);
+
+  requestAnimationFrame(() => {
+    Object.assign(flyingHeart.style, {
+      transform: `translate(${endX - startX}px, ${endY - startY}px)`,
+      opacity: '0',
+      scale: '0.5'
+    });
+  });
+
+  setTimeout(() => {
+    flyingHeart.remove();
+  }, 800);
 };
 
 onMounted( () => {
@@ -242,5 +297,6 @@ onMounted( () => {
 
 :deep(.el-carousel__container) {
   height: 270px;
+  margin-top: 5px;
 }
 </style>

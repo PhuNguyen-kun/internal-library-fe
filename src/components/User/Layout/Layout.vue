@@ -23,7 +23,7 @@
             <input
               type="text"
               class="search-bar"
-              placeholder="Tìm kiếm sách theo tiêu đề"
+              placeholder="Tìm kiếm sách theo tiêu đề, tác giả, NXB"
               v-model="searchTerm"
               @keyup.enter="handleSearch"
             />
@@ -47,7 +47,7 @@
                   <ul>
                     <li>
                       <img src="@/assets/img/User/user-icon-white.svg" alt="">
-                      <a href="#">Quản lý tài khoản</a>
+                      <router-link to="/profile">Quản lý tài khoản</router-link>
                     </li>
                     <li>
                       <img src="@/assets/img/User/borrow-history-icon.svg" alt="">
@@ -67,6 +67,9 @@
 
       <el-main class="main">
         <RouterView />
+        <div class="to-top-btn" :class="{ 'visible': isVisible }" :style="{ bottom: `${buttonBottom}px` }" @click="scrollToTop">
+          <img src="@/assets/img/User/totop-btn.svg" alt="">
+        </div>
       </el-main>
 
       <el-footer class="footer">
@@ -145,7 +148,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import SendIcon from "@/components/User/Icons/SendIcon.vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/User/auth.store';
@@ -192,11 +195,46 @@ const closeDropdown = (event: MouseEvent) => {
   }
 };
 
+const isVisible = ref(false);
+const buttonBottom = ref(20);
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
+const checkScroll = () => {
+  isVisible.value = window.scrollY > 200;
+
+  const footer = document.querySelector('.footer');
+  if (footer) {
+    const footerRect = footer.getBoundingClientRect();
+    const buttonHeight = 50;
+    const safeDistance = 20;
+
+    if (footerRect.top < window.innerHeight) {
+      buttonBottom.value = window.innerHeight - footerRect.top + safeDistance;
+    } else {
+      buttonBottom.value = 20;
+    }
+  }
+};
+
 const logout = () => {
   authStore.logout();
 };
 
 document.addEventListener('click', closeDropdown);
+
+onMounted(() => {
+  window.addEventListener('scroll', checkScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', checkScroll);
+});
 
 onMounted(async () => {
   await cartStore.fetchCart();
@@ -205,8 +243,34 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+.to-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 120px;
+  z-index: 1000;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 10px;
+  background-color: #F5F5F5;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &:hover {
+    background-color: var(--user-theme-color);
+
+    img {
+      filter: invert(1);
+    }
+  }
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 .main {
-  padding: 113px 250px;
+  padding: 113px 250px 70px 250px;
   overflow-y: hidden
 }
 
@@ -372,14 +436,14 @@ onMounted(async () => {
       border-radius: 5px;
       padding: 7px 33px 7px 15px;
       background-color: #F5F5F5;
-      width: 200px;
+      width: 270px;
       font-family: Poppins, sans-serif;
     }
 
     .search-icon {
       position: absolute;
       margin-left: 10px;
-      left: 210px;
+      left: 280px;
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;

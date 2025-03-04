@@ -58,6 +58,7 @@ const dashboardStore = useDashboardStore();
 const topBorrowers = ref<Borrower[]>([]);
 const topBorrowedBooks = ref<Book[]>([]);
 const borrowedBooksByMonth = ref<Order[]>([]);
+const borrowedBooksByMonthLabels = ref([]);
 const booksByCategory = ref([]);
 const mostFavoriteBooks = ref([]);
 const {loading, fetchTopBorrowers, fetchTopBorrowedBooks, fetchBorrowedBooksByMonth, fetchBooksByCategory, fetchMostFavoriteBooks} = dashboardStore;
@@ -98,7 +99,7 @@ const chartOptionsOne = {
   plugins: {
     title: {
       display: true,
-      text: 'Top người mượn nhiều nhất',
+      text: 'Top 10 người mượn nhiều nhất',
       font: {
         size: 18,
         weight: '600',
@@ -127,7 +128,7 @@ const chartOptionsTwo = {
   plugins: {
     title: {
       display: true,
-      text: 'Top sách mượn nhiều nhất',
+      text: 'Top 10 sách mượn nhiều nhất',
       font: {
         size: 18,
         weight: '600',
@@ -144,7 +145,7 @@ const chartOptionsTwo = {
 // Line Chart
 function renderLineChart() {
   const lineChartData = {
-    labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+    labels: dashboardStore.borrowedBooksByMonthLabels,
     datasets: [
       {
         label: '',
@@ -168,7 +169,7 @@ function renderLineChart() {
     plugins: {
       title: {
         display: true,
-        text: 'Số lượng đơn mượn theo tháng',
+        text: 'Số lượng đơn mượn theo 12 tháng gần nhất',
         font: {
           size: 18,
           weight: '600',
@@ -223,7 +224,7 @@ function renderPieChart() {
     plugins: {
       title: {
         display: true,
-        text: 'Số lượng sách theo danh mục',
+        text: 'Số lượng sách theo 10 danh mục được mượn nhiều nhất',
         font: {
           size: 18,
           weight: '600',
@@ -281,7 +282,7 @@ function renderFavoriteBooksChart() {
     plugins: {
       title: {
         display: true,
-        text: 'Top sách được yêu thích nhất',
+        text: 'Top 30 sách được yêu thích nhất',
         font: {
           size: 18,
           weight: '600',

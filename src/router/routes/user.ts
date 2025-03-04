@@ -57,6 +57,40 @@ const userRoutes: RouteRecordRaw[] = [
         name: 'wishlist',
         component: () => import('@/views/User/Wishlist.vue')
       },
+      {
+        path: '/profile',
+        name: 'profile',
+        component: () => import('@/components/User/Layout/Profile.vue'),
+        children: [
+          {
+            path: '/profile',
+            name: 'profile',
+            component: () => import('@/views/User/MyProfile.vue')
+          },
+          {
+            path: '/change-password',
+            name: 'change-password',
+            component: () => import('@/views/User/ChangePassword.vue')
+          },
+        ]
+      },
+      {
+        path: '/forgot-password',
+        name: 'forgot-password',
+        component: () => import('@/views/User/ForgotPassword.vue')
+      },
+      {
+        path: '/reset-password',
+        name: 'reset-password',
+        component: () => import('@/views/User/ResetPassword.vue'),
+        meta: { public: true }
+      },
+      {
+        path: '/contact',
+        name: 'contact',
+        component: () => import('@/views/User/Contact.vue'),
+        meta: { public: true }
+      },
     ]
   },
 

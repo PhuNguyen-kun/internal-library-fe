@@ -8,10 +8,9 @@
       <h1 class="auth__title">Create an account</h1>
       <h2 class="auth__sub-title">Enter your details below</h2>
 
-      <form @submit.prevent="" id="form">
+      <form @submit.prevent="authStore.signup" id="form">
         <!-- Name -->
         <div class="form-group">
-<!--          <div class="label">Name</div>-->
           <input
             v-model="authStore.name"
             type="text"
@@ -23,7 +22,6 @@
 
         <!-- Email -->
         <div class="form-group">
-<!--          <div class="label">Email address</div>-->
           <input
             v-model="authStore.email"
             type="text"
@@ -37,7 +35,6 @@
 
         <!-- Password -->
         <div class="form-group">
-<!--          <div class="label">Password</div>-->
           <input
             v-model="authStore.password"
             type="password"
@@ -61,17 +58,22 @@
               Create account
             </template>
           </button>
-          <button class="user-long-btn user-long-btn--google">
-            <img src="@/assets/img/User/google-icon.svg" alt="Google Icon" />
-            <span>Sign up with Google</span>
-          </button>
-
-          <div class="link-to-login">
-            Already have account?
-            <router-link to="/login" style="text-decoration: underline; color: #000">Log in</router-link>
-          </div>
         </div>
       </form>
+
+<!--      <button class="user-long-btn user-long-btn&#45;&#45;google" @click="callback">-->
+<!--        <img src="@/assets/img/User/google-icon.svg" alt="Google Icon" />-->
+<!--        <span>Sign up with Google</span>-->
+<!--      </button>-->
+
+      <GoogleLogin :callback="callback" popup-type="TOKEN">
+        <button class="user-white-btn">Login Using Google</button>
+      </GoogleLogin>
+
+      <div class="link-to-login">
+        Already have account?
+        <router-link to="/login" style="text-decoration: underline; color: #000">Log in</router-link>
+      </div>
 
     </div>
   </div>
@@ -80,11 +82,50 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/User/auth.store';
+import { loginGoogle } from '@/services/Common/auth';
+import { ElNotification } from 'element-plus';
+// import { CallbackTypes } from '@/types/Common/auth';
+import { useRouter } from 'vue-router';
+import { GoogleLogin } from 'vue3-google-login';
 
+const router = useRouter();
 const authStore = useAuthStore();
+import type { CallbackTypes } from "vue3-google-login";
+
+const callback: CallbackTypes.TokenResponseCallback = async (response) => {
+  console.log("Access token", response.access_token);
+  try {
+    await loginGoogle(response.access_token as string)
+    if (response) {
+      ElNotification({
+        type: 'success',
+        message: 'login with google is successed',
+        title: 'Successed'
+      })
+      router.push({ name: 'homepage' });
+      localStorage.setItem("user_access_token", response.access_token);
+    } else {
+      ElNotification({
+        type: 'error',
+        message: 'login with google is failed',
+        title: 'Errors'
+      })
+    }
+  } catch (e: any) {
+    ElNotification({
+      type: 'error',
+      message: e.response.data.message,
+      title: 'Errors'
+    })
+  }
+};
 </script>
 
 <style scoped lang="scss">
+.user-white-btn {
+  width: 400px;
+}
+
 .auth {
   display: flex;
   justify-content: space-between;
@@ -158,10 +199,10 @@ const authStore = useAuthStore();
   button:first-of-type {
     margin-top: 40px;
   }
+}
 
-  .link-to-login {
-    text-align: center;
-    margin-top: 20px;
-  }
+.link-to-login {
+  text-align: center;
+  margin-top: 20px;
 }
 </style>

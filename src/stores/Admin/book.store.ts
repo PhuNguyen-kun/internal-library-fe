@@ -75,8 +75,6 @@ export const useBookStore = defineStore('book', () => {
       await fetchBooks();
     } catch (error) {
       handleError(error, 'Failed to update book');
-    } finally {
-      loading.value=false;
     }
   }
 

@@ -8,6 +8,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const topBorrowers = ref([]);
   const topBorrowedBooks = ref([]);
   const borrowedBooksByMonth = ref([]);
+  const borrowedBooksByMonthLabels = ref([]);
   const booksByCategory = ref([]);
   const mostFavoriteBooks = ref([]);
   const loading = ref(false);
@@ -45,6 +46,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     try {
       const response = await dashboardService.fetchBorrowedBooksByMonth();
       borrowedBooksByMonth.value = response.data;
+      borrowedBooksByMonthLabels.value = borrowedBooksByMonth.value.map((item) => item.month_year);
     } catch (error) {
       handleError(error, 'Cannot fetch borrowed books by month');
     } finally {
@@ -84,6 +86,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     borrowedBooksByMonth,
     booksByCategory,
     mostFavoriteBooks,
+    borrowedBooksByMonthLabels,
     loading,
     error,
     fetchTopBorrowers,

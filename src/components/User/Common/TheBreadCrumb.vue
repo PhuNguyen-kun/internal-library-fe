@@ -22,7 +22,7 @@ const routeToVietnameseMap: Record<string, string> = {
   login: 'Đăng nhập',
   'book-detail': 'Chi tiết hàng',
   cart: 'Giỏ hàng',
-  checkout: 'Xác nhận mua hàng',
+  checkout: 'Xác nhận mượn sách',
   register: 'Đăng ký',
   books: 'Sách',
   wishlist: 'Danh sách yêu thích',
@@ -31,7 +31,11 @@ const routeToVietnameseMap: Record<string, string> = {
   'edit-profile': 'Chỉnh sửa hồ sơ',
   'change-password': 'Đổi mật khẩu',
   'order-list': 'Danh sách đơn mua',
-  'order-detail': 'Chi tiết đơn mua'
+  'order-detail': 'Chi tiết đơn mua',
+  'profile': 'Hồ sơ',
+  'forgot-password': 'Quên mật khẩu',
+  'reset-password': 'Reset mật khẩu',
+  'Contact': 'Liên hệ',
 }
 
 const route = useRoute()
@@ -70,6 +74,12 @@ const breadcrumbItems = computed(() => {
 
   if (route.name === "book-detail" && !items.some(item => item.text === "Sách")) {
     items.splice(items.length - 1, 0, { text: "Sách", link: "/books" });
+  }
+
+  if (route.name === "profile") {
+    return items.filter((item, index, self) => {
+      return index === self.findIndex((t) => t.text === item.text);
+    });
   }
 
   return items;

@@ -10,11 +10,11 @@
           v-model="selectedDateRange"
           type="daterange"
           unlink-panels
-          range-separator="To"
-          start-placeholder="Start date"
-          end-placeholder="End date"
+          range-separator="Đến"
+          start-placeholder="Ngày bắt đầu"
+          end-placeholder="Ngày kết thúc"
         />
-        <div class="user-btn" @click="filterByDate">Xác nhận</div>
+        <div class="user-btn custom" @click="filterByDate">Xác nhận</div>
       </div>
 
       <div class="history__content--list">
@@ -28,7 +28,11 @@
             <p><strong>Mã nhân viên:</strong> {{ order.employee_code }}</p>
             <p><strong>Họ và tên:</strong> {{ order.full_name }}</p>
             <p><strong>Ngày tạo đơn:</strong> {{ order.created_at }}</p>
-            <p><strong>Trạng thái:</strong> {{ order.status }}</p>
+            <p><strong>Trạng thái: </strong>
+              <el-tag :type="getStatusTagType(order.status)" effect="dark" round>
+                {{ order.status }}
+              </el-tag>
+            </p>
           </div>
 
           <div class="order__details">
@@ -52,12 +56,29 @@
                 <span>{{ book.return_date_due }}</span>
               </div>
               <div class="list__item--return-real">
-                <span>{{ book.return_date_real ? book.return_date_real : "Chưa trả" }}</span>
+                <el-date-picker
+                  v-model="book.return_date_real"
+                  type="date"
+                  placeholder="Chọn ngày trả thực tế"
+                />
               </div>
               <div class="list__item--status">
-                <span>{{ book.status }}</span>
+                <el-select
+                  v-model="book.status"
+                  placeholder="Chọn trạng thái"
+                >
+                  <el-option label="Đang mượn" value="Đang mượn" />
+                  <el-option label="Quá hạn" value="Quá hạn" />
+                  <el-option label="Mất" value="Mất" />
+                  <el-option label="Đã trả" value="Đã trả" />
+                </el-select>
               </div>
             </div>
+          </div>
+
+          <div class="user-btn__container">
+            <div class="cancel-btn" @click="cancelUpdateOrder">Hủy</div>
+            <div class="user-btn" @click="handleUpdateOrder(order)">Xác nhận thay đổi</div>
           </div>
         </div>
       </div>
@@ -68,11 +89,25 @@
 <script setup lang="ts">
 import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
 import { useBookStore } from "@/stores/User/book.store";
+import {useOrderStore} from "@/stores/Admin/order.store";
 import { onMounted, ref } from "vue";
+import dayjs from "dayjs";
+import {notifyError, notifySuccess} from "@/composables/notifications";
 
 const bookStore = useBookStore();
+const orderStore = useOrderStore();
 const dateRange = ref<[Date, Date] | null>(null);
 const selectedDateRange = ref<[Date, Date] | null>(null);
+
+const getStatusTagType = (status: string): string => {
+  const statusTagTypes: Record<string, string> = {
+    "Đang mượn": "primary",
+    "Đã trả": "success",
+    "Quá hạn": "warning",
+    "Mất": "danger",
+  };
+  return statusTagTypes[status] ?? "info";
+};
 
 const filterByDate = async () => {
   if (!selectedDateRange.value) {
@@ -88,18 +123,52 @@ const filterByDate = async () => {
   }
 };
 
+const handleUpdateOrder = async (order: any) => {
+  try {
+    const payload = {
+      details: order.details.map((detail: any) => ({
+        id: detail.id,
+        status: detail.status,
+        return_date_real: detail.return_date_real
+          ? dayjs(detail.return_date_real).format('YYYY-MM-DD')
+          : null
+      }))
+    };
+
+    console.log('Payload:', payload);
+
+    await orderStore.updateOrder(order.id, payload);
+
+    await bookStore.fetchBorrowedBooks();
+  } catch (error) {
+    notifyError("Cập nhật thất bại");
+  }
+};
+
+const cancelUpdateOrder = () => {
+  bookStore.fetchBorrowedBooks();
+};
+
 onMounted(async () => {
   await bookStore.fetchBorrowedBooks();
 });
 </script>
 
 <style scoped lang="scss">
+.user-btn__container {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 20px;
+  padding-top: 10px;
+  gap: 10px;
+}
+
 :deep(.el-range-editor) {
   margin-left: 250px;
 }
 
-.user-btn {
-  height: 5px;
+.custom {
+  height: 4px;
 }
 
 .history {
@@ -118,7 +187,7 @@ onMounted(async () => {
     &--date-range {
       display: flex;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 50px;
       margin-top: 30px;
       gap: 15px;
     }
@@ -127,16 +196,18 @@ onMounted(async () => {
   &__order {
     background: #fff;
     padding: 15px 15px 0 15px;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
 
     .order {
       &__header {
         display: flex;
         justify-content: space-between;
-        background: #eee;
-        padding: 10px;
+        align-items: center;
+        background: #f6f6f6;
+        padding: 11px;
         border-radius: 5px;
         font-size: 14px;
         margin-bottom: 10px;
@@ -153,10 +224,6 @@ onMounted(async () => {
     align-items: center;
     padding: 15px 10px;
     border-bottom: 1px solid #ccc;
-
-    &:last-child {
-      border-bottom: none;
-    }
   }
 }
 
@@ -174,7 +241,7 @@ onMounted(async () => {
     &--name {
       display: flex;
       align-items: center;
-      flex: 2;
+      flex: 1.6;
 
       img {
         width: 60px;
@@ -183,12 +250,25 @@ onMounted(async () => {
       }
     }
 
-    &--quantity,
-    &--return-due,
-    &--return-real,
+    &--return-real {
+      //flex: 1;
+      width: 250px;
+      text-align: center;
+    }
+
+    &--quanity {
+      width: 80px;
+    }
+
     &--status {
+      width: 150px;
+      text-align: center;
+    }
+
+    &--return-due {
       flex: 1;
       text-align: center;
+
     }
   }
 

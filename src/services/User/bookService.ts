@@ -6,7 +6,7 @@ export const getBooks = async (params = {}) => {
   try {
     const response = await axiosInstance.get("/user/books", { params });
 
-    console.log("✅ Received response:", response.data);
+    console.log("Received response:", response.data);
     return {
       data: response.data.data,
       pagination: response.data.pagination

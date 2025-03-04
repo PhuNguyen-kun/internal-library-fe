@@ -3,12 +3,12 @@
     <h1 class="admin-page__title">Quản lý sách</h1>
 
     <div class="admin-page__heading">
-      <div class="admin-page__search-container" style="width: 750px">
+      <div class="admin-page__search-container" style="width: 700px">
         <el-input
           v-model="bookStore.searchTerm"
           class="admin-page__search-input"
           clearable
-          placeholder="Tìm kiếm sách theo tên sách, tên tác giả, nhà xuất bản, danh mục, mô tả"
+          placeholder="Tìm kiếm sách theo tên sách, tên tác giả, nhà xuất bản, danh mục"
           @change="handleSearch"
         />
 
@@ -230,9 +230,10 @@
         </el-select>
       </el-form-item>
       <el-form-item label="Số lượng" prop="stock_quantity">
-        <epl-input-number
+        <el-input-number
           v-model="book.stock_quantity"
           :min="1"
+          :max="100"
           placeholder="Nhập số lượng"
           controls-position="right"
         />
@@ -241,6 +242,7 @@
         <el-input-number
           v-model="book.page"
           :min="1"
+          :max="10000"
           placeholder="Nhập số trang"
           controls-position="right"
         />
@@ -551,7 +553,7 @@ const handleSubmit = async () => {
   // Existing image IDs
   const existingImageIds = uploadAdditionalFileList.value
     .filter(file => !file.raw)
-    .map(file => file.uid); // Assuming `uid` is the image ID from the server
+    .map(file => file.uid);
   formData.append('existing_images', JSON.stringify(existingImageIds));
 
   if (uploadAdditionalFileList.value.length > 0) {
@@ -578,6 +580,22 @@ const handleSubmit = async () => {
 onMounted( () => {
   bookStore.fetchBooks();
   bookStore.fetchAuthorsCategoriesPublishers()
+});
+
+watch(() => book.page, (newValue) => {
+  if (newValue > 10000) {
+    book.page = 10000;
+  } else if (newValue < 1) {
+    book.page = 1;
+  }
+});
+
+watch(() => book.stock_quantity, (newValue) => {
+  if (newValue > 100) {
+    book.stock_quantity = 100;
+  } else if (newValue < 1) {
+    book.stock_quantity = 1;
+  }
 });
 
 watch(isModalVisible, (value) => {

@@ -1,17 +1,15 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import * as cartService from "@/services/User/cartService";
+import * as bookService from "@/services/User/bookService";
 import {handleError} from "@/utils/Admin/handleError";
-import {notifySuccess} from "@/composables/notifications";
+import {notifyError, notifySuccess} from "@/composables/notifications";
+import type {CartItem} from "@/types/User/cart";
 
 export const useCartStore = defineStore("cart", () => {
-  const cart = ref([]);
+  const cart = ref<CartItem[]>([]);
   const cartItem = ref(null);
   const loading = ref(false);
-
-  // const cartTotal = computed(() => {
-  //   return cart.value.reduce((acc, item) => acc + item.quantity, 0);
-  // });
 
   const fetchCart = async () => {
     try {
@@ -41,8 +39,24 @@ export const useCartStore = defineStore("cart", () => {
 
   const addToCart = async (bookId: number, quantity: number = 1) => {
     try {
+      await fetchCart();
+
+      const existingItem = cart.value.find((item) => item.book.id === bookId);
+      const currentQuantity = existingItem ? existingItem.quantity : 0;
+      const totalQuantity = currentQuantity + quantity;
+
+      const isStockAvailable = await cartService.checkStock(bookId, totalQuantity);
+      if (!isStockAvailable) {
+        notifyError("Số lượng tồn kho không đủ");
+        return false;
+      }
+      if (totalQuantity > 5) {
+        notifyError("Bạn chỉ được mượn tối đa 5 quyển cho 1 sách!");
+        return false;
+      }
       const response = await cartService.addToCart(bookId, quantity);
       console.log("Sách đã được thêm vào giỏ hàng:", response);
+      notifySuccess("Sách đã được thêm vào giỏ hàng");
       await fetchCart();
     } catch (error) {
       console.error("Failed to add to cart", error);
@@ -73,11 +87,23 @@ export const useCartStore = defineStore("cart", () => {
 
   const checkoutCart = async (orderData: any) => {
     try {
+      const itemsToCheck = orderData.items.map((item: any) => ({
+        bookId: item.book_id,
+        quantity: item.quantity,
+      }));
+
+      const isStockAvailable = await cartService.checkStocks(itemsToCheck);
+      if (!isStockAvailable) {
+        notifyError("Một số sản phẩm đã hết hàng! Vui lòng quay trở lại giỏ hàng!");
+        throw new Error("Một số sản phẩm đã hết hàng!");
+      }
+
       const response = await cartService.checkoutCart(orderData);
-      console.log("Thanh toán giỏ hàng thành công:", response);
       cart.value = [];
+      return response.data;
     } catch (error) {
-      console.error("Failed to checkout cart", error);
+      console.error("Lỗi khi checkout:", error);
+      throw error;
     }
   };
 

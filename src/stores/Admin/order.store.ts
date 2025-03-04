@@ -50,12 +50,11 @@ export const useOrderStore = defineStore("order", () => {
     fetchOrders();
   };
 
-  // Lấy 1 order (DB trả status, details)
   const fetchOrderWithDetails = async (id: number) => {
     try {
       loading.value = true;
       const response = await orderService.fetchOrderWithDetails(id);
-      selectedOrder.value = response.data; // DB trả { id, full_name, status, details, ... }
+      selectedOrder.value = response.data;
     } catch (error) {
       handleError(error, "Failed to fetch order with details");
     } finally {

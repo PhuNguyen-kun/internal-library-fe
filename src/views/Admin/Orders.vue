@@ -79,13 +79,18 @@
         <el-input v-model="order.employee_code" placeholder="..." disabled />
       </el-form-item>
 
-      <el-form-item label="Trạng thái" prop="status">
-        <el-select v-model="order.status" placeholder="Chọn trạng thái">
-          <el-option label="Đang mượn" value="Đang mượn" />
-          <el-option label="Đã trả" value="Đã trả" />
-          <el-option label="Quá hạn" value="Quá hạn" />
-          <el-option label="Mất" value="Mất" />
-        </el-select>
+<!--      <el-form-item label="Trạng thái" prop="status">-->
+<!--        <el-select v-model="order.status" placeholder="Chọn trạng thái">-->
+<!--          <el-option label="Đang mượn" value="Đang mượn" />-->
+<!--          <el-option label="Đã trả" value="Đã trả" />-->
+<!--          <el-option label="Quá hạn" value="Quá hạn" />-->
+<!--          <el-option label="Mất" value="Mất" />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
+      <el-form-item label="Trạng thái đơn mượn">
+        <el-tag :type="getStatusTagType(orderStore.selectedOrder?.status)" size="large">
+          {{ orderStore.selectedOrder?.status }}
+        </el-tag>
       </el-form-item>
     </el-form>
 
@@ -114,20 +119,24 @@
             v-model="row.return_date_real"
             type="date"
             placeholder="Chọn ngày trả thực tế"
-            :disabled="row.status === 'Đã trả'"
+            :disabled-formatter="(date: Date) => date < new Date()"
             @change="handleReturnDateChange(row)"
           />
         </template>
       </el-table-column>
 
-      <el-table-column prop="status" label="Trạng thái">
+      <el-table-column label="Trạng thái" width="200">
         <template #default="{ row }">
-          <el-select v-if="row.status !== 'Đã trả'" v-model="row.status" placeholder="Chọn trạng thái">
+          <el-select
+            v-model="row.status"
+            placeholder="Chọn trạng thái"
+            @change="handleStatusChange(row)"
+          >
             <el-option label="Đang mượn" value="Đang mượn" />
+            <el-option label="Đã trả" value="Đã trả" />
             <el-option label="Quá hạn" value="Quá hạn" />
             <el-option label="Mất" value="Mất" />
           </el-select>
-          <span v-else>{{ row.status }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -150,6 +159,7 @@ import Button from "@/components/Admin/Common/Button.vue";
 import Table from "@/components/Admin/Common/Table.vue";
 import Pagination from "@/components/Admin/Common/Pagination.vue";
 import Modal from "@/components/Admin/Common/Modal.vue";
+import dayjs from 'dayjs';
 
 import { useOrderStore } from "@/stores/Admin/order.store";
 import { notifyError, notifySuccess } from "@/composables/notifications";
@@ -164,7 +174,12 @@ const columns = [
   { prop: "full_name", label: "Tên người mượn", width: 200 },
   { prop: "employee_code", label: "Mã nhân viên", width: 400, align: "center" },
   { prop: "created_at", label: "Ngày mượn", width: 300 },
-  { prop: "status", label: "Trạng thái", width: 250 },
+  {
+    prop: "status",
+    label: "Trạng thái",
+    width: 250,
+    formatter: (row: Order) => row.status
+  },
   { prop: "actions", label: "Hành động", width: 125, align: "center" },
 ];
 
@@ -177,10 +192,8 @@ const order = reactive({
   id: 0,
   full_name: "",
   employee_code: "",
-  status: "",
 });
 
-// Tag colors
 const getStatusTagType = (status: string): string => {
   const statusTagTypes: Record<string, string> = {
     "Đang mượn": "primary",
@@ -192,17 +205,10 @@ const getStatusTagType = (status: string): string => {
 };
 
 const handleReturnDateChange = (row: any) => {
-  if (row.status === "Mất") return;
-
-  const dueDate = new Date(row.return_date_due);
-  const realDate = new Date(row.return_date_real);
-
-  if (realDate > dueDate) {
-    row.status = "Quá hạn";
-  } else {
-    row.status = "Đã trả";
-  }
 };
+
+const handleStatusChange = (row: any) => {
+  };
 
 const openEditModal = async (row: Order) => {
   try {
@@ -269,27 +275,25 @@ const handleSubmit = async () => {
   try {
     if (orderStore.selectedOrder) {
       const payload = {
-        id: order.id,
-        full_name: order.full_name,
-        employee_code: order.employee_code,
-        status: order.status,
         details: orderStore.selectedOrder.details.map((detail) => ({
           id: detail.id,
           status: detail.status,
-          return_date_real: detail.return_date_real,
-        })),
+          return_date_real: detail.return_date_real
+            ? dayjs(detail.return_date_real).format('YYYY-MM-DD')
+            : null
+        }))
       };
-      console.log("Submitting payload:", payload);
+
+      console.log('Payload:', payload);
 
       await orderStore.updateOrder(order.id, payload);
 
-      await orderStore.fetchOrders();
+      await orderStore.fetchOrderWithDetails(order.id);
+      // notifySuccess("Cập nhật thành công!");
     }
-    orderStore.resetForm();
-    isModalVisible.value = false;
   } catch (error) {
-    console.error("handleSubmit error:", error);
-    notifyError("Cập nhật đơn mượn thất bại.");
+    notifyError("Cập nhật thất bại");
+    console.log("handleSubmit error:", error);
   }
 };
 

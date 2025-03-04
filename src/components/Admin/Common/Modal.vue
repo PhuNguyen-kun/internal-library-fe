@@ -49,7 +49,6 @@ const handleClose = () => {
 const handleCancel = () => {
   emit("update:visible", false);
   emit("reset");
-  console.log(1)
 };
 
 const handleSubmit = () => {
@@ -61,7 +60,7 @@ const handleSubmit = () => {
         emit("update:visible", false);
         emit("reset");
       } else {
-        console.log('Form không hợp lệ');
+        return false;
       }
     });
   } else {

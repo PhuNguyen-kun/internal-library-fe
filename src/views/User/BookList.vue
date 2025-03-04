@@ -62,7 +62,7 @@
 import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
 import TheSidebar from "@/components/User/Common/TheSidebar.vue";
 import { useBookStore } from "@/stores/User/book.store";
-import {onMounted, watchEffect, ref} from "vue";
+import {onMounted, watchEffect, watch, ref} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Pagination from "@/components/User/Common/Pagination.vue";
 import ProductList from "@/components/User/Common/ProductList.vue";
@@ -83,13 +83,20 @@ const updateFilters = () => {
   router.push({ query: newQuery });
 };
 
-watchEffect(() => {
-  selectedSort.value = route.query.sort as string;
-});
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+};
 
 onMounted(() => {
   bookStore.fetchTopBorrowedBooks();
   // bookStore.fetchBooks();
+});
+
+watchEffect(() => {
+  selectedSort.value = route.query.sort as string;
 });
 
 watchEffect(() => {
@@ -103,6 +110,7 @@ watchEffect(() => {
 
   console.log("Applying filters:", filters);
   bookStore.fetchBooks(filters);
+  scrollToTop();
 });
 </script>
 
@@ -185,7 +193,7 @@ watchEffect(() => {
       }
 
       .active {
-        color: var(--user-theme-color);
+      color: var(--user-theme-color);
         font-weight: 600;
       }
     }

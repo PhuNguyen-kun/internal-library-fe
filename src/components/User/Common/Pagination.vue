@@ -1,9 +1,5 @@
 <template>
   <div class="pagination-container">
-<!--    <div class="pagination-info">-->
-<!--      Showing {{ start }}-{{ end }} of {{ pagination.total }}-->
-<!--    </div>-->
-
     <el-pagination
       background
       layout="prev, pager, next"
@@ -42,8 +38,16 @@ const end = computed(() => {
   return Math.min(props.pagination.current_page * props.pagination.per_page, props.pagination.total);
 });
 
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+};
+
 function handlePageChange(page: number) {
   emit('changePage', page);
+  scrollToTop();
 }
 </script>
 

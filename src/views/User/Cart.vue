@@ -7,17 +7,32 @@
     <div class="cart__title">
       <div class="cart__item--name">Tên sách</div>
       <div class="cart__item--stock">SL trong kho</div>
-      <div class="cart__item--quantity">Số lượng</div>
+      <div class="cart__item--quantity">Số lượng mượn</div>
       <div class="cart__item--date">Ngày trả</div>
     </div>
 
     <div v-if="cartStore.cart.length === 0" class="cart__empty">Giỏ hàng trống</div>
     <div class="cart__items">
       <div v-for="item in cartStore.cart" :key="item.id" class="cart__item">
-        <div class="cart__item--name">
-          <img :src="item.book.image_url" alt="Book Image" class="cart__item--image">
+        <router-link
+          :to="'/books/' + item.book.slug"
+          class="cart__item--name no-text-decoration__strong"
+          @mouseover="showDeleteButton(item.id)"
+          @mouseleave="hideDeleteButton(item.id)"
+        >
+          <div class="image-container">
+            <img :src="item.book.image_url" alt="Book Image" class="cart__item--image" />
+            <!--  Delete button -->
+            <div
+              v-show="hoveredItemId === item.id"
+              class="delete-btn"
+              @click.prevent.stop="showDeleteDialog(item)"
+            >
+              <img src="@/assets/img/User/delete-cart-item-btn.svg" alt="Delete" />
+            </div>
+          </div>
           <span>{{ item.book.title }}</span>
-        </div>
+        </router-link>
         <div class="cart__item--stock">
           <span>{{ item.book.stock_quantity }}</span>
         </div>
@@ -38,10 +53,13 @@
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
             :disabled-date="disablePastDates"
+            :class="{ 'error-border': errors[item.id] }"
             @change="handleDateChange(item.id, item.return_date_due)"
           />
-        </div>
-      </div>
+          <div v-if="errors[item.id]" class="error-message">
+            {{ errors[item.id] }}
+          </div>
+        </div>      </div>
     </div>
   </div>
 
@@ -57,7 +75,7 @@
       <p>{{ total }} quyển</p>
     </div>
     <div class="button">
-      <router-link to="/checkout" class="user-btn">Checkout</router-link>
+      <div class="user-btn" @click="checkout">Checkout</div>
     </div>
   </div>
 
@@ -80,9 +98,11 @@
 import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
 import {useCartStore} from "@/stores/User/cart.store";
 import {onMounted} from "vue";
-import { ref, computed } from "vue";
+import { ref, computed} from "vue";
+import { useRouter} from "vue-router";
 import {notifyError, notifySuccess} from "@/composables/notifications";
 
+const router = useRouter();
 const cartStore = useCartStore();
 const updatedCart = ref<{ [key: number]: { quantity: number; return_date_due: string } }>({});
 const total = computed(() => {
@@ -90,6 +110,34 @@ const total = computed(() => {
 });
 const isDeleteDialogVisible = ref(false);
 const itemToRemove = ref(null);
+const errors = ref<{ [key: number]: string }>({});
+const validateCart = () => {
+  let isValid = true;
+  errors.value = {};
+
+  cartStore.cart.forEach((item) => {
+    if (!item.return_date_due) {
+      errors.value[item.id] = "Ngày trả không được trống!";
+      isValid = false;
+    }
+  });
+
+  return isValid;
+};
+
+const hoveredItemId = ref<number | null>(null);
+const showDeleteButton = (itemId: number) => {
+  hoveredItemId.value = itemId;
+};
+
+const hideDeleteButton = () => {
+  hoveredItemId.value = null;
+};
+
+const showDeleteDialog = (item: any) => {
+  isDeleteDialogVisible.value = true;
+  itemToRemove.value = item;
+};
 
 const disablePastDates = (time: any) => {
   return time.getTime() < Date.now() - 8.64e7;
@@ -106,7 +154,7 @@ const increaseQuantity = (cartItemId: number) => {
   const item = cartStore.cart.find((item) => item.id === cartItemId);
   if (item) {
     if (item.quantity >= 5) {
-      notifyError("Bạn chỉ có thể mượn tối đa 5 quyển!");
+      notifyError("Bạn chỉ có thể mượn tối đa 5 quyển cho 1 sách!");
       return;
     }
 
@@ -140,10 +188,9 @@ const handleDateChange = (cartItemId: number, newDate: string) => {
   const item = cartStore.cart.find((item) => item.id === cartItemId);
   if (item) {
     item.return_date_due = newDate;
+    delete errors.value[cartItemId];
   }
-  console.log(`Ngày trả cập nhật: ${cartItemId} -> ${newDate}`);
 };
-
 const updateCart = async () => {
   try {
     const updates = cartStore.cart.map((item) => ({
@@ -160,12 +207,47 @@ const updateCart = async () => {
   }
 };
 
+const checkout = async () => {
+  if (!validateCart()) {
+    notifyError("Vui lòng chọn ngày trả sách!");
+    return;
+  }
+
+  await updateCart();
+  router.push("/checkout");
+};
 onMounted(() => {
   cartStore.fetchCart();
 });
 </script>
 
 <style scoped lang="scss">
+.delete-btn {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  border: none;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    img {
+      transform: scale(1.2);
+    }
+  }
+}
+
 .cart {
   width: 100%;
   &__title, &__item {
@@ -197,6 +279,7 @@ onMounted(() => {
       width: 400px;
       display: flex;
       align-items: center;
+      position: relative;
     }
 
     &--stock {
@@ -211,11 +294,22 @@ onMounted(() => {
     }
 
     &--quantity {
-      width: 70px;
+      display: flex;
+      justify-content: center;
+      width: 150px;
     }
 
     &--date {
-      width: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 200px;
+
+      .error-message {
+        font-size: 13px;
+        margin-bottom: -23px;
+      }
     }
   }
 

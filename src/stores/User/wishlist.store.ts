@@ -2,7 +2,14 @@ import {defineStore} from "pinia";
 import {reactive, ref} from "vue";
 import * as wishlistService from "@/services/User/wishlistService";
 import {defaultPagination} from "@/constants/Admin/pagination";
-import {notifyError, notifySuccess} from "@/composables/notifications";
+import {
+  message,
+  messageError,
+  messageSuccess,
+  notifyError,
+  notifyInfo,
+  notifySuccess
+} from "@/composables/notifications";
 
 export const useWishlistStore = defineStore("wishlist", () => {
   const wishlists = ref([]);
@@ -13,11 +20,28 @@ export const useWishlistStore = defineStore("wishlist", () => {
     total_pages: defaultPagination.total_pages,
     per_page: 12,
   });
+  const isInWishlist = (bookId: number): boolean => {
+    return wishlists.value.some((item: any) => item.book?.id === bookId);
+  };
 
   const handlePageChange = (page: number) => {
     pagination.current_page = page;
     fetchWishlists();
   }
+
+  const toggleWishlist = async (bookId: number) => {
+    try {
+      if (isInWishlist(bookId)) {
+        await removeFromWishlist(bookId);
+        message("Đã xóa khỏi danh sách yêu thích!");
+      } else {
+        await addToWishlist(bookId);
+        messageSuccess("Đã thêm vào danh sách yêu thích!");
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const fetchWishlists = async (filters = {}) => {
     try {
@@ -26,10 +50,10 @@ export const useWishlistStore = defineStore("wishlist", () => {
         page: pagination.current_page,
         ...filters
       });
+      console.log("Wishlist response:", response.data);
       wishlists.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
-      console.log(wishlists.value);
     } catch (error) {
       console.error("Failed to fetch wishlists", error);
       throw error;
@@ -51,11 +75,11 @@ export const useWishlistStore = defineStore("wishlist", () => {
     try {
       const response = await wishlistService.addToWishlist(bookId);
       console.log("Sách đã được thêm vào danh sách yêu thích:", response);
-      notifySuccess("Thêm vào danh sách yêu thích thành công!");
+      // notifySuccess("Thêm vào danh sách yêu thích thành công!");
       await fetchWishlists();
     } catch (error) {
       console.error("Failed to add to wishlist", error);
-      notifyError("Sách đã được thêm vào danh sách yêu thích!");
+      notifyInfo("Sách đã được thêm vào danh sách yêu thích!");
       throw error;
     }
   }
@@ -64,6 +88,8 @@ export const useWishlistStore = defineStore("wishlist", () => {
     wishlists,
     wishlist,
     pagination,
+    isInWishlist,
+    toggleWishlist,
     handlePageChange,
     fetchWishlists,
     removeFromWishlist,

@@ -11,6 +11,7 @@
         require-asterisk-position="right"
         ref="userForm"
         :rules="formRules"
+        :model="formData"
         class="checkout__content--user-info"
       >
         <el-form-item label="Họ và tên">
@@ -20,10 +21,10 @@
           <el-input v-model="userStore.userInfo.email" disabled/>
         </el-form-item>
         <el-form-item label="Số điện thoại" prop="phone_number">
-          <el-input v-model="userStore.userInfo.phone_number"/>
+          <el-input v-model="formData.phone_number"/>
         </el-form-item>
-        <el-form-item label="Tỉnh" prop="province">
-          <el-select v-model="userStore.userInfo.province_id" @change="handleProvinceChange" placeholder="Chọn tỉnh">
+        <el-form-item label="Tỉnh" prop="province_id">
+          <el-select v-model="formData.province_id" @change="handleProvinceChange" placeholder="Chọn tỉnh">
             <el-option
               v-for="province in userStore.provinces"
               :key="province.id"
@@ -32,8 +33,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Quận/Huyện" prop="district">
-          <el-select v-model="userStore.userInfo.district_id" @change="handleDistrictChange" placeholder="Chọn quận/huyện">
+        <el-form-item label="Quận/Huyện" prop="district_id">
+          <el-select v-model="formData.district_id" @change="handleDistrictChange" placeholder="Chọn quận/huyện">
             <el-option
               v-for="district in userStore.districts"
               :key="district.id"
@@ -42,8 +43,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Phường/Xã" prop="ward">
-          <el-select v-model="userStore.userInfo.ward_id" placeholder="Chọn phường/xã">
+        <el-form-item label="Phường/Xã" prop="ward_id">
+          <el-select v-model="formData.ward_id" placeholder="Chọn phường/xã">
             <el-option
               v-for="ward in userStore.wards"
               :key="ward.id"
@@ -53,11 +54,15 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Địa chỉ" prop="address">
-          <el-input v-model="userStore.userInfo.address" type="textarea"/>
+          <el-input v-model="formData.address" type="textarea"/>
         </el-form-item>
 
         <label class="checkout__content--remember">
-          <input type="checkbox" v-model="saveUserInfo" @change="handleSaveUserInfo" />
+          <input
+            type="checkbox"
+            v-model="saveUserInfo"
+            @change="handleSaveUserInfo"
+          />
           Lưu thông tin cho lần mượn sau
         </label>
       </el-form>
@@ -103,17 +108,26 @@ import router from "@/router";
 const userStore = useUserStore();
 const cartStore = useCartStore();
 const saveUserInfo = ref(false);
+const userForm = ref(null);
+const formData = ref({
+  full_name: userStore.userInfo.full_name,
+  email: userStore.userInfo.email,
+  phone_number: userStore.userInfo.phone_number,
+  province_id: userStore.userInfo.province_id,
+  district_id: userStore.userInfo.district_id,
+  ward_id: userStore.userInfo.ward_id,
+  address: userStore.userInfo.address
+});
 
 const handleSaveUserInfo = () => {
   if (saveUserInfo.value) {
-    console.log("Lưu thông tin người dùng vào localStorage");
-    localStorage.setItem("savedUserInfo", JSON.stringify(userStore.userInfo));
-  } else {
-    console.log("Xóa thông tin người dùng khỏi localStorage");
-    localStorage.removeItem("savedUserInfo");
+    userStore.userInfo = {
+      ...userStore.userInfo,
+      ...formData.value
+    };
+    localStorage.setItem("savedUserInfo", JSON.stringify(formData.value));
   }
 };
-
 const formRules = {
   full_name: [{ required: true, message: "Họ và tên không được để trống", trigger: "blur" }],
   email: [{ required: true, message: "Email không được để trống", trigger: "blur" }],
@@ -132,57 +146,71 @@ const total = computed(() => {
 });
 
 const handleProvinceChange = async (provinceId: number) => {
-  userStore.userInfo.province = provinceId;
-  userStore.userInfo.district_id = null;
-  userStore.userInfo.ward_id = null;
+  formData.value.province_id = provinceId;
+  formData.value.district_id = null;
+  formData.value.ward_id = null;
   await userStore.fetchDistricts(provinceId);
 };
 
 const handleDistrictChange = async (districtId: number) => {
-  userStore.userInfo.district = districtId;
-  userStore.userInfo.ward_id = null;
+  formData.value.district_id = districtId;
+  formData.value.ward_id = null;
   await userStore.fetchWards(districtId);
 };
 
+// const handleCheckout = async () => {
+//
+//   const orderData = {
+//     full_name: userStore.userInfo.full_name,
+//     phone_number: userStore.userInfo.phone_number,
+//     email: userStore.userInfo.email,
+//     province_id: userStore.userInfo.province_id,
+//     district_id: userStore.userInfo.district_id,
+//     ward_id: userStore.userInfo.ward_id,
+//     address: userStore.userInfo.address,
+//     items: cartStore.cart.map(item => ({
+//       book_id: item.book.id,
+//       quantity: item.quantity,
+//       return_date_due: item.return_date_due,
+//     })),
+//   };
+//
+//   try {
+//     await cartStore.checkoutCart(orderData);
+//     notifySuccess("Đơn mượn sách đã được tạo thành công!");
+//     router.push({ name: "borrowing-history" });
+//   } catch (error) {
+//     notifyError("Lỗi khi tạo đơn mượn sách!");
+//   }
+// };
+
 const handleCheckout = async () => {
-  if (!userStore.userInfo.full_name) {
-    notifyError("Vui lòng nhập họ và tên người mượn!");
-    return;
-  }
-
-  const orderData = {
-    full_name: userStore.userInfo.full_name,
-    phone_number: userStore.userInfo.phone_number,
-    email: userStore.userInfo.email,
-    province_id: userStore.userInfo.province_id,
-    district_id: userStore.userInfo.district_id,
-    ward_id: userStore.userInfo.ward_id,
-    address: userStore.userInfo.address,
-    items: cartStore.cart.map(item => ({
-      book_id: item.book.id,
-      quantity: item.quantity,
-      return_date_due: item.return_date_due,
-    })),
-  };
-
   try {
+    await (userForm.value as any).validate();
+
+    const orderData = {
+      ...formData.value,
+      items: cartStore.cart.map(item => ({
+        book_id: item.book.id,
+        quantity: item.quantity,
+        return_date_due: item.return_date_due,
+      })),
+    };
+
     await cartStore.checkoutCart(orderData);
     notifySuccess("Đơn mượn sách đã được tạo thành công!");
     router.push({ name: "borrowing-history" });
   } catch (error) {
-    notifyError("Lỗi khi tạo đơn mượn sách!");
+    console.log(error);
   }
 };
 
 onMounted(async () => {
   const savedInfo = localStorage.getItem("savedUserInfo");
   if (savedInfo) {
-    console.log("Tải thông tin đã lưu từ localStorage");
-    userStore.userInfo = JSON.parse(savedInfo);
-    saveUserInfo.value = true;
+    formData.value = JSON.parse(savedInfo);
   } else {
-    await userStore.fetchUserInfo();
-    await userStore.fetchProvinces();
+    saveUserInfo.value = false;
   }
 });
 
@@ -190,12 +218,12 @@ onMounted(async () => {
   await userStore.fetchUserInfo();
   await userStore.fetchProvinces();
 
-  if (userStore.userInfo.province_id) {
-    await userStore.fetchDistricts(userStore.userInfo.province_id);
+  if (formData.value.province_id) {
+    await userStore.fetchDistricts(formData.value.province_id);
   }
 
-  if (userStore.userInfo.district_id) {
-    await userStore.fetchWards(userStore.userInfo.district_id);
+  if (formData.value.district_id) {
+    await userStore.fetchWards(formData.value.district_id);
   }
 });
 </script>

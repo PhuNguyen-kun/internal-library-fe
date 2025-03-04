@@ -28,9 +28,12 @@
         </div>
         <p class="book-detail__info--short-desc">{{ bookStore.book.short_description }}</p>
         <div class="book-detail__info--function">
-          <el-input-number class="custom-input-quantity function__quantity" v-model="num" :min="1" :max="10" @change="handleChange" />
+          <el-input-number class="custom-input-quantity function__quantity" v-model="num" :min="1" :max="5" @change="handleChange" />
           <button class="user-btn" @click="addToCart">Mượn ngay</button>
-          <button class="wishlist-btn" @click="addToWishlist"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></button>
+          <button class="wishlist-btn" @click.prevent.stop="wishlistStore.toggleWishlist(bookStore.book.id)"
+                  :class="{ 'active': wishlistStore.isInWishlist(bookStore.book.id) }">
+            <img src="@/assets/img/User/wishlist-icon.svg" alt="">
+          </button>
         </div>
         <div class="book-detail__info--delivery">
           <div class="delivery-details">
@@ -56,9 +59,31 @@
     <div class="book-detail__description">
       <div class="book-detail__description--heading">
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
-        <span class="product-section__label">Mô tả chi tiết</span>
+        <span class="product-section__label">Mô tả sản phẩm</span>
       </div>
       <div class="book-detail__description--content">{{ bookStore.book.description }}</div>
+    </div>
+
+    <!--  Details  -->
+    <div class="book-detail__description">
+      <div class="book-detail__description--heading">
+        <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
+        <span class="product-section__label">Thông tin chi tiết</span>
+      </div>
+      <div class="book-detail__description--content">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="Tác Giả">
+            {{ bookStore.book.author.join(', ') }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Số Trang">{{ bookStore.book.page }}</el-descriptions-item>
+          <el-descriptions-item label="Nhà Xuất Bản">{{ bookStore.book.publisher }}</el-descriptions-item>
+          <el-descriptions-item label="Số Lượng Trong Kho">{{ bookStore.book.stock_quantity }}</el-descriptions-item>
+          <el-descriptions-item label="Năm Xuất Bản">{{ bookStore.book.published_year }}</el-descriptions-item>
+          <el-descriptions-item label="Danh Mục">
+            {{ bookStore.book.category.join(', ') }}
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
     </div>
 
     <!--  Review  -->
@@ -68,6 +93,49 @@
         <span class="product-section__label">Đánh giá</span>
       </div>
       <div class="book-detail__description--review">
+        <!--   Review summary   -->
+        <div class="review-summary">
+          <div class="average-rating">
+            <h3>{{ bookStore.book.average_star }}</h3>
+            <el-rate
+              v-model="bookStore.book.average_star"
+              disabled
+              allow-half
+              class="average-star"
+              size="large"
+            />
+            <div class="total-reviews">{{ bookStore.book.review_count }} đánh giá</div>
+          </div>
+
+          <div class="star-distribution">
+            <div
+              v-for="targetStar in 5"
+              :key="targetStar"
+              class="star-row"
+            >
+              <div class="star-label">
+                {{ 6 - targetStar }} sao
+                <el-rate
+                  :model-value="6 - targetStar"
+                  disabled
+                  :max="6 - targetStar"
+                />
+              </div>
+              <div class="bar-container">
+                <el-progress
+                  :percentage="getStarPercentage(6 - targetStar)"
+                  :stroke-width="12"
+                  :show-text = false
+                  :color="barColor"
+                />
+                <div class="count">
+                  {{ getStarCount(6 - targetStar) }} đánh giá
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div v-for="review in bookStore.reviews" :key="review.id" class="container">
           <img src="@/assets/img/User/user-icon.svg" alt="">
           <div>
@@ -78,9 +146,11 @@
           </div>
         </div>
         <Pagination
+          v-if="bookStore.reviewPagination.total > 0"
           :pagination="bookStore.reviewPagination"
           @changePage="(page: number) => bookStore.handleReviewPageChange(page)"
         />
+<!--        <div v-else class="list__empty">Chưa có đánh giá nào</div>-->
 
         <div class="review-input">
           <p class="review-input__title">Bình luận và đánh giá của bạn</p>
@@ -113,33 +183,10 @@
         </div>
       </div>
 
-      <el-carousel ref="carouselRef" arrow="never" class="">
+      <el-carousel ref="carouselRef" arrow="never" class="" indicator-position="none">
         <el-carousel-item v-for="(group, index) in relatedBooksGroup" :key="index" class="no-text-decoration">
           <div class="product-section__category">
-            <router-link :to="'/books/' + book.slug" class="product-card" v-for="book in group" :key="book.id">
-              <div class="product-card__image">
-                <img :src="book.image_url" alt="Book Image" class="img">
-                <div class="product-card__add-to-cart">
-                  <button @click="addToCart(book)">
-                    <img src="@/assets/img/User/card-icon-white.svg" alt="">
-                    Thêm vào giỏ hàng
-                  </button>
-                </div>
-              </div>
-              <div class="product-card__actions">
-                <div class="action-buttons"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></div>
-                <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
-              </div>
-              <div class="product-card__info">
-                <h3 class="product-card__info--title no-text-decoration">{{ book.title }}</h3>
-                <div class="product-card__info--review">
-                  <el-rate v-model="book.average_star" disabled disabled-void-color="#E5E5E5"></el-rate>
-                  <div class="review-count">({{book.review_count}})</div>
-                </div>
-              </div>
-            </router-link>
-
-<!--            <ProductList :books="bookStore.relatedBooks" />-->
+            <ProductList :books="bookStore.relatedBooks" />
           </div>
         </el-carousel-item>
       </el-carousel>
@@ -157,6 +204,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {useCartStore} from "@/stores/User/cart.store";
 import {notifyError, notifySuccess} from "@/composables/notifications";
 import Pagination from "@/components/User/Common/Pagination.vue";
+import ProductList from "@/components/User/Common/ProductList.vue";
 
 const route = useRoute()
 const bookStore = useBookStore()
@@ -165,20 +213,21 @@ const cartStore = useCartStore()
 const carouselRef = ref()
 const num = ref(1);
 const router = useRouter()
+const barColor = 'rgba(255,69,0,0.63)'
 const handleChange = (value: number) => {
   num.value = value;
 };
 
 const addToCart = async () => {
   if (!bookStore.book) return;
-  await cartStore.addToCart(bookStore.book.id, num.value);
-  notifySuccess("Thêm vào giỏ hàng thành công!");
-  await router.push('/cart')
-};
-
-const addToWishlist = async () => {
-  if (!bookStore.book) return;
-  await wishlistStore.addToWishlist(bookStore.book.id);
+  try {
+    const success = await cartStore.addToCart(bookStore.book.id, num.value);
+    if (success) {
+      await router.push('/cart');
+    }
+  } catch (error) {
+    console.error("Failed to add to cart", error);
+  }
 };
 
 const userReview = ref({
@@ -221,6 +270,15 @@ const nextSlide = () => {
   carouselRef.value?.next()
 }
 
+const getStarCount = (star: number) => {
+  return bookStore.book.star_distribution[star - 1] || 0;
+};
+
+const getStarPercentage = (star: number) => {
+  const total = bookStore.book.review_count;
+  return total > 0 ? Math.round((getStarCount(star) / total * 100)) : 0;
+};
+
 onMounted(async () => {
   const slug = route.params.slug as string;
   await bookStore.fetchBookBySlug(slug);
@@ -230,6 +288,20 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+:deep(.is-bordered-label) {
+  background-color: #fff !important;
+  font-weight: 500 !important;
+  width: 250px !important;
+}
+
+:deep(.el-descriptions__body) {
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-descriptions__cell) {
+  border: 1px solid #ccc !important;
+}
+
 :deep(.custom-input-quantity) {
   .el-input__wrapper {
     box-shadow: none !important;
@@ -269,6 +341,7 @@ onMounted(async () => {
       padding: 32px 60px;
       background-color: #f5f5f5;
       border-radius: 5px;
+      object-fit: cover;
     }
   }
 
@@ -327,6 +400,15 @@ onMounted(async () => {
         &:hover {
           background-color: var(--user-theme-color);
           border-color: #fff;
+          img {
+            filter: invert(1);
+          }
+        }
+
+        &.active {
+          background-color: var(--user-theme-color);
+          border-color: var(--user-theme-color);
+
           img {
             filter: invert(1);
           }
@@ -392,6 +474,7 @@ onMounted(async () => {
     &--content {
       margin-top: 20px;
       line-height: 24px;
+      white-space: pre-wrap;
       //padding: 20px;
       //box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
       //border: 1px solid #ccc;
@@ -409,10 +492,9 @@ onMounted(async () => {
         padding: 30px 20px;
 
         &__title {
-          font-size: 16px;
+          font-size: 17px;
           font-weight: 500;
           margin-bottom: 10px;
-          margin-top: 30px;
         }
         &__content {
           width: 100%;
@@ -428,7 +510,7 @@ onMounted(async () => {
         margin-top: 10px;
         display: flex;
         gap: 15px;
-        padding: 23px 20px;
+        padding: 23px 30px;
       }
 
       .container:last-of-type {
@@ -492,6 +574,83 @@ onMounted(async () => {
 
 .pagination-container {
   margin-top: 10px;
+}
+
+.list__empty {
+  padding: 0 2rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #888888;
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: -40px;
+}
+
+.review-summary {
+  display: flex;
+  padding: 20px 40px 28px 40px;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.average-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0.3;
+  padding-right: 60px;
+  h3 {
+    font-size: 60px;
+    font-weight: 500;
+  }
+
+  .total-reviews {
+    font-size: 18px;
+    font-weight: 500;
+    color: #858585;
+    margin-top: 6px;
+  }
+}
+
+.star-label {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 15px;
+ }
+
+.bar-container {
+  display: flex;
+  gap: 20px;
+}
+
+:deep(.el-progress) {
+  width: 620px !important;
+}
+
+.star-distribution {
+  flex: 1;
+}
+
+.average-star {
+  --el-rate-icon-size: 26px;
+  padding: 5px 0;
+}
+
+:deep(.product-card) {
+  width: 268px;
+}
+
+:deep(.el-carousel__container) {
+  height: 390px;
+}
+
+:deep(.product-section__category) {
+  margin-top: 0;
+}
+
+:deep(.product-section__label) {
+  font-size: 17px;
 }
 </style>
 

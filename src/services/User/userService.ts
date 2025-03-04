@@ -39,3 +39,23 @@ export const getWards = async (districtId: number) => {
     throw error;
   }
 }
+
+export const updateUserInfo = async (userData: any) => {
+  try {
+    const response = await axiosInstance.put(`/user/info`, userData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update user info", error);
+    throw error;
+  }
+};
+
+export const updatePassword = async (passwordData: any) => {
+  try {
+    const response = await axiosInstance.put(`/user/info/password`, passwordData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update password", error);
+    throw error;
+  }
+};

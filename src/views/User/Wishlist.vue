@@ -61,7 +61,7 @@ import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
 import { useWishlistStore } from "@/stores/User/wishlist.store";
 import {onMounted, ref} from "vue";
 import Pagination from "@/components/User/Common/Pagination.vue";
-import {notifySuccess} from "@/composables/notifications";
+import {notifyError, notifyInfo, notifySuccess} from "@/composables/notifications";
 import {useCartStore} from "@/stores/User/cart.store";
 
 const wishlistStore = useWishlistStore();
@@ -75,7 +75,6 @@ const handleRemoveFromWishlist = (book: any) => {
 };
 const addToCart = async (book: any) => {
   await cartStore.addToCart(book.book.id);
-  notifySuccess('Thêm vào giỏ hàng thành công');
 };
 
 const confirmRemoveItem = async () => {
@@ -88,7 +87,7 @@ const confirmRemoveItem = async () => {
 
 const addAllToCart = async () => {
   if (wishlistStore.wishlists.length === 0) {
-    notifySuccess("Danh sách yêu thích trống!");
+    notifyInfo("Danh sách yêu thích trống!");
     return;
   }
 

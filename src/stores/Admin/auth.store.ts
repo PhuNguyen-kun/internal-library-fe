@@ -28,13 +28,46 @@ export const useAuthStore = defineStore('auth', () => {
       isValid = false;
     }
 
-    if (password.value.length < 6) {
-      errors.value.password = 'Password must be at least 6 characters';
+    if (password.value.length < 8) {
+      errors.value.password = 'Password must be at least 8 characters';
       isValid = false;
     }
 
     return isValid;
   };
+
+  // const login = async () => {
+  //   const isValid = validateForm();
+  //   if (!isValid) {
+  //     return;
+  //   }
+  //
+  //   loading.value = true;
+  //
+  //   try {
+  //     const response = await loginService({ email: email.value, password: password.value });
+  //
+  //     const access_token = response.data.access_token;
+  //     localStorage.setItem('access_token', access_token);
+  //
+  //     formError.value = '';
+  //     router.push('/admin/dashboard');
+  //   } catch (error: any) {
+  //     if (error.response) {
+  //       if (error.response.status === 404) {
+  //         formError.value = 'Email or Password is incorrect!';
+  //       } else if (error.response.status === 401) {
+  //         formError.value = 'Email or Password is incorrect!';
+  //       } else {
+  //         formError.value = 'Email or Password is incorrect!';
+  //       }
+  //     } else {
+  //       console.error('An unexpected error occurred:', error);
+  //     }
+  //   } finally {
+  //     loading.value = false;
+  //   }
+  // };
 
   const login = async () => {
     const isValid = validateForm();
@@ -47,20 +80,31 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await loginService({ email: email.value, password: password.value });
 
+      console.log('API response:', response.data);
+
       const access_token = response.data.access_token;
-      localStorage.setItem('access_token', access_token);
+      const user_role = response.data.profile.role;
+
+      console.log('User role:', user_role);
+
+      if (user_role === 0) { // Admin
+        localStorage.setItem('admin_access_token', access_token);
+        console.log('Admin token saved');
+      } else { // User
+        localStorage.setItem('user_access_token', access_token);
+        console.log('User token saved');
+      }
 
       formError.value = '';
-      router.push('/admin/dashboard');
+      if (user_role === 0) {
+        console.log('Navigating to /admin/dashboard');
+        router.push('/admin/dashboard');
+      } else {
+        formError.value = 'Email or Password is incorrect!';
+      }
     } catch (error: any) {
       if (error.response) {
-        if (error.response.status === 404) {
-          formError.value = 'Email or Password is incorrect!';
-        } else if (error.response.status === 401) {
-          formError.value = 'Email or Password is incorrect!';
-        } else {
-          formError.value = 'Email or Password is incorrect!';
-        }
+        formError.value = 'Email or Password is incorrect!';
       } else {
         console.error('An unexpected error occurred:', error);
       }
@@ -69,16 +113,33 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  // const logout = async () => {
+  //   try {
+  //     await logoutService()
+  //     localStorage.removeItem('access_token')
+  //     await router.push('/admin/login')
+  //   } catch (error) {
+  //     console.error('Failed to logout:', error)
+  //   }
+  // }
+
   const logout = async () => {
     try {
-      await logoutService()
-      console.log('ok')
-      localStorage.removeItem('access_token')
-      await router.push('/admin/login')
+      await logoutService();
+
+      const currentPath = router.currentRoute.value.path;
+
+      if (currentPath.startsWith('/admin')) {
+        localStorage.removeItem('admin_access_token'); // Chỉ xóa token admin
+        await router.push('/admin/login');
+      } else {
+        localStorage.removeItem('user_access_token'); // Chỉ xóa token user
+        await router.push('/user/login');
+      }
     } catch (error) {
-      console.error('Failed to logout:', error)
+      console.error('Failed to logout:', error);
     }
-  }
+  };
 
   return {
     email,
