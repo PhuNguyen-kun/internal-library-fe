@@ -257,7 +257,12 @@
 
       </el-form-item>
       <el-form-item label="Mô tả đầy đủ" prop="description">
-        <el-input v-model="book.description" placeholder="Nhập mô tả đầy đủ" rows="6" type="textarea"></el-input>
+        <!-- <el-input v-model="book.description" placeholder="Nhập mô tả đầy đủ" rows="6" type="textarea"></el-input> -->
+        <ckeditor
+          v-model="book.description"
+          :editor="editor"
+          :config="config"
+        />
       </el-form-item>
     </el-form>
   </Modal>
@@ -310,7 +315,6 @@ const config = {
     '|',
     'bold',
     'italic',
-    'link',
     'bulletedList',
     'numberedList',
     'blockQuote'

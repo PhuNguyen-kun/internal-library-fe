@@ -33,6 +33,7 @@
 import { ref } from "vue";
 import { useUserStore } from "@/stores/User/user.store";
 import { notifySuccess, notifyError } from "@/composables/notifications";
+import router from "@/router";
 
 const userStore = useUserStore();
 const passwordForm = ref();
@@ -82,6 +83,9 @@ const handleChangePassword = async () => {
       passwordData.value.new_password = "";
       passwordData.value.new_password_confirmation = "";
       errorMessages.value.old_password = "";
+
+      localStorage.removeItem("user_access_token");
+      await router.push('/login');
     } catch (error: any) {
       if (error.response && error.response.data.errors) {
         if (error.response.data.errors.old_password) {

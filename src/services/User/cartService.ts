@@ -72,18 +72,15 @@ export const checkStock = async (bookId: number, quantity: number) => {
   }
 };
 
-// cartService.ts
 export const checkStocks = async (
   items: { bookId: number; quantity: number }[]
 ): Promise<boolean> => {
   try {
-    // Gọi API kiểm tra stock cho nhiều sách
     const promises = items.map(async (item) => {
       const response = await axiosInstance.get(`/user/books/${item.bookId}`);
       return response.data.data.stock_quantity >= item.quantity;
     });
 
-    // Kiểm tra tất cả kết quả
     const results = await Promise.all(promises);
     return results.every((isAvailable) => isAvailable);
   } catch (error) {

@@ -27,7 +27,6 @@ export const useOrderStore = defineStore("order", () => {
     selectedOrder.value = null;
   };
 
-  // Lấy danh sách orders từ DB (status do DB trả về)
   const fetchOrders = async () => {
     try {
       loading.value = true;
@@ -36,7 +35,7 @@ export const useOrderStore = defineStore("order", () => {
         pagination.per_page,
         pagination.current_page
       );
-      orders.value = response.data; // Mảng orders
+      orders.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
       loading.value = false;
@@ -75,7 +74,6 @@ export const useOrderStore = defineStore("order", () => {
     }
   };
 
-  // Update: user gửi payload => server lưu
   const updateOrder = async (id: number, updatedOrder: Order) => {
     try {
       loading.value = true;

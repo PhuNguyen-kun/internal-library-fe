@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TheBreadCrumb />
+    <TheBreadCrumb/>
   </div>
 
   <div class="cart">
@@ -13,59 +13,76 @@
 
     <div v-if="cartStore.cart.length === 0" class="cart__empty">Giỏ hàng trống</div>
     <div class="cart__items">
-      <div v-for="item in cartStore.cart" :key="item.id" class="cart__item">
-        <router-link
-          :to="'/books/' + item.book.slug"
-          class="cart__item--name no-text-decoration__strong"
-          @mouseover="showDeleteButton(item.id)"
-          @mouseleave="hideDeleteButton(item.id)"
+      <div v-for="item in cartStore.cart" :key="item.id">
+        <div class="cart__item" :class="{'out-of-stock': !isStockAvailable(item) }">
+          <router-link
+            :to="'/books/' + item.book.slug"
+            class="cart__item--name no-text-decoration__strong"
+            @mouseleave="hideDeleteButton(item.id)"
+            @mouseover="showDeleteButton(item.id)"
+          >
+            <div class="image-container">
+              <img :src="item.book.image_url" alt="Book Image" class="cart__item--image"/>
+              <!--  Delete button -->
+              <div
+                v-show="hoveredItemId === item.id"
+                class="delete-btn"
+                @click.prevent.stop="showDeleteDialog(item)"
+              >
+                <img alt="Delete" src="@/assets/img/User/delete-cart-item-btn.svg"/>
+              </div>
+            </div>
+            <span>{{ item.book.title }}</span>
+          </router-link>
+          <div class="cart__item--stock">
+            <span>{{ item.book.stock_quantity }}</span>
+          </div>
+          <div class="cart__item--quantity">
+            <div class="quantity-input">
+              <div class="input-field">{{ item.quantity }}</div>
+              <div class="button">
+                <button class="btn" @click="increaseQuantity(item.id)">
+                  <el-icon>
+                    <ArrowUp/>
+                  </el-icon>
+                </button>
+                <button class="btn" @click="handleDecreaseQuantity(item)">
+                  <el-icon>
+                    <ArrowDown/>
+                  </el-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="cart__item--date">
+            <el-date-picker
+              v-model="item.return_date_due"
+              :class="{ 'error-border': errors[item.id] }"
+              :disabled-date="disablePastDates"
+              format="YYYY-MM-DD"
+              placeholder="Chọn ngày trả"
+              type="date"
+              value-format="YYYY-MM-DD"
+              @change="handleDateChange(item.id, item.return_date_due)"
+            />
+            <div v-if="errors[item.id]" class="error-message">
+              {{ errors[item.id] }}
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="cartStore.outOfStockItems.includes(item.book.id)"
+          class="quantity__error-message"
         >
-          <div class="image-container">
-            <img :src="item.book.image_url" alt="Book Image" class="cart__item--image" />
-            <!--  Delete button -->
-            <div
-              v-show="hoveredItemId === item.id"
-              class="delete-btn"
-              @click.prevent.stop="showDeleteDialog(item)"
-            >
-              <img src="@/assets/img/User/delete-cart-item-btn.svg" alt="Delete" />
-            </div>
-          </div>
-          <span>{{ item.book.title }}</span>
-        </router-link>
-        <div class="cart__item--stock">
-          <span>{{ item.book.stock_quantity }}</span>
+          Số lượng tồn kho không đủ (Còn {{ item.book.stock_quantity }} quyển)
         </div>
-        <div class="cart__item--quantity">
-          <div class="quantity-input">
-            <div class="input-field">{{ item.quantity }}</div>
-            <div class="button">
-              <button @click="increaseQuantity(item.id)" class="btn"><el-icon><ArrowUp /></el-icon></button>
-              <button @click="handleDecreaseQuantity(item)" class="btn"><el-icon><ArrowDown /></el-icon></button>
-            </div>
-          </div>
-        </div>
-        <div class="cart__item--date">
-          <el-date-picker
-            v-model="item.return_date_due"
-            type="date"
-            placeholder="Chọn ngày trả"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            :disabled-date="disablePastDates"
-            :class="{ 'error-border': errors[item.id] }"
-            @change="handleDateChange(item.id, item.return_date_due)"
-          />
-          <div v-if="errors[item.id]" class="error-message">
-            {{ errors[item.id] }}
-          </div>
-        </div>      </div>
+      </div>
     </div>
   </div>
 
   <div class="cart__functions">
-    <router-link to="/homepage" class="cart__functions--btn">Tiếp tục mua hàng</router-link>
-    <div @click="updateCart" class="cart__functions--btn">Cập nhật giỏ hàng</div>
+    <router-link class="cart__functions--btn" to="/homepage">Tiếp tục mua hàng</router-link>
+    <div class="cart__functions--btn" @click="updateCart">Cập nhật giỏ hàng</div>
   </div>
 
   <div class="cart__total">
@@ -81,10 +98,10 @@
 
   <el-dialog
     v-model="isDeleteDialogVisible"
-    title="Xác nhận xóa"
-    width="30%"
     center
+    title="Xác nhận xóa"
     top="20vh"
+    width="30%"
   >
     <span>Bạn có chắc muốn xóa sản phẩm khỏi giỏ hàng?</span>
     <template #footer>
@@ -94,12 +111,11 @@
   </el-dialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
 import {useCartStore} from "@/stores/User/cart.store";
-import {onMounted} from "vue";
-import { ref, computed} from "vue";
-import { useRouter} from "vue-router";
+import {computed, onMounted, ref} from "vue";
+import {useRouter} from "vue-router";
 import {notifyError, notifySuccess} from "@/composables/notifications";
 
 const router = useRouter();
@@ -111,6 +127,10 @@ const total = computed(() => {
 const isDeleteDialogVisible = ref(false);
 const itemToRemove = ref(null);
 const errors = ref<{ [key: number]: string }>({});
+const isStockAvailable = (item: any): boolean => {
+  return item.book.stock_quantity >= item.quantity;
+};
+
 const validateCart = () => {
   let isValid = true;
   errors.value = {};
@@ -160,7 +180,7 @@ const increaseQuantity = (cartItemId: number) => {
 
     if (item.quantity < item.book.stock_quantity) {
       item.quantity++;
-      updatedCart.value = { ...updatedCart.value, [cartItemId]: item.quantity };
+      updatedCart.value = {...updatedCart.value, [cartItemId]: item.quantity};
     } else {
       notifyError("Số lượng sách trong kho không đủ!");
     }
@@ -199,7 +219,25 @@ const updateCart = async () => {
       return_date_due: item.return_date_due,
     }));
 
+    if (!validateCart()) {
+      notifyError("Vui lòng chọn ngày trả sách!");
+      return;
+    }
+
+    const itemsToCheck = cartStore.cart.map((item) => ({
+      bookId: item.book.id,
+      quantity: item.quantity,
+    }));
+
+    const isStockAvailable = await cartStore.checkStocks(itemsToCheck);
+
+    if (!isStockAvailable) {
+      notifyError("Một số sản phẩm trong giỏ hàng đã hết hàng. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     await cartStore.updateCart(updates);
+    await cartStore.fetchCart();
     notifySuccess("Giỏ hàng đã được cập nhật!");
   } catch (error) {
     console.error("Lỗi khi cập nhật giỏ hàng", error);
@@ -208,20 +246,34 @@ const updateCart = async () => {
 };
 
 const checkout = async () => {
+  await cartStore.fetchCart();
   if (!validateCart()) {
     notifyError("Vui lòng chọn ngày trả sách!");
+    return;
+  }
+
+  const itemsToCheck = cartStore.cart.map((item) => ({
+    bookId: item.book.id,
+    quantity: item.quantity,
+  }));
+
+  const isStockAvailable = await cartStore.checkStocks(itemsToCheck);
+
+  if (!isStockAvailable) {
+    notifyError("Một số sản phẩm trong giỏ hàng đã hết hàng. Vui lòng kiểm tra lại!");
     return;
   }
 
   await updateCart();
   router.push("/checkout");
 };
+
 onMounted(() => {
   cartStore.fetchCart();
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .delete-btn {
   position: absolute;
   top: -20px;
@@ -250,6 +302,7 @@ onMounted(() => {
 
 .cart {
   width: 100%;
+
   &__title, &__item {
     display: flex;
     justify-content: space-between;
@@ -388,6 +441,7 @@ onMounted(() => {
   .button {
     display: flex;
     flex-direction: column;
+
     button {
       height: 20px;
       padding: 3px 0;
@@ -397,5 +451,15 @@ onMounted(() => {
       color: var(--user-theme-color);
     }
   }
+}
+
+.quantity__error-message {
+  font-size: 14px;
+  color: red;
+  padding: 10px 30px 0 30px;
+}
+
+.cart__item.out-of-stock {
+  border: 1px solid #ff4d4f;
 }
 </style>

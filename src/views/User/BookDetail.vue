@@ -26,7 +26,7 @@
           <el-rate v-model="bookStore.book.average_star" disabled size="large" disabled-void-color="#E5E5E5"></el-rate>
           <div class="review-count">({{bookStore.book.review_count}} đánh giá)</div>
         </div>
-        <p class="book-detail__info--short-desc">{{ bookStore.book.short_description }}</p>
+        <p class="book-detail__info--short-desc" v-html="bookStore.book.short_description"></p>
         <div class="book-detail__info--function">
           <el-input-number class="custom-input-quantity function__quantity" v-model="num" :min="1" :max="5" @change="handleChange" />
           <button class="user-btn" @click="addToCart">Mượn ngay</button>
@@ -61,7 +61,7 @@
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
         <span class="product-section__label">Mô tả sản phẩm</span>
       </div>
-      <div class="book-detail__description--content">{{ bookStore.book.description }}</div>
+      <div class="book-detail__description--content" v-html="bookStore.book.description"></div>
     </div>
 
     <!--  Details  -->

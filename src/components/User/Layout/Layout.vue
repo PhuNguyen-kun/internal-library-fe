@@ -8,16 +8,21 @@
         </div>
 
         <div class="header__content">
-          <div class="header__logo">
-            Kiai Library
+          <div class="hamburger-menu">
+            <img src="@/assets/img/User/menu-icon.svg" alt="Menu">
           </div>
 
-          <nav class="header__nav">
-            <router-link exact-active-class="active-link" to="/homepage">Home</router-link>
-            <router-link exact-active-class="active-link" to="/contact">Contact</router-link>
-            <router-link exact-active-class="active-link" to="/about">About</router-link>
+          <router-link to="/homepage" class="header__logo">
+            Kiai Library
+          </router-link>
+
+          <nav class="header__nav" id="navbar">
+            <router-link exact-active-class="active-link" to="/homepage">Trang chủ</router-link>
+            <router-link exact-active-class="active-link" to="/contact">Liên hệ</router-link>
+            <router-link exact-active-class="active-link" to="/about">Về chúng tôi</router-link>
             <router-link v-if="!authStore.isLoggedIn" exact-active-class="active-link" to="/signup">Sign up</router-link>
           </nav>
+          <div class="header__nav--overlay"></div>
 
           <div class="header__search">
             <input
@@ -28,6 +33,17 @@
               @keyup.enter="handleSearch"
             />
             <div class="search-icon">
+              <img src="@/assets/img/User/search-icon.svg" alt="">
+            </div>
+
+            <input
+              type="text"
+              class="search-bar responsive"
+              placeholder="Tìm kiếm sách, tác giả"
+              v-model="searchTerm"
+              @keyup.enter="handleSearch"
+            />
+            <div class="search-icon responsive">
               <img src="@/assets/img/User/search-icon.svg" alt="">
             </div>
 
@@ -406,7 +422,14 @@ onMounted(async () => {
 
   &__nav {
     display: flex;
-    gap: 50px;
+    width: 330px;
+    gap: 48px;
+    margin-left: 60px;
+
+    &--overlay {
+      visibility: hidden;
+      opacity: 0;
+    }
 
     a {
       text-decoration: none;
@@ -590,177 +613,158 @@ onMounted(async () => {
   width: min-content;
 }
 
-@media (max-width: 1024px) {
-  .container {
-    flex-wrap: wrap;
+//Responsive
+.responsive-header {
+  display: none;
+}
+.responsive {
+  display: none;
+}
+.hamburger-menu {
+  display: none;
+}
+@media (max-width: 992px) {
+  //.header__content {
+  //  padding: 18px 50px !important;
+  //  flex-wrap: wrap;
+  //  gap: 15px;
+  //  //display: none;
+  //}
+  //.header__nav {
+  //  order: 3;
+  //  width: 100%;
+  //  justify-content: center;
+  //  gap: 25px !important;
+  //}
+  //
+  //.responsive-header {
+  //  display: flex;
+  //  padding: 12px 20px;
+  //  align-items: center;
+  //  justify-content: space-between;
+  //  gap: 15px;
+  //  width: 390px;
+  //
+  //  .header__logo {
+  //    width: 50%;
+  //    font-size: 21px;
+  //  }
+  //
+  //  .header__search {
+  //    .search-bar {
+  //      width: 160px !important;
+  //      margin-left: -10px;
+  //    }
+  //
+  //    .search-icon {
+  //      left: 158px;
+  //    }
+  //  }
+  //}
 
-    .logo {
-      width: 50%;
-      flex: 1;
+  .hamburger-menu {
+    img {
+      width: 27px;
+      height: 27px;
     }
-
-    .support {
-      width: 50%;
-      flex: 1;
-    }
-
-    .account {
-      width: 50%;
-      flex: 1;
-    }
-
-    .quick-link {
-      width: 30%;
-      flex: 1;
-      max-width: fit-content;
-      padding-right: 112px;
-    }
-
-    .download-app {
-      width: 50%;
-      flex: 1;
-    }
-  }
-
-  .logo p:nth-child(1) {
-    font-size: 18px;
-  }
-
-  .logo p:nth-child(2) {
-    font-size: 14px;
-  }
-
-  .logo p:nth-child(3) {
-    font-size: 10px;
-  }
-
-  .download-app span {
-    font-size: 8px;
-  }
-
-  .icon-socials {
-    gap: 16px;
-  }
-
-  .input-email {
-    :deep(.el-input__wrapper) {
-      display: flex;
-      width: 217px;
-      padding: 12px 0 12px 16px;
-      align-items: center;
-      gap: 32px;
-    }
-  }
-
-  .download {
-    gap: 4px;
-  }
-
-  .icon-app {
-    gap: 4px;
-  }
-
-  .icon-socials {
-    gap: 16px;
-  }
-
-  .subscribe-box {
-    padding-top: 16px;
-  }
-
-  :deep(.el-input) {
-    width: 150px;
   }
 }
 
-@media (max-width: 480px) {
-  .container {
+@media (max-width: 768px) {
+  .common-layout {
+    width: 430px !important;
+  }
+  .header__content {
+    padding: 18px 20px !important;
+    //display: none;
+  }
+  .header__container {
+    width: 430px !important;
+  }
+  .main {
+    padding: 113px 20px 70px 20px !important;
+  }
+  .footer .container {
     flex-direction: column;
-    gap: 32px;
-
-    .logo {
-      width: 100%;
-      flex: 1;
-    }
-
-    .support {
-      width: 100%;
-      flex: 1;
-    }
-
-    .account {
-      width: 100%;
-      flex: 1;
-    }
-
-    .quick-link {
-      width: 100%;
-      flex: 1;
-      max-width: fit-content;
-      padding-right: 0;
-    }
-
-    .download-app {
-      width: 100%;
-      flex: 1;
-    }
+    gap: 40px;
   }
 
-  .input-email {
-    :deep(.el-input__wrapper) {
-      padding: 12px;
-    }
-  }
-
-  .footer-noti {
-    font-size: 12px;
-  }
-}
-
-.common-layout {
-  height: 100vh;
-}
-
-//responsive for mobile
-@media screen and (max-width: 768px) {
-  .main {
-    padding: 113px 20px;
-  }
-  .header__content {
-    padding: 18px 50px;
-  }
-  .header__search {
-    .search-bar {
-      width: 150px;
-    }
-    .search-icon {
-      left: 160px;
-    }
-  }
   .footer {
-    padding: 0 50px;
+    width: 430px !important;
+    padding: 20px !important;
   }
-  .footer h3 {
-    font-size: 16px;
-  }
-  .footer ul li a {
-    font-size: 14px;
-  }
-  .footer-noti {
-    font-size: 14px;
-  }
-}
 
-//responsive for tablet
-@media screen and (max-width: 1024px) {
-  .main {
-    padding: 113px 100px;
+  .header__announcement {
+    display: none;
   }
+
+  .hamburger-menu {
+    display: block;
+  }
+
+  .to-top-btn {
+    display: none;
+  }
+
   .header__content {
-    padding: 18px 100px;
+    display: flex;
+    padding: 12px 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    width: 390px;
+
+    .header__logo {
+      font-size: 21px;
+    }
+
+    .header__search {
+      .search-bar {
+        width: 160px !important;
+        margin-left: -10px;
+        display: none;
+      }
+
+      .responsive {
+        display: block;
+      }
+
+      .search-icon {
+        left: 158px;
+      }
+    }
+
+    .header__action {
+      display: none;
+    }
+
+    .header__nav {
+      //display: none;
+      position: fixed;
+      inset: 0 50% 0 0;
+      width: 250px;
+      background-color: #fff;
+      z-index: 999;
+      flex-direction: column;
+      gap: 20px;
+      margin-left: 0;
+
+      &--overlay {
+        visibility: visible;
+        opacity: 1;
+        position: fixed;
+        inset: 0 0 0 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+      }
+    }
   }
-  .footer {
-    padding: 0 100px;
+
+  .hamburger-menu {
+    img {
+      width: 27px;
+      height: 27px;
+    }
   }
 }
 </style>

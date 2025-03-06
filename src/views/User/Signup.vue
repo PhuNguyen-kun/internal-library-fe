@@ -153,6 +153,7 @@ const callback: CallbackTypes.TokenResponseCallback = async (response) => {
 
   &__sub-title {
     margin-bottom: 50px;
+    font-weight: 400;
   }
 }
 

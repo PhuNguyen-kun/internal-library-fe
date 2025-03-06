@@ -2,7 +2,7 @@
   <div class="homepage__hero">
     <div class="homepage__hero--categories">
       <el-scrollbar>
-      <ul>
+      <ul class="category-sidebar">
         <li v-for="category in homepageStore.categories" :key="category.id" class="homepage__hero--items no-text-decoration">
          <router-link :to="'books?category=' + category.slug"> {{ category.name }}</router-link>
         </li>
@@ -298,5 +298,17 @@ onMounted( () => {
 :deep(.el-carousel__container) {
   height: 270px;
   margin-top: 5px;
+}
+
+ol, ul {
+   list-style: none;
+}
+
+.category-sidebar {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

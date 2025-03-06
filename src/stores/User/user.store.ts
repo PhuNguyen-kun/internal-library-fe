@@ -43,18 +43,18 @@ export const useUserStore = defineStore("user", () => {
     }
   };
 
-  const updateUserInfo = async () => {
+  const updateUserInfo = async (userData: any) => {
     try {
-      const response = await userService.updateUserInfo(userInfo.value);
+      const response = await userService.updateUserInfo(userData);
       userInfo.value = response.data;
       localStorage.setItem("userInfo", JSON.stringify(userInfo.value));
       notifySuccess("Cập nhật thông tin thành công!");
     } catch (error) {
-      console.error("Failed to update user info", error);
-      notifyError("Lỗi khi cập nhật thông tin người dùng!");
+      console.error("Lỗi khi cập nhật thông tin:", error);
+      notifyError("Có lỗi xảy ra khi cập nhật thông tin!");
+      throw error;
     }
   };
-
   const updatePassword = async (passwordData: any) => {
     try {
       const response = await userService.updatePassword(passwordData);

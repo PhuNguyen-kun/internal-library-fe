@@ -158,32 +158,6 @@ const handleDistrictChange = async (districtId: number) => {
   await userStore.fetchWards(districtId);
 };
 
-// const handleCheckout = async () => {
-//
-//   const orderData = {
-//     full_name: userStore.userInfo.full_name,
-//     phone_number: userStore.userInfo.phone_number,
-//     email: userStore.userInfo.email,
-//     province_id: userStore.userInfo.province_id,
-//     district_id: userStore.userInfo.district_id,
-//     ward_id: userStore.userInfo.ward_id,
-//     address: userStore.userInfo.address,
-//     items: cartStore.cart.map(item => ({
-//       book_id: item.book.id,
-//       quantity: item.quantity,
-//       return_date_due: item.return_date_due,
-//     })),
-//   };
-//
-//   try {
-//     await cartStore.checkoutCart(orderData);
-//     notifySuccess("Đơn mượn sách đã được tạo thành công!");
-//     router.push({ name: "borrowing-history" });
-//   } catch (error) {
-//     notifyError("Lỗi khi tạo đơn mượn sách!");
-//   }
-// };
-
 const handleCheckout = async () => {
   try {
     await (userForm.value as any).validate();

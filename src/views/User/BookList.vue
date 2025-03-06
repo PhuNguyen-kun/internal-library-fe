@@ -143,6 +143,10 @@ watchEffect(() => {
       font-size: 15px;
       font-weight: 400;
 
+      h2 {
+        font-weight: 400;
+      }
+
       .sort-options {
         display: flex;
         gap: 15px;

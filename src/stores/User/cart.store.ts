@@ -10,6 +10,7 @@ export const useCartStore = defineStore("cart", () => {
   const cart = ref<CartItem[]>([]);
   const cartItem = ref(null);
   const loading = ref(false);
+  const outOfStockItems = ref<number[]>([]);
 
   const fetchCart = async () => {
     try {
@@ -107,15 +108,37 @@ export const useCartStore = defineStore("cart", () => {
     }
   };
 
+  const checkStocks = async (items: { bookId: number; quantity: number }[]) => {
+    try {
+      const results = await Promise.all(
+        items.map(async (item) => {
+          const isAvailable = await cartService.checkStock(item.bookId, item.quantity);
+          return { bookId: item.bookId, isAvailable };
+        })
+      );
+
+      outOfStockItems.value = results
+        .filter(result => !result.isAvailable)
+        .map(result => result.bookId);
+
+      return outOfStockItems.value.length === 0;
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra stock:", error);
+      return false;
+    }
+  };
+
   return {
     cart,
     cartItem,
     loading,
+    outOfStockItems,
     fetchCart,
     fetchCartItem,
     addToCart,
     updateCart,
     removeCartItem,
     checkoutCart,
+    checkStocks,
   };
 });

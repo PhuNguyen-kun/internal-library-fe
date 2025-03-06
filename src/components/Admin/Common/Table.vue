@@ -25,7 +25,7 @@
         <slot :name="column.prop" :row="scope.row" :index="scope.$index"/>
       </template>
       <template v-else #default="scope" >
-        <span :class="{'is-line-clamp': column.lineClamp}" :title="scope.row[column.prop]" style="white-space: pre-wrap;" >{{ scope.row[column.prop] }}</span>
+        <span :class="{'is-line-clamp': column.lineClamp}" :title="scope.row[column.prop]" style="white-space: pre-wrap;" v-html="scope.row[column.prop]"></span>
       </template>
     </el-table-column>
   </el-table>

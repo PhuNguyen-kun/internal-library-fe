@@ -96,6 +96,7 @@ const authStore = useAuthStore();
 
   &__sub-title {
     margin-bottom: 50px;
+    font-weight: 400;
   }
 }
 

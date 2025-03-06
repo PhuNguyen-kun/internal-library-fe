@@ -35,7 +35,7 @@ const routeToVietnameseMap: Record<string, string> = {
   'profile': 'Hồ sơ',
   'forgot-password': 'Quên mật khẩu',
   'reset-password': 'Reset mật khẩu',
-  'Contact': 'Liên hệ',
+  'contact': 'Liên hệ',
 }
 
 const route = useRoute()

@@ -6,85 +6,164 @@
       require-asterisk-position="right"
       ref="userForm"
       :rules="formRules"
-    class="checkout__content--user-info"
+      :model="formData"
+      class="checkout__content--user-info"
     >
       <el-form-item label="Họ và tên">
-        <el-input v-model="userStore.userInfo.full_name"/>
+        <el-input v-model="userStore.userInfo.full_name" disabled/>
       </el-form-item>
-      <el-form-item label="Email">
-        <el-input v-model="userStore.userInfo.email"/>
-      </el-form-item>
-      <el-form-item label="Số điện thoại" prop="phone_number">
-        <el-input v-model="userStore.userInfo.phone_number"/>
-      </el-form-item>
-      <el-form-item label="Tỉnh" prop="province">
-        <el-select v-model="userStore.userInfo.province_id" @change="handleProvinceChange" placeholder="Chọn tỉnh">
-          <el-option
-            v-for="province in userStore.provinces"
-            :key="province.id"
-            :label="province.name"
-            :value="province.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Quận/Huyện" prop="district">
-        <el-select v-model="userStore.userInfo.district_id" @change="handleDistrictChange" placeholder="Chọn quận/huyện">
-          <el-option
-            v-for="district in userStore.districts"
-            :key="district.id"
-            :label="district.name"
-            :value="district.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Phường/Xã" prop="ward">
-        <el-select v-model="userStore.userInfo.ward_id" placeholder="Chọn phường/xã">
-          <el-option
-            v-for="ward in userStore.wards"
-            :key="ward.id"
-            :label="ward.name"
-            :value="ward.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Địa chỉ" prop="address">
-        <el-input v-model="userStore.userInfo.address" type="textarea"/>
-      </el-form-item>
+      <el-row gutter="50">
+        <el-col :span="12">
+          <el-form-item label="Email">
+            <el-input v-model="userStore.userInfo.email" disabled/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="Số điện thoại" prop="phone_number">
+            <el-input v-model="formData.phone_number"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row gutter="50">
+        <el-col :span="12">
+          <el-form-item label="Tỉnh" prop="province_id">
+            <el-select v-model="formData.province_id" @change="handleProvinceChange" placeholder="Chọn tỉnh">
+              <el-option
+                v-for="province in userStore.provinces"
+                :key="province.id"
+                :label="province.name"
+                :value="province.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Quận/Huyện" prop="district_id">
+            <el-select v-model="formData.district_id" @change="handleDistrictChange" placeholder="Chọn quận/huyện">
+              <el-option
+                v-for="district in userStore.districts"
+                :key="district.id"
+                :label="district.name"
+                :value="district.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Phường/Xã" prop="ward_id">
+            <el-select v-model="formData.ward_id" placeholder="Chọn phường/xã">
+              <el-option
+                v-for="ward in userStore.wards"
+                :key="ward.id"
+                :label="ward.name"
+                :value="ward.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="12">
+          <el-form-item label="Giới tính" prop="gender">
+            <el-select v-model="formData.gender" placeholder="Chọn giới tính">
+              <el-option label="Nam" :value="0"></el-option>
+              <el-option label="Nữ" :value="1"></el-option>
+              <el-option label="Khác" :value="2"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Địa chỉ" prop="address">
+            <el-input v-model="formData.address" type="textarea"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
       <div class="button-container">
-        <div @click="cancelChanges" class="cancel">Cancel</div>
+        <div @click="cancelChanges" class="cancel">Hủy thay đổi</div>
         <div class="user-btn" @click="updateUser">Lưu thay đổi</div>
       </div>
     </el-form>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import {onMounted, ref} from "vue";
 import {useUserStore} from "@/stores/User/user.store";
 
 const userStore = useUserStore();
+const userForm = ref(null);
+
+const formData = ref({
+  full_name: userStore.userInfo.full_name,
+  email: userStore.userInfo.email,
+  phone_number: userStore.userInfo.phone_number,
+  gender: userStore.userInfo.gender,
+  province_id: userStore.userInfo.province_id,
+  district_id: userStore.userInfo.district_id,
+  ward_id: userStore.userInfo.ward_id,
+  address: userStore.userInfo.address
+});
+
+const formRules = {
+  full_name: [{ required: true, message: "Họ và tên không được để trống", trigger: "blur" }],
+  email: [{ required: true, message: "Email không được để trống", trigger: "blur" }],
+  gender: [{ required: true, message: "Vui lòng chọn giới tính", trigger: "change" }],
+  phone_number: [
+    { required: true, message: "Số điện thoại không được để trống", trigger: "blur" },
+    { pattern: /^0\d{9}$/, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", trigger: "blur" }
+  ],
+  province_id: [{ required: true, message: "Vui lòng chọn tỉnh", trigger: "change" }],
+  district_id: [{ required: true, message: "Vui lòng chọn quận/huyện", trigger: "change" }],
+  ward_id: [{ required: true, message: "Vui lòng chọn phường/xã", trigger: "change" }],
+  address: [{ required: true, message: "Địa chỉ không được để trống", trigger: "blur" }],
+};
 
 const handleProvinceChange = async (provinceId: number) => {
-  userStore.userInfo.province = provinceId;
-  userStore.userInfo.district_id = null;
-  userStore.userInfo.ward_id = null;
+  formData.value.province_id = provinceId;
+  formData.value.district_id = null;
+  formData.value.ward_id = null;
   await userStore.fetchDistricts(provinceId);
 };
 
 const handleDistrictChange = async (districtId: number) => {
-  userStore.userInfo.district = districtId;
-  userStore.userInfo.ward_id = null;
+  formData.value.district_id = districtId;
+  formData.value.ward_id = null;
   await userStore.fetchWards(districtId);
 };
 
-const updateUser = async () => {
-  await userStore.updateUserInfo();
+const mapGenderToValue = (gender: string): number => {
+  switch (gender) {
+    case "Nam":
+      return 0;
+    case "Nữ":
+      return 1;
+    case "Khác":
+      return 2;
+    default:
+      return 0;
+  }
 };
 
+const updateUser = async () => {
+  try {
+    await (userForm.value as any).validate();
+
+    const payload = {
+      ...formData.value,
+      gender: mapGenderToValue(formData.value.gender),
+    };
+
+    await userStore.updateUserInfo(payload);
+  } catch (error) {
+    console.error("Lỗi khi cập nhật thông tin:", error);
+  }
+};
 const cancelChanges = () => {
-  userStore.fetchUserInfo();
+  formData.value = {
+    full_name: userStore.userInfo.full_name,
+    email: userStore.userInfo.email,
+    gender: userStore.userInfo.gender,
+    phone_number: userStore.userInfo.phone_number,
+    province_id: userStore.userInfo.province_id,
+    district_id: userStore.userInfo.district_id,
+    ward_id: userStore.userInfo.ward_id,
+    address: userStore.userInfo.address
+  };
 };
 
 onMounted(async () => {
@@ -141,10 +220,19 @@ onMounted(async () => {
   justify-content: end;
   gap: 30px;
   .cancel {
+    font-size: 14px;
     &:hover {
       cursor: pointer;
       color: var(--user-theme-color);
     }
   }
+}
+
+:deep(.el-select__wrapper) {
+  width: 100% !important;
+}
+
+:deep(.el-textarea__inner) {
+  height: 137px !important;
 }
 </style>
