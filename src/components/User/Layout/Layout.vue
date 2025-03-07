@@ -4,73 +4,108 @@
       <el-header class="header__container">
         <div class="header__announcement">
           Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!
-          <a href="#" class="shop-now">ShopNow</a>
+          <a class="shop-now" href="#">ShopNow</a>
         </div>
 
         <div class="header__content">
-          <div class="hamburger-menu">
-            <img src="@/assets/img/User/menu-icon.svg" alt="Menu">
+          <div class="hamburger-menu" @click="toggleMenu">
+            <img alt="Menu" src="@/assets/img/User/menu-icon.svg">
           </div>
 
-          <router-link to="/homepage" class="header__logo">
+          <router-link class="header__logo" to="/homepage">
             Kiai Library
           </router-link>
 
-          <nav class="header__nav" id="navbar">
+          <nav id="navbar" :class="{ active: isMenuOpen }" class="header__nav" @click="closeMenu">
             <router-link exact-active-class="active-link" to="/homepage">Trang chủ</router-link>
             <router-link exact-active-class="active-link" to="/contact">Liên hệ</router-link>
             <router-link exact-active-class="active-link" to="/about">Về chúng tôi</router-link>
-            <router-link v-if="!authStore.isLoggedIn" exact-active-class="active-link" to="/signup">Sign up</router-link>
+            <router-link v-if="!authStore.isLoggedIn" exact-active-class="active-link" to="/signup">Sign up
+            </router-link>
+
+            <!-- Mobile Actions -->
+            <div
+              v-if="authStore.isLoggedIn && !['/signup', '/login'].includes(route.path)"
+              class="header__action--mobile"
+            >
+              <router-link to="/wishlist" @click="closeMenu">
+                <el-badge :value="wishlistTotal" :offset="[-7, 3]" class="header__action--icon" color="#FF4500C7">
+                  <img alt="" src="@/assets/img/User/wishlist-icon.svg">
+                </el-badge>
+                <p>Danh sách yêu thích</p>
+              </router-link>
+
+              <router-link to="/cart" @click="closeMenu">
+                <el-badge :offset="[-3, 6]" :value="cartTotal" class="header__action--icon cart" color="#FF4500C7">
+                  <img alt="" src="@/assets/img/User/cart-icon.svg">
+                </el-badge>
+                <p>Giỏ hàng</p>
+              </router-link>
+              <div class="header__action--user">
+                <div class="header__action--user-each">
+                  <img alt="" src="@/assets/img/User/user-icon-white.svg">
+                  <router-link to="/profile">Quản lý tài khoản</router-link>
+                </div>
+                <div class="header__action--user-each">
+                  <img alt="" src="@/assets/img/User/borrow-history-icon.svg">
+                  <router-link to="/borrowing-history">Lịch sử mượn</router-link>
+                </div>
+                <div @click="logout" class="header__action--user-each">
+                  <img alt="" src="@/assets/img/User/logout-icon.svg">
+                  <a href="#">Đăng xuất</a>
+                </div>
+              </div>
+            </div>
           </nav>
-          <div class="header__nav--overlay"></div>
+          <div :class="{ active: isMenuOpen }" class="header__nav--overlay" @click="toggleMenu"></div>
 
           <div class="header__search">
             <input
-              type="text"
+              v-model="searchTerm"
               class="search-bar"
               placeholder="Tìm kiếm sách theo tiêu đề, tác giả, NXB"
-              v-model="searchTerm"
+              type="text"
               @keyup.enter="handleSearch"
             />
             <div class="search-icon">
-              <img src="@/assets/img/User/search-icon.svg" alt="">
+              <img alt="" src="@/assets/img/User/search-icon.svg">
             </div>
 
             <input
-              type="text"
+              v-model="searchTerm"
               class="search-bar responsive"
               placeholder="Tìm kiếm sách, tác giả"
-              v-model="searchTerm"
+              type="text"
               @keyup.enter="handleSearch"
             />
             <div class="search-icon responsive">
-              <img src="@/assets/img/User/search-icon.svg" alt="">
+              <img alt="" src="@/assets/img/User/search-icon.svg">
             </div>
 
-            <div class="header__action" v-if="authStore.isLoggedIn && !['/signup', '/login'].includes(route.path)">
-              <el-badge :value="wishlistTotal" color="#FF4500C7" class="header__action--icon">
-                <router-link to="/wishlist"><img src="@/assets/img/User/wishlist-icon.svg" alt=""></router-link>
+            <div v-if="authStore.isLoggedIn && !['/signup', '/login'].includes(route.path)" class="header__action">
+              <el-badge :value="wishlistTotal" class="header__action--icon" color="#FF4500C7">
+                <router-link to="/wishlist"><img alt="" src="@/assets/img/User/wishlist-icon.svg"></router-link>
               </el-badge>
-              <el-badge :value="cartTotal" :offset="[-3, 6]" color="#FF4500C7" class="header__action--icon" >
-                <router-link to="/cart"><img src="@/assets/img/User/cart-icon.svg" alt=""></router-link>
+              <el-badge :offset="[-3, 6]" :value="cartTotal" class="header__action--icon" color="#FF4500C7">
+                <router-link to="/cart"><img alt="" src="@/assets/img/User/cart-icon.svg"></router-link>
               </el-badge>
-              <div class="header__action--icon user-icon"
-                   :class="{ active: isDropdownActive }"
-                    @click="toggleDropdown"
+              <div :class="{ active: isDropdownActive }"
+                   class="header__action--icon user-icon"
+                   @click="toggleDropdown"
               >
-                <img src="@/assets/img/User/user-icon.svg" alt="" class="user-icon__img">
-                <div class="dropdown-menu" v-if="isDropdownActive">
+                <img alt="" class="user-icon__img" src="@/assets/img/User/user-icon.svg">
+                <div v-if="isDropdownActive" class="dropdown-menu">
                   <ul>
                     <li>
-                      <img src="@/assets/img/User/user-icon-white.svg" alt="">
+                      <img alt="" src="@/assets/img/User/user-icon-white.svg">
                       <router-link to="/profile">Quản lý tài khoản</router-link>
                     </li>
                     <li>
-                      <img src="@/assets/img/User/borrow-history-icon.svg" alt="">
+                      <img alt="" src="@/assets/img/User/borrow-history-icon.svg">
                       <router-link to="/borrowing-history">Lịch sử mượn</router-link>
                     </li>
                     <li @click="logout">
-                      <img src="@/assets/img/User/logout-icon.svg" alt="">
+                      <img alt="" src="@/assets/img/User/logout-icon.svg">
                       <a href="#">Đăng xuất</a>
                     </li>
                   </ul>
@@ -82,9 +117,10 @@
       </el-header>
 
       <el-main class="main">
-        <RouterView />
-        <div class="to-top-btn" :class="{ 'visible': isVisible }" :style="{ bottom: `${buttonBottom}px` }" @click="scrollToTop">
-          <img src="@/assets/img/User/totop-btn.svg" alt="">
+        <RouterView/>
+        <div :class="{ 'visible': isVisible }" :style="{ bottom: `${buttonBottom}px` }" class="to-top-btn"
+             @click="scrollToTop">
+          <img alt="" src="@/assets/img/User/totop-btn.svg">
         </div>
       </el-main>
 
@@ -96,10 +132,10 @@
             <p>Get 10% off your first order</p>
             <div class="subscribe-box">
               <el-input
-                class="input-email"
-                style="width: 217px"
-                placeholder="Enter your email"
                 :suffix-icon="SendIcon"
+                class="input-email"
+                placeholder="Enter your email"
+                style="width: 217px"
               />
             </div>
           </div>
@@ -140,16 +176,16 @@
 
             <div class="icon-socials">
               <a href="#"
-              ><img src="@/assets/img/User/Icon-Facebook.png" alt="" width="24" height="24"
+              ><img alt="" height="24" src="@/assets/img/User/Icon-Facebook.png" width="24"
               /></a>
               <a href="#"
-              ><img src="@/assets/img/User/Icon-Twitter.png" alt="" width="24" height="24"
+              ><img alt="" height="24" src="@/assets/img/User/Icon-Twitter.png" width="24"
               /></a>
               <a href="#"
-              ><img src="@/assets/img/User/icon-instagram.png" alt="" width="24" height="24"
+              ><img alt="" height="24" src="@/assets/img/User/icon-instagram.png" width="24"
               /></a>
               <a href="#"
-              ><img src="@/assets/img/User/Icon-Linkedin.png" alt="" width="24" height="24"
+              ><img alt="" height="24" src="@/assets/img/User/Icon-Linkedin.png" width="24"
               /></a>
             </div>
           </div>
@@ -164,11 +200,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import SendIcon from "@/components/User/Icons/SendIcon.vue";
-import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/User/auth.store';
-import { useCartStore } from '@/stores/User/cart.store';
+import {useRoute, useRouter} from 'vue-router';
+import {useAuthStore} from '@/stores/User/auth.store';
+import {useCartStore} from '@/stores/User/cart.store';
 import {useWishlistStore} from "@/stores/User/wishlist.store";
 
 const authStore = useAuthStore();
@@ -178,6 +214,14 @@ const route = useRoute();
 const router = useRouter();
 const isDropdownActive = ref(false);
 const searchTerm = ref("");
+const isMenuOpen = ref(false);
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
+const closeMenu = () => {
+  isMenuOpen.value = false;
+};
 
 const cartTotal = computed(() => {
   return cartStore.cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -188,7 +232,7 @@ const wishlistTotal = computed(() => {
 });
 
 const handleSearch = () => {
-  const newQuery = { ...route.query };
+  const newQuery = {...route.query};
 
   if (searchTerm.value.trim() === "") {
     delete newQuery.search_term;
@@ -196,7 +240,7 @@ const handleSearch = () => {
     newQuery.search_term = searchTerm.value.trim();
   }
 
-  router.push({ path: "/books", query: newQuery });
+  router.push({path: "/books", query: newQuery});
 };
 
 const toggleDropdown = (event: MouseEvent) => {
@@ -241,6 +285,20 @@ const checkScroll = () => {
 const logout = () => {
   authStore.logout();
 };
+
+const handleResize = () => {
+  if (window.innerWidth > 768) {
+    closeMenu();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
 document.addEventListener('click', closeDropdown);
 
@@ -296,12 +354,14 @@ onMounted(async () => {
     justify-content: center;
     align-items: center;
     gap: 18px;
+
     &--icon {
       cursor: pointer;
     }
 
     .user-icon {
       position: relative;
+
       .dropdown-menu {
         display: none;
         position: absolute;
@@ -357,6 +417,7 @@ onMounted(async () => {
           padding: 5px;
           filter: invert(1);
         }
+
         .dropdown-menu {
           display: block;
           animation: fadeIn 0.3s ease-in-out;
@@ -422,13 +483,42 @@ onMounted(async () => {
 
   &__nav {
     display: flex;
-    width: 330px;
     gap: 48px;
     margin-left: 60px;
+    @media (max-width: 768px) {
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      padding: 20px;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      background: white;
+
+      &.active {
+        transform: translateX(0);
+      }
+    }
 
     &--overlay {
       visibility: hidden;
       opacity: 0;
+      @media (max-width: 768px) {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        transition: opacity 0.3s;
+        opacity: 0;
+        visibility: hidden;
+
+        &.active {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
     }
 
     a {
@@ -488,6 +578,7 @@ onMounted(async () => {
   border-top: 1px solid #ff9168;
   background-color: rgba(255, 69, 0, 0.78);
 }
+
 .footer {
   height: fit-content;
   background-color: rgba(255, 69, 0, 0.78);
@@ -519,6 +610,7 @@ onMounted(async () => {
 
     li {
       padding-bottom: 16px;
+
       a {
         font-size: 14px;
         font-style: normal;
@@ -617,12 +709,19 @@ onMounted(async () => {
 .responsive-header {
   display: none;
 }
+
 .responsive {
   display: none;
 }
+
 .hamburger-menu {
   display: none;
 }
+
+.header__action--mobile {
+  display: none;
+}
+
 @media (max-width: 992px) {
   //.header__content {
   //  padding: 18px 50px !important;
@@ -672,17 +771,13 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .common-layout {
-    width: 430px !important;
-  }
-  .header__content {
-    padding: 18px 20px !important;
-    //display: none;
+    width: 100% !important;
   }
   .header__container {
-    width: 430px !important;
+    width: 100% !important;
   }
   .main {
-    padding: 113px 20px 70px 20px !important;
+    padding: 113px 10px 70px 10px !important;
   }
   .footer .container {
     flex-direction: column;
@@ -708,14 +803,14 @@ onMounted(async () => {
 
   .header__content {
     display: flex;
-    padding: 12px 20px;
+    padding: 12px 10px;
     align-items: center;
     justify-content: space-between;
     gap: 15px;
-    width: 390px;
 
     .header__logo {
       font-size: 21px;
+      margin-left: -40px;
     }
 
     .header__search {
@@ -749,13 +844,12 @@ onMounted(async () => {
       gap: 20px;
       margin-left: 0;
 
-      &--overlay {
-        visibility: visible;
-        opacity: 1;
-        position: fixed;
-        inset: 0 0 0 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 998;
+      a {
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 15px;
+        display: flex;
+        gap: 20px;
       }
     }
   }
@@ -764,6 +858,48 @@ onMounted(async () => {
     img {
       width: 27px;
       height: 27px;
+    }
+  }
+
+  .header__action--mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    border-top: 1px solid #ccc;
+    margin-top: 20px;
+    padding-top: 40px;
+  }
+  .header__action--icon:nth-of-type(2) {
+    margin-left: -5px;
+  }
+  .cart {
+    margin-left: -5px !important;
+    margin-right: 5px;
+  }
+  .header__action--icon {
+    width: 30px;
+  }
+  .header__action--user {
+    border-top: 1px solid #ccc;
+    padding-top: 25px;
+    margin-top: 10px;
+
+  }
+  .header__action--user-each {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 14px;
+
+    a {
+      margin-bottom: 14px;
+    }
+
+    img {
+      width: 27px;
+      margin-right: 10px;
+
+      filter: invert(1);
     }
   }
 }

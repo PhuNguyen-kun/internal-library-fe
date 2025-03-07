@@ -118,7 +118,7 @@ export const useBookStore = defineStore("book", () => {
     try {
       const response = await bookService.getRelatedBooks(slug);
       relatedBooks.value = response.data;
-      console.log(relatedBooks.value);
+      console.log("Related books:", relatedBooks.value);
     } catch (error) {
       console.error("Failed to fetch related books", error);
       throw error;

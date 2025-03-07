@@ -173,7 +173,7 @@ const handleCheckout = async () => {
 
     await cartStore.checkoutCart(orderData);
     notifySuccess("Đơn mượn sách đã được tạo thành công!");
-    router.push({ name: "borrowing-history" });
+    await router.push({name: "borrowing-history"});
   } catch (error) {
     console.log(error);
   }

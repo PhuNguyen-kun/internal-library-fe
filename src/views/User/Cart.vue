@@ -311,6 +311,10 @@ onMounted(() => {
     margin-top: 30px;
     box-shadow: 2px 2px 8px #efefef;
 
+    @media (max-width: 768px) {
+      padding: 10px 10px;
+    }
+
     div {
       font-size: 1rem;
       font-weight: 400;
@@ -333,6 +337,12 @@ onMounted(() => {
       display: flex;
       align-items: center;
       position: relative;
+
+      @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+        width: 120px;
+      }
     }
 
     &--stock {
@@ -396,6 +406,11 @@ onMounted(() => {
     border: 1.5px solid #000;
     border-radius: 5px;
     padding: 20px;
+
+    @media (max-width: 768px) {
+      width: auto;
+      margin-left: 0;
+    }
 
     .button {
       display: flex;
@@ -461,5 +476,11 @@ onMounted(() => {
 
 .cart__item.out-of-stock {
   border: 1px solid #ff4d4f;
+}
+
+:deep(.el-input) {
+  @media (max-width: 768px) {
+    max-width: 150px !important;
+  }
 }
 </style>

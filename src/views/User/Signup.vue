@@ -142,6 +142,11 @@ const callback: CallbackTypes.TokenResponseCallback = async (response) => {
   &__signup-form {
     flex: 1;
     padding: 0 40px;
+
+    @media (max-width: 768px) {
+      padding: 0 20px;
+      margin-left: -14px;
+    }
   }
 
   &__title {

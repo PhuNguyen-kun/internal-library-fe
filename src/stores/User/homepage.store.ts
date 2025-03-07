@@ -8,7 +8,7 @@ export const useHomepageStore = defineStore('homepage', () => {
     try {
       const response = await homepageService.getCategories();
       categories.value = response.data;
-      console.log(categories.value);
+      console.log("Category:", categories.value);
     } catch (error) {
       console.error('Failed to fetch categories', error);
       throw error;

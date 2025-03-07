@@ -172,7 +172,7 @@
       <div class="product-section__header">
         <div style="display: flex; align-items: center; gap: 10px">
           <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
-          <span class="product-section__label">Related books</span>
+          <span class="product-section__label">Gợi ý</span>
         </div>
         <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
           <h2 class="product-section__title">Các sản phẩm có liên quan</h2>
@@ -183,8 +183,16 @@
         </div>
       </div>
 
-      <el-carousel ref="carouselRef" arrow="never" class="" indicator-position="none">
+      <el-carousel ref="carouselRef" arrow="never" class="no-responsive" indicator-position="none">
         <el-carousel-item v-for="(group, index) in relatedBooksGroup" :key="index" class="no-text-decoration">
+          <div class="product-section__category">
+            <ProductList :books="bookStore.relatedBooks" />
+          </div>
+        </el-carousel-item>
+      </el-carousel>
+
+      <el-carousel ref="carouselRefForMobile" arrow="never" class="for-mobile" indicator-position="none">
+        <el-carousel-item v-for="(group, index) in relatedBooksGroupForMobile" :key="index" class="no-text-decoration">
           <div class="product-section__category">
             <ProductList :books="bookStore.relatedBooks" />
           </div>
@@ -197,7 +205,7 @@
 
 <script setup lang="ts">
 import TheBreadCrumb from '@/components/User/Common/TheBreadCrumb.vue'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useBookStore} from "@/stores/User/book.store";
 import {useWishlistStore} from "@/stores/User/wishlist.store";
 import { useRoute, useRouter } from 'vue-router'
@@ -211,6 +219,7 @@ const bookStore = useBookStore()
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const carouselRef = ref()
+const carouselRefForMobile = ref()
 const num = ref(1);
 const router = useRouter()
 const barColor = 'rgba(255,69,0,0.63)'
@@ -254,6 +263,7 @@ const handleSubmitReview = async () => {
 };
 
 const booksPerSlide = 4
+const booksPerSlideForMobile = 2
 const relatedBooksGroup = computed(() => {
   const groups = []
   for (let i = 0; i < bookStore.relatedBooks.length; i += booksPerSlide) {
@@ -262,12 +272,29 @@ const relatedBooksGroup = computed(() => {
   console.log('relatedBooksGroup:', groups)
   return groups
 })
+const relatedBooksGroupForMobile = computed(() => {
+  const groups = []
+  for (let i = 0; i < bookStore.relatedBooks.length; i += booksPerSlideForMobile) {
+    groups.push(bookStore.relatedBooks.slice(i, i + booksPerSlideForMobile))
+  }
+  console.log('relatedBooksGroup:', groups)
+  return groups
+})
 
 const prevSlide = () => {
-  carouselRef.value?.prev()
+  if (window.innerWidth > 768) {
+    carouselRef.value?.prev()
+  } else {
+    carouselRefForMobile.value?.prev()
+  }
 }
+
 const nextSlide = () => {
-  carouselRef.value?.next()
+  if (window.innerWidth > 768) {
+    carouselRef.value?.next()
+  } else {
+    carouselRefForMobile.value?.next()
+  }
 }
 
 const getStarCount = (star: number) => {
@@ -315,14 +342,27 @@ onMounted(async () => {
     align-items: center;
     margin-top: 50px;
     height: 100%;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
   }
   &__images {
     display: flex;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
 
     .additional-images {
       display: flex;
       flex-direction: column;
       gap: 15px;
+
+      @media (max-width: 768px) {
+        flex-direction: row;
+        order: 2;
+      }
     }
 
     .additional-image {
@@ -332,6 +372,13 @@ onMounted(async () => {
       padding: 15px 30px;
       background-color: #f5f5f5;
       border-radius: 5px;
+
+      @media (max-width: 768px) {
+        width: 61px;
+        height: 80px;
+        padding: 10px 15px;
+        margin-bottom: 30px;
+      }
     }
 
     .main-image {
@@ -342,6 +389,12 @@ onMounted(async () => {
       background-color: #f5f5f5;
       border-radius: 5px;
       object-fit: cover;
+
+      @media (max-width: 768px) {
+        width: 290px;
+        height: 400px;
+        margin: -15px 0 15px 0;
+      }
     }
   }
 
@@ -511,6 +564,10 @@ onMounted(async () => {
         display: flex;
         gap: 15px;
         padding: 23px 30px;
+
+        @media (max-width: 768px) {
+          padding: 20px 15px 15px 15px;
+        }
       }
 
       .container:last-of-type {
@@ -591,6 +648,11 @@ onMounted(async () => {
   padding: 20px 40px 28px 40px;
   align-items: center;
   border-bottom: 1px solid #ccc;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 20px;
+  }
 }
 
 .average-rating {
@@ -599,9 +661,18 @@ onMounted(async () => {
   align-items: center;
   flex: 0.3;
   padding-right: 60px;
+
+  @media (max-width: 768px) {
+    padding-right: 0;
+  }
+
   h3 {
     font-size: 60px;
     font-weight: 500;
+
+    @media (max-width: 768px) {
+      font-size: 43px;
+    }
   }
 
   .total-reviews {
@@ -609,6 +680,11 @@ onMounted(async () => {
     font-weight: 500;
     color: #858585;
     margin-top: 6px;
+
+    @media (max-width: 768px) {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
   }
 }
 
@@ -630,6 +706,28 @@ onMounted(async () => {
 
 .star-distribution {
   flex: 1;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0;
+
+    :deep(.el-progress--without-text) {
+      height: 10px;
+      width: 260px !important ;
+    }
+
+    :deep(.el-progress-bar__outer) {
+      width: 260px !important;
+    }
+    .count {
+      flex: 1;
+    }
+
+    :deep(.bar-container) {
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  }
 }
 
 .average-star {
@@ -639,10 +737,18 @@ onMounted(async () => {
 
 :deep(.product-card) {
   width: 268px;
+
+  @media (max-width: 768px) {
+    width: 48%;
+  }
 }
 
 :deep(.el-carousel__container) {
   height: 390px;
+
+  @media (max-width: 768px) {
+    height: 3900px;
+  }
 }
 
 :deep(.product-section__category) {
@@ -651,6 +757,12 @@ onMounted(async () => {
 
 :deep(.product-section__label) {
   font-size: 17px;
+}
+
+@media (max-width: 768px) {
+  :deep(.is-bordered-label) {
+    width: 180px !important;
+  }
 }
 </style>
 

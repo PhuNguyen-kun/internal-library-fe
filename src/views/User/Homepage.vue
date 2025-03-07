@@ -25,13 +25,14 @@
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
         <span class="product-section__label">Sách hot</span>
       </div>
-      <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
+      <div class="product-section__header--title">
         <h2 class="product-section__title">Top các sách được mượn nhiều nhất</h2>
-        <router-link to="/books?sort=most_borrowed" class="user-btn">Xem tất cả</router-link>
+        <router-link to="/books?sort=most_borrowed" class="user-btn show-all">Xem tất cả</router-link>
       </div>
     </div>
 
     <ProductList :books="bookStore.topBorrowedBooks" />
+    <router-link to="/books?sort=most_borrowed" class="user-btn show-all">Xem tất cả</router-link>
   </div>
 
   <!-- Category row -->
@@ -39,7 +40,7 @@
     <div class="product-section__header">
       <div style="display: flex; align-items: center; gap: 10px">
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
-        <span class="product-section__label">Categories</span>
+        <span class="product-section__label">Danh mục</span>
       </div>
       <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
         <h2 class="product-section__title">Các danh mục sách</h2>
@@ -50,8 +51,19 @@
       </div>
     </div>
 
-    <el-carousel ref="carouselRef" arrow="never">
+    <el-carousel ref="carouselRef" arrow="never" class="no-responsive">
       <el-carousel-item v-for="(group, index) in categoryGroups" :key="index" class="no-text-decoration">
+        <div class="product-section__category">
+          <router-link :to="'/books?category=' + category.slug" class="category-card" v-for="(category, idx) in group" :key="category.id">
+            <img :src="categoryImages[idx % categoryImages.length]" alt="Category image" class="category-image">
+            <span>{{ category.name }}</span>
+          </router-link>
+        </div>
+      </el-carousel-item>
+    </el-carousel>
+
+    <el-carousel ref="carouselRefForMobile" arrow="never" class="for-mobile">
+      <el-carousel-item v-for="(group, index) in categoryGroupsForMobile" :key="index" class="no-text-decoration">
         <div class="product-section__category">
           <router-link :to="'/books?category=' + category.slug" class="category-card" v-for="(category, idx) in group" :key="category.id">
             <img :src="categoryImages[idx % categoryImages.length]" alt="Category image" class="category-image">
@@ -70,10 +82,10 @@
     <div class="product-section__header">
       <div style="display: flex; align-items: center; gap: 10px">
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
-        <span class="product-section__label">All products</span>
+        <span class="product-section__label">Sản phẩm</span>
       </div>
       <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
-        <h2 class="product-section__title">Khám phá tất cả sản phẩm</h2>
+        <h2 class="product-section__title">Khám phá tất cả sách</h2>
         <router-link :to="'/books'" class="user-btn">Xem tất cả</router-link>
       </div>
     </div>
@@ -147,8 +159,11 @@ const homepageStore = useHomepageStore();
 const cartStore = useCartStore();
 const bookStore = useBookStore();
 const wishlistStore = useWishlistStore();
-const categoriesPerPage = 6
+const categoriesPerPage = 6;
+const categoriesPerPageForMobile = 3
+
 const carouselRef = ref()
+const carouselRefForMobile = ref()
 const first8Books = computed(() => bookStore.books.slice(0, 8))
 const firstRows = computed(() => first8Books.value.slice(0, 4))
 const secondRows = computed(() => first8Books.value.slice(4, 8))
@@ -177,11 +192,28 @@ const categoryGroups = computed(() => {
   return groups
 })
 
+const categoryGroupsForMobile = computed(() => {
+  const groups = []
+  for (let i = 0; i < homepageStore.categories.length; i += categoriesPerPageForMobile) {
+    groups.push(homepageStore.categories.slice(i, i + categoriesPerPageForMobile))
+  }
+  return groups
+})
+
 const prevSlide = () => {
-  carouselRef.value?.prev()
+  if (window.innerWidth > 768) {
+    carouselRef.value?.prev()
+  } else {
+    carouselRefForMobile.value?.prev()
+  }
 }
+
 const nextSlide = () => {
-  carouselRef.value?.next()
+  if (window.innerWidth > 768) {
+    carouselRef.value?.next()
+  } else {
+    carouselRefForMobile.value?.next()
+  }
 }
 
 const addToCart = async (book: any) => {
@@ -254,6 +286,10 @@ onMounted( () => {
   &__hero {
     display: flex;
     justify-content: space-between;
+    @media (max-width: 768px) {
+      margin-bottom: -140px;
+      margin-top: -30px;
+    }
 
     &--categories {
       padding-top: 20px;
@@ -262,6 +298,10 @@ onMounted( () => {
       align-items: center;
       border-right: 1px solid #ddd;
       height: 380px;
+
+      @media (max-width: 768px) {
+        border: none;
+      }
     }
 
     &--items {
@@ -282,10 +322,20 @@ onMounted( () => {
       margin-top: 30px;
       margin-left: 50px;
 
+      @media (max-width: 768px) {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0;
+      }
+
       .carousel-image {
         height: 344px;
         width: 100%;
         object-fit: cover;
+
+        @media (max-width: 768px) {
+          height: 270px;
+        }
       }
     }
   }
@@ -310,5 +360,9 @@ ol, ul {
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 </style>

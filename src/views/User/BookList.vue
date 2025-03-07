@@ -56,6 +56,145 @@
       </div>
     </div>
   </div>
+
+  <div class="filter-button" @click="toggleFilter">
+    <el-icon class="icon"><Filter /></el-icon>
+  </div>
+
+  <!-- Cập nhật filter-sidebar -->
+  <div class="filter-sidebar" :class="{ active: isFilterOpen }">
+    <!-- Thêm nút đóng mobile -->
+    <div class="close-btn" @click="toggleFilter">
+      <el-icon><Close /></el-icon>
+    </div>
+
+    <!-- Di chuyển filter section vào đây -->
+    <div class="mobile-filter-section">
+      <h2>Sắp xếp theo:</h2>
+      <div class="sort-options">
+        <label class="sort-label" :class="{ 'active': selectedSort === 'most_borrowed'}">
+          <input
+            type="checkbox"
+            value="most_borrowed"
+            :checked="selectedSort === 'most_borrowed'"
+            @change="toggleSort('most_borrowed')"
+          />
+          Được mượn nhiều nhất
+        </label>
+        <label class="sort-label" :class="{ 'active': selectedSort === 'most_loved'}">
+          <input
+            type="checkbox"
+            value="most_loved"
+            :checked="selectedSort === 'most_loved'"
+            @change="toggleSort('most_loved')"
+          />
+          Được yêu thích nhất
+        </label>
+        <label class="sort-label" :class="{ 'active': selectedSort === 'ratings' }">
+          <input
+            type="checkbox"
+            value="ratings"
+            :checked="selectedSort === 'ratings'"
+            @change="toggleSort('ratings')"
+          />
+          Được đánh giá cao
+        </label>
+      </div>
+    </div>
+
+    <!-- Di chuyển sidebar vào đây -->
+    <div class="mobile-sidebar">
+      <div class="sidebar">
+        <!-- Danh mục -->
+        <div class="sidebar__item">
+          <div class="sidebar__item--title">
+            <el-icon class="sidebar-icon"><Grid /></el-icon>
+            <span>Danh mục</span>
+          </div>
+          <div class="sidebar__item--content">
+            <el-scrollbar ref="scrollbarRef" height="400px">
+              <ul>
+                <li
+                  v-for="category in bookStore.categories"
+                  :key="category.id"
+                  ref="categoryRefs"
+                >
+                  <label
+                    :class="{ 'active': selectedCategory === category.slug }"
+                    :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="category.slug"
+                      :checked="selectedCategory === category.slug"
+                      @change="toggleFilter('category', category.slug)"
+                    />
+                    {{ category.name }}
+                  </label>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </div>
+
+        <!-- Tác giả -->
+        <div class="sidebar__item">
+          <div class="sidebar__item--title">
+            <el-icon class="sidebar-icon"><StarFilled /></el-icon>
+            <span>Tác giả</span>
+          </div>
+          <div class="sidebar__item--content">
+            <el-scrollbar height="400px">
+              <ul>
+                <li v-for="author in bookStore.authors" :key="author.id">
+                  <label :class="{ 'active': selectedAuthor === author.slug }">
+                    <input
+                      type="checkbox"
+                      :value="author.slug"
+                      :checked="selectedAuthor === author.slug"
+                      @change="toggleFilter('author', author.slug)"
+                    />
+                    {{ author.name }}
+                  </label>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </div>
+
+        <!-- Nhà xuất bản -->
+        <div class="sidebar__item">
+          <div class="sidebar__item--title">
+            <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
+            <span>Nhà xuất bản</span>
+          </div>
+          <div class="sidebar__item--content">
+            <el-scrollbar height="400px">
+              <ul>
+                <li v-for="publisher in bookStore.publishers" :key="publisher.id">
+                  <label :class="{ 'active': selectedPublisher === publisher.slug }">
+                    <input
+                      type="checkbox"
+                      :value="publisher.slug"
+                      :checked="selectedPublisher === publisher.slug"
+                      @change="toggleFilter('publisher', publisher.slug)"
+                    />
+                    {{ publisher.name }}
+                  </label>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="filter-sidebar__overlay"
+    :class="{ active: isFilterOpen }"
+    @click="toggleFilter"
+  ></div>
 </template>
 
 <script setup lang="ts">
@@ -71,6 +210,14 @@ const bookStore = useBookStore();
 const route = useRoute();
 const router = useRouter();
 const selectedSort = ref<string>();
+const isFilterOpen = ref(false);
+const toggleFilter = () => {
+  isFilterOpen.value = !isFilterOpen.value;
+};
+
+const closeFilter = () => {
+  isFilterOpen.value = false;
+}
 
 const toggleSort = (sortType: string) => {
   selectedSort.value = selectedSort.value === sortType ? undefined : sortType;
@@ -121,6 +268,11 @@ watchEffect(() => {
     justify-content: space-between;
     gap: 30px;
     margin-top: 40px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      margin-top: 10px;
+    }
   }
 
   &__sidebar {
@@ -129,6 +281,10 @@ watchEffect(() => {
 
   &__content {
     width: calc(100% - 17rem);
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
 
     .title {
       font-size: 25px;
@@ -142,6 +298,10 @@ watchEffect(() => {
       gap: 20px;
       font-size: 15px;
       font-weight: 400;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
 
       h2 {
         font-weight: 400;
@@ -212,25 +372,46 @@ watchEffect(() => {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
+
+    @media (max-width: 768px) {
+      gap: 20px;
+    }
   }
 
   :deep(.product-card) {
     width: calc(32% - 20px);
+
+    @media (max-width: 768px) {
+      width: calc(52% - 20px);
+    }
   }
 
   :deep(.product-card__image) {
     height: 250px;
+    @media (max-width: 768px) {
+      height: 200px;
+    }
 
     img {
       width: 65%;
       height: 86%;
       object-fit: cover;
+      @media (max-width: 768px) {
+        width: 60%;
+        height: 80%;
+        object-fit: cover;
+      }
     }
   }
 
   :deep(.product-card__actions) {
     top: 6px;
     right: 6px;
+
+    @media (max-width: 768px) {
+      top: 5px;
+      right: 3px;
+    }
 
     .action-buttons {
       width: 5px;
@@ -244,6 +425,113 @@ watchEffect(() => {
 
   :deep(.product-card__add-to-cart img) {
     width: 25px;
+  }
+}
+
+.filter-button {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background-color: #FF4500FF;
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2);
+
+    .icon {
+      color: white;
+    }
+  }
+}
+
+.filter-sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  left: auto;
+  width: 70%;
+  height: 100vh;
+  background: white;
+  transition: right 0.3s ease;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 99999;
+
+  &.active {
+    right: 0;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+    right: -100%;
+    transform: none;
+    transition: right 0.3s ease;
+
+    &.active {
+      right: 0;
+      transform: none;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      padding: 8px;
+      cursor: pointer;
+
+      .el-icon {
+        font-size: 24px;
+        color: #666;
+      }
+    }
+
+    .mobile-filter-section {
+      margin-top: 30px;
+
+      h2 {
+        font-weight: 500;
+        font-size: 16px;
+      }
+    }
+
+    .sort-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .mobile-sidebar {
+      display: block;
+      height: 500px !important;
+    }
+  }
+}
+
+.filter-sidebar__overlay {
+  visibility: hidden;
+  opacity: 0;
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 9999;
+
+    &.active {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 }
 </style>

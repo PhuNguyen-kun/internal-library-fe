@@ -47,34 +47,32 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+// axiosInstance.ts
 axiosInstance.interceptors.response.use(
   (response) => {
     loadingStore.finishLoading();
     return response;
   },
   async (error) => {
-    console.error("Axios error:", error.response);
+    loadingStore.finishLoading(); // Luôn dừng loading khi có lỗi
 
-    const adminToken = localStorage.getItem("admin_access_token");
-    const userToken = localStorage.getItem("user_access_token");
+    // Xử lý lỗi 401
+    if (error.response?.status === 401) {
+      // Xóa token cũ
+      localStorage.removeItem('user_access_token');
 
-    if (error.response && error.response.status === 401) {
-      const url = error.config.url;
+      // Chỉ chuyển hướng nếu request thuộc API yêu cầu auth
+      const isAuthRequiredApi = error.config.url.includes('/api/user/cart') ||
+        error.config.url.includes('/api/user/wishlist') ||
+        error.config.url.includes('/api/user/info');
 
-      if (url.includes("/api/user/")) {
-        window.alert("Your session has expired. Please log in again.");
-        localStorage.removeItem("user_access_token");
-        await router.replace("/homepage");
-      }
-
-      if (url.includes("/api/admin/") && userToken) {
-        console.warn("Ignoring 401 error from admin API for user.");
-        return Promise.reject(error);
+      if (isAuthRequiredApi && !window.location.pathname.includes('/signup')) {
+        await router.replace('/signup');
+        window.alert('Vui lòng đăng nhập để tiếp tục');
       }
     }
 
     return Promise.reject(error);
   }
 );
-
 export default axiosInstance;

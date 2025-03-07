@@ -36,6 +36,7 @@ const routeToVietnameseMap: Record<string, string> = {
   'forgot-password': 'Quên mật khẩu',
   'reset-password': 'Reset mật khẩu',
   'contact': 'Liên hệ',
+  'about': 'Về chúng tôi',
 }
 
 const route = useRoute()
@@ -90,6 +91,11 @@ const breadcrumbItems = computed(() => {
 .layout {
   padding-top: 40px;
   border: none !important;
+
+  @media (max-width: 768px) {
+    padding-top: 0;
+    margin-top: -20px;
+  }
 }
 a {
   &:hover {

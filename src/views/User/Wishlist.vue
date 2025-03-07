@@ -44,7 +44,7 @@
   <el-dialog
     v-model="isDeleteDialogVisible"
     title="Xác nhận xóa"
-    width="30%"
+    width="45%"
     center
     top="20vh"
   >
@@ -114,6 +114,17 @@ onMounted(() => {
     justify-content: space-between;
     font-size: 16px;
     margin-top: 30px;
+
+    @media (max-width: 768px) {
+      display: flex;
+
+      .user-white-btn {
+        width: 100px;
+        text-align: center;
+        line-height: 18px;
+        padding: 5px 15px;
+      }
+    }
   }
 }
 
@@ -124,6 +135,10 @@ onMounted(() => {
 
   .product-card {
     width: calc(25% - 30px);
+
+    @media (max-width: 768px) {
+      width: calc(55% - 30px);
+    }
   }
 }
 

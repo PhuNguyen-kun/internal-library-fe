@@ -151,6 +151,10 @@ watch(selectedCategory, () => {
 
 <style lang="scss" scoped>
 .sidebar {
+  @media (max-width: 768px) {
+    display: none;
+  }
+
   &__item {
     margin-bottom: 30px;
     border: 1px solid #ccc;
@@ -180,6 +184,7 @@ watch(selectedCategory, () => {
         padding: 0;
 
         li {
+          list-style: none;
           margin: 1px 15px;
           display: flex;
           align-items: center;

@@ -80,11 +80,19 @@ const authStore = useAuthStore();
     img {
       width: 90%;
     }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &__signup-form {
     flex: 1;
     padding: 0 40px;
+
+      @media (max-width: 768px) {
+        padding: 0 20px;
+    }
   }
 
   &__title {
