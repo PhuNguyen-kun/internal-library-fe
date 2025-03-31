@@ -8,9 +8,26 @@
           v-model="userStore.searchTerm"
           class="admin-page__search-input"
           clearable
-          placeholder="Tìm kiếm người dùng theo họ tên, email"
+          placeholder="Tìm kiếm người dùng theo họ tên, email, mã nhân viên"
           @change="handleSearch"
         />
+
+        <el-select
+          v-model="userStore.selectedStatus"
+          placeholder="Lọc theo trạng thái"
+          multiple
+          clearable
+          collapse-tags
+          collapse-tags-tooltip
+          class="filter-select"
+        >
+          <el-option
+            v-for="status in statusOptions"
+            :key="status.value"
+            :label="status.label"
+            :value="status.value"
+          />
+        </el-select>
 
         <Button class=" btn--primary" @click="handleSearch">
           <el-icon class="icon--nicer">
@@ -31,7 +48,7 @@
            @selection-change="handleSelectionChange">
       <template #status="{ row }">
         <el-tag :type="getStatusTagType(row.status).type" :effect="getStatusTagType(row.status).effect" round>
-          {{ row.status }}
+          {{ getStatusLabel(row.status) }}
         </el-tag>
       </template>
 
@@ -93,8 +110,8 @@
         </el-form-item>
         <el-form-item label="Trạng thái" prop="status">
           <el-radio-group v-model="user.status">
-            <el-radio label="Active">Active</el-radio>
-            <el-radio label="Inactive">In active</el-radio>
+            <el-radio label="Active">Hoạt động</el-radio>
+            <el-radio label="Inactive">Bị chặn</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -135,14 +152,24 @@ const userStore = useUserStore();
 const fetchLoading = ref<boolean>(false);
 const columns = [
   {prop: "full_name", label: "Tên người dùng", width: 250, type: "string", fixed: "left"},
+  {prop: "employee_code", label: "Mã NV", width: 150},
   {prop: "email", label: "Email", width: 280, type: "string"},
   {prop: "phone_number", label: "Số điện thoại", width: 170, type: "string"},
   {prop: "gender", label: "Giới tính", width: 120, type: "string", align: "center"},
   {prop: "birth_date", label: "Ngày sinh", width: 200, type: "string", align: "center"},
   {prop: "address", label: "Địa chỉ", width: 300, type: "string", lineClamp: 2},
-  {prop: "status", label: "Trạng thái", width: 170, type: "string"},
+  {prop: "status", label: "Trạng thái", width: 120, type: "string", fixed: "right"},
   {prop: "actions", label: "Hành động", width: 125, type: "string", fixed: "right"}
 ];
+
+const getStatusLabel = (status: string) => {
+  if (status === 'Inactive') {
+    return 'Bị chặn';
+  } else if (status === 'Active') {
+    return 'Hoạt động';
+  }
+  return status;
+};
 
 const formRules = {
   full_name: [
@@ -185,7 +212,8 @@ const user = reactive({
   gender: "",
   birth_date: "",
   address: "",
-  status: ""
+  status: "",
+  employee_code: ""
 });
 
 const getStatusTagType = (status: string): { type: string, effect: string } => {
@@ -276,6 +304,16 @@ const confirmBlockSelectedCategories = async () => {
   blockSelectedConfirmVisible.value = false;
 };
 
+const statusOptions = [
+  { label: 'Bị chặn', value: '0' },
+  { label: 'Hoạt động', value: '1' }
+];
+
+const handleFilter = () => {
+  userStore.pagination.current_page = 1;
+  userStore.fetchUsers();
+};
+
 onMounted(() => {
   userStore.fetchUsers();
 });
@@ -299,3 +337,21 @@ watch(isModalVisible, (value) => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+.admin-page__search-input {
+  width: 100%;
+}
+
+.admin-page__search-container {
+  width: 610px;
+}
+
+.filter-select {
+  width: 310px !important;
+}
+
+:deep(.el-select__wrapper) {
+  height: 37px;
+}
+</style>

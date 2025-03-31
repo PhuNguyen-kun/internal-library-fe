@@ -6,7 +6,7 @@
       <div class="admin-page__search-container">
         <el-input
           v-model="searchTerm"
-          placeholder="Tìm kiếm nhân viên theo tên danh mục"
+          placeholder="Tìm kiếm theo tên danh mục"
           class="admin-page__search-input"
           @change="handleSearch"
           clearable
@@ -22,7 +22,7 @@
         <Button class="btn btn--danger" v-if="selectedRows.length" @click="deleteSelectedCategories"
         >
           <el-icon class="btn--nicer">
-            <Delete/>
+            <Delete />
           </el-icon>
           <span>Xóa các mục đã chọn</span>
         </Button>
@@ -275,7 +275,7 @@ const confirmDelete = async () => {
       notifySuccess('Danh mục được xóa thành công');
       await fetchCategories();
     } catch (error) {
-      notifyError('Xóa thất bại!')
+      notifyError('Không thể xóa vì tồn tại sách thuộc danh mục này!');
     } finally {
       deleteConfirmVisible.value = false;
     }
@@ -303,7 +303,7 @@ const confirmDeleteSelectedCategories = async () => {
     notifySuccess('Danh mục được xóa thành công');
     await fetchCategories();
   } catch (error) {
-    notifyError('Xóa danh mục thất bại!');
+    notifyError('Không thể xóa vì tồn tại sách thuộc danh mục này!');
     console.error('Error deleting selected categories:', error);
   } finally {
     deleteSelectedConfirmVisible.value = false;

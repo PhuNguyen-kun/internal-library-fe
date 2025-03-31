@@ -109,7 +109,11 @@ const handleChangePassword = async () => {
 
 .container {
   padding: 40px 60px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.06);
+
+  @media (max-width: 768px) {
+    padding: 15px 10px;
+  }
 }
 
 .title {
@@ -117,6 +121,10 @@ const handleChangePassword = async () => {
   font-size: 17px;
   font-weight: 500;
   margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .button-container {

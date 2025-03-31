@@ -39,7 +39,7 @@ const notifyError = (message: string, title = 'Có lỗi xảy ra') => {
 const message = (message: string) => {
   ElMessage({
     message: message,
-    offset: 120
+    offset: 90
   })
 }
 
@@ -47,7 +47,7 @@ const messageSuccess = (message: string) => {
   ElMessage({
     message: message,
     type: 'success',
-    offset: 120
+    offset: 90
   })
 }
 
@@ -55,7 +55,7 @@ const messageError = (message: string, title = 'Error') => {
   ElMessage({
     message: message,
     type: 'error',
-    offset: 120
+    offset: 90
   })
 }
 

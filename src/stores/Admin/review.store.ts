@@ -18,16 +18,21 @@ export const useReviewStore = defineStore('review', () => {
   const formError = ref<string>('');
   const loading = ref<boolean>(false);
   const selectedReview = ref<Review | null>(null);
+  const selectedStars = ref<number[]>([]);
+  const selectedStatus = ref<number[]>([]);
 
   const fetchReviews = async () => {
     try {
       loading.value = true;
-      const response = await reviewService.getReviews(
-        searchTerm.value.trim(),
-        pagination.per_page,
-        pagination.current_page
-      );
-      reviews.value = response.data
+      const response = await reviewService.getReviews({
+        search_term: searchTerm.value.trim(),
+        stars: selectedStars.value,
+        status: selectedStatus.value,
+        page: pagination.current_page,
+        per_page: pagination.per_page
+      });
+
+      reviews.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
       loading.value = false;
@@ -73,7 +78,7 @@ export const useReviewStore = defineStore('review', () => {
     Pending: 0,
     Approved: 1,
     Rejected: 2,
-  };
+  } as any;
 
   const updateMultipleReviews = async (ids: number[], status: string) => {
     try {
@@ -104,6 +109,8 @@ export const useReviewStore = defineStore('review', () => {
     loading,
     selectedReview,
     searchTerm,
+    selectedStars,
+    selectedStatus,
     createReview,
     updateReview,
     fetchReviews,

@@ -8,7 +8,7 @@
           v-model="publisherStore.searchTerm"
           class="admin-page__search-input"
           clearable
-          placeholder="Tìm kiếm nhà xuất bản theo họ tên"
+          placeholder="Tìm kiếm theo tên NXB"
           @change="handleSearch"
         />
 

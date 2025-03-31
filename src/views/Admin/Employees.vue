@@ -157,12 +157,13 @@
         class="upload-demo"
         drag
         multiple
+        accept=".csv, .xlsx"
       >
         <el-icon class="el-icon--upload">
           <upload-filled/>
         </el-icon>
         <div class="el-upload__text">
-          Drop file here or <em>click to upload</em>
+          Kéo file vào đây <em>hoặc ấn để tải lên</em>
         </div>
         <template #tip>
           <div class="el-upload__tip">

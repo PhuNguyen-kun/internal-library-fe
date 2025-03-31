@@ -56,8 +56,8 @@ export const useCartStore = defineStore("cart", () => {
         return false;
       }
       const response = await cartService.addToCart(bookId, quantity);
+      notifySuccess("Sách đã được thêm vào giỏ hàng!");
       console.log("Sách đã được thêm vào giỏ hàng:", response);
-      notifySuccess("Sách đã được thêm vào giỏ hàng");
       await fetchCart();
     } catch (error) {
       console.error("Failed to add to cart", error);

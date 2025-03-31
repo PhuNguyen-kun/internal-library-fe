@@ -7,4 +7,5 @@ export interface User {
   birth_date: string;
   address: string;
   status: string;
+  employee_code: string;
 }

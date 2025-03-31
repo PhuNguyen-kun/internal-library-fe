@@ -8,9 +8,43 @@
           v-model="reviewStore.searchTerm"
           class="admin-page__search-input"
           clearable
-          placeholder="Tìm kiếm đánh giá theo tên sách, người đánh giá, trạng thái"
+          placeholder="Tìm kiếm đánh giá theo tên sách, người đánh giá"
           @change="handleSearch"
         />
+
+        <el-select
+          v-model="reviewStore.selectedStars"
+          placeholder="Lọc theo sao"
+          multiple
+          clearable
+          collapse-tags
+          collapse-tags-tooltip
+          :max-collapse-tags="2"
+          class="star-filter"
+        >
+          <el-option
+            v-for="star in 5"
+            :key="star"
+            :label="`${star} ⭐`"
+            :value="star"
+          />
+        </el-select>
+
+        <el-select
+          v-model="reviewStore.selectedStatus"
+          placeholder="Lọc theo trạng thái"
+          multiple
+          clearable
+          collapse-tags
+          collapse-tags-tooltip
+        >
+          <el-option
+            v-for="status in statusOptions"
+            :key="status.value"
+            :label="status.label"
+            :value="status.value"
+          />
+        </el-select>
 
         <Button class=" btn--primary" @click="handleSearch">
           <el-icon class="icon--nicer">
@@ -24,8 +58,10 @@
           class="btn btn--danger"
           @click="rejectSelectedReviews"
         >
-          <el-icon class="btn--nicer"><Close /></el-icon>
-          <span>Reject Selection</span>
+          <el-icon class="btn--nicer">
+            <Close/>
+          </el-icon>
+          <span>Từ chối tất cả</span>
         </Button>
 
         <Button
@@ -33,8 +69,10 @@
           class="btn btn--primary"
           @click="approveSelectedReviews"
         >
-          <el-icon class="btn--nicer"><Check /></el-icon>
-          <span>Approve Selection</span>
+          <el-icon class="btn--nicer">
+            <Check/>
+          </el-icon>
+          <span>Duyệt tất cả</span>
         </Button>
       </div>
     </div>
@@ -42,8 +80,8 @@
     <Table
       :columns="columns"
       :data="reviewStore.reviews"
-      :row-class-name="getRowClass"
       :loading="fetchLoading"
+      :row-class-name="getRowClass"
       @selection-change="handleSelectionChange"
     >
       <template #user_name="{ row }">
@@ -59,14 +97,12 @@
       </template>
 
       <template #status="{ row }">
-        <template v-if="row.status !== 'Rejected'">
-          <el-select v-model="row.status" placeholder="Chọn trạng thái" @change="handleStatusChange(row)" style="width: 120px">
-            <el-option label="Pending" value="Pending"></el-option>
-            <el-option label="Approved" value="Approved"></el-option>
-            <el-option label="Rejected" value="Rejected"></el-option>
-          </el-select>
-        </template>
-        <span v-else>{{ row.status }}</span>
+        <el-select v-model="row.status" placeholder="Chọn trạng thái" style="width: 133px"
+                   @change="handleStatusChange(row)">
+          <el-option label="Chờ xử lý" value="Pending" :disabled="row.status === 'Approved' || row.status === 'Rejected'"></el-option>
+          <el-option label="Đã phê duyệt" value="Approved"></el-option>
+          <el-option label="Bị từ chối" value="Rejected"></el-option>
+        </el-select>
       </template>
     </Table>
 
@@ -74,17 +110,6 @@
       :pagination="reviewStore.pagination"
       @changePage="(page: number) => reviewStore.handlePageChange(page)"
     />
-
-<!--    <Modal-->
-<!--      :visible="deleteSelectedConfirmVisible"-->
-<!--      :title="'Xác nhận xóa'"-->
-<!--      @update:visible="deleteSelectedConfirmVisible = $event"-->
-<!--      @submit="confirmDeleteSelectedCategories"-->
-<!--      style="width: 500px"-->
-<!--    >-->
-<!--      <span>Bạn có chắc chắn muốn xóa đánh giá này?</span>-->
-<!--    </Modal>-->
-
   </div>
 </template>
 <script lang="ts" setup>
@@ -93,23 +118,22 @@ import Table from "@/components/Admin/Common/Table.vue";
 import Pagination from "@/components/Admin/Common/Pagination.vue";
 import type {Review} from '@/types/Admin/review';
 import {onMounted, reactive, ref} from "vue";
-import Modal from "@/components/Admin/Common/Modal.vue";
 import {useReviewStore} from "@/stores/Admin/review.store";
 
 const reviewStore = useReviewStore();
 const fetchLoading = ref<boolean>(false);
 const columns = [
-  { prop: 'user_name', label: 'Người đánh giá', width: 200 },
-  { prop: 'book_title', label: 'Tên sách', width: 250 },
-  { prop: 'comment', label: 'Nhận xét', width: 450, type: 'string', lineClamp: 2 },
-  { prop: 'star', label: 'Số sao', width: 180, type: 'number', align: 'center' },
-  { prop: 'status', label: 'Trạng thái', width: 150, type: 'string', align: 'center' },
+  {prop: 'user_name', label: 'Người đánh giá', width: 200},
+  {prop: 'book_title', label: 'Tên sách', width: 250},
+  {prop: 'comment', label: 'Nhận xét', width: 450, type: 'string', lineClamp: 2},
+  {prop: 'star', label: 'Số sao', width: 180, type: 'number', align: 'center'},
+  {prop: 'status', label: 'Trạng thái', width: 150, type: 'string', align: 'center'},
 ];
 
 const formRules = {
-  comment: [{ required: true, message: 'Comment is required', trigger: 'blur' }],
-  star: [{ required: true, message: 'Star rating is required', trigger: 'blur' }],
-  status: [{ required: true, message: 'Status is required', trigger: 'blur' }]
+  comment: [{required: true, message: 'Comment is required', trigger: 'blur'}],
+  star: [{required: true, message: 'Star rating is required', trigger: 'blur'}],
+  status: [{required: true, message: 'Status is required', trigger: 'blur'}]
 };
 
 const review = reactive<Review>({
@@ -119,7 +143,7 @@ const review = reactive<Review>({
   status: 0
 });
 
-const getRowClass = ({ row }) => {
+const getRowClass = ({row}) => {
   return row.status === 'Rejected' ? 'row-rejected' : '';
 };
 
@@ -165,6 +189,17 @@ const approveSelectedReviews = async () => {
   selectedRows.value = [];
 };
 
+const statusOptions = [
+  { label: 'Chờ xử lý', value: 0 },
+  { label: 'Đã phê duyệt', value: 1 },
+  { label: 'Bị từ chối', value: 2 }
+];
+
+const handleFilter = () => {
+  reviewStore.pagination.current_page = 1;
+  reviewStore.fetchReviews();
+};
+
 onMounted(() => {
   reviewStore.fetchReviews();
 });
@@ -173,5 +208,21 @@ onMounted(() => {
 <style lang="scss">
 .row-rejected {
   color: #b2b2b2;
+}
+</style>
+
+<style scoped lang="scss">
+:deep(.el-input__wrapper) {
+  width: 320px !important;
+}
+.admin-page__search-container {
+  width: 830px;
+}
+:deep(.el-select__wrapper) {
+  height: 37px;
+}
+
+.star-filter {
+  width: 800px !important;
 }
 </style>

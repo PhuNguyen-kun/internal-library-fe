@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref<boolean>(false);
 
   const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^(kiaisoft\..+|.+@kiaisoft\.com)$/;
     return emailRegex.test(email);
   };
 
@@ -24,12 +24,12 @@ export const useAuthStore = defineStore('auth', () => {
     formError.value = '';
 
     if (!isValidEmail(email.value)) {
-      errors.value.email = 'Please enter a valid email';
+      errors.value.email = 'Nhập email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
       isValid = false;
     }
 
     if (password.value.length < 8) {
-      errors.value.password = 'Password must be at least 8 characters';
+      errors.value.password = 'Mật khẩu ít nhất 8 ký tự';
       isValid = false;
     }
 
@@ -100,11 +100,11 @@ export const useAuthStore = defineStore('auth', () => {
         console.log('Navigating to /admin/dashboard');
         router.push('/admin/dashboard');
       } else {
-        formError.value = 'Email or Password is incorrect!';
+        formError.value = 'Email hoặc mật khẩu không đúng!';
       }
     } catch (error: any) {
       if (error.response) {
-        formError.value = 'Email or Password is incorrect!';
+        formError.value = 'Email hoặc mật khẩu không đúng!';
       } else {
         console.error('An unexpected error occurred:', error);
       }

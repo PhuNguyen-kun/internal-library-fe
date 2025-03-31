@@ -1,7 +1,7 @@
 <template>
-  <div class="page-wrapper" v-if="bookStore.book" :key="route.params.slug">
+  <div v-if="bookStore.book" :key="route.params.slug" class="page-wrapper">
     <div>
-      <TheBreadCrumb />
+      <TheBreadCrumb/>
     </div>
 
     <div class="book-detail__container">
@@ -13,31 +13,46 @@
             :src="image.url"
             alt="Additional Image"
             class="additional-image"
+            @click="changeMainImage(image.url)"
           />
         </div>
         <div>
-          <img :src="bookStore.book.image_url" alt="" class="main-image">
+          <el-skeleton :loading="loading" animated class="main-image">
+            <template #template>
+              <el-skeleton-item style="width: 100%; height: 100%;" variant="image"/>
+            </template>
+
+            <template #default>
+              <div>
+                <img :src="mainImage" alt="" class="main-image"/>
+              </div>
+            </template>
+          </el-skeleton>
         </div>
       </div>
 
       <div class="book-detail__info">
         <h1 class="book-detail__info--title">{{ bookStore.book.title }}</h1>
         <div class="book-detail__info--rate">
-          <el-rate v-model="bookStore.book.average_star" disabled size="large" disabled-void-color="#E5E5E5"></el-rate>
-          <div class="review-count">({{bookStore.book.review_count}} đánh giá)</div>
+          <el-rate v-model="bookStore.book.average_star" disabled disabled-void-color="#E5E5E5" size="large"></el-rate>
+          <div class="review-count">({{ bookStore.book.review_count }} đánh giá)</div>
+          <div :class="{'in-stock': bookStore.book.availability_status === 'Còn hàng'}" class="availability-status">
+            {{ bookStore.book.availability_status }}
+          </div>
         </div>
         <p class="book-detail__info--short-desc" v-html="bookStore.book.short_description"></p>
         <div class="book-detail__info--function">
-          <el-input-number class="custom-input-quantity function__quantity" v-model="num" :min="1" :max="5" @change="handleChange" />
+          <el-input-number v-model="num" :max="5" :min="1" class="custom-input-quantity function__quantity"
+                           step-strictly @change="handleChange"/>
           <button class="user-btn" @click="addToCart">Mượn ngay</button>
-          <button class="wishlist-btn" @click.prevent.stop="wishlistStore.toggleWishlist(bookStore.book.id)"
-                  :class="{ 'active': wishlistStore.isInWishlist(bookStore.book.id) }">
-            <img src="@/assets/img/User/wishlist-icon.svg" alt="">
+          <button :class="{ 'active': wishlistStore.isInWishlist(bookStore.book.id) }" class="wishlist-btn"
+                  @click.prevent.stop="wishlistStore.toggleWishlist(bookStore.book.id)">
+            <img alt="" src="@/assets/img/User/wishlist-icon.svg">
           </button>
         </div>
         <div class="book-detail__info--delivery">
           <div class="delivery-details">
-            <img src="@/assets/img/User/delivery-icon-1.svg" alt="">
+            <img alt="" src="@/assets/img/User/delivery-icon-1.svg">
             <div class="delivery-details__content">
               <p class="delivery-details__title">Free Delivery</p>
               <p class="delivery-details__sub-title">Enter your postal code for Delivery Availability</p>
@@ -45,7 +60,7 @@
           </div>
           <div class="separator"></div>
           <div class="delivery-details">
-            <img src="@/assets/img/User/delivery-icon-2.svg" alt="">
+            <img alt="" src="@/assets/img/User/delivery-icon-2.svg">
             <div class="delivery-details__content">
               <p class="delivery-details__title">Return Delivery</p>
               <p class="delivery-details__sub-title">Free 30 Days Delivery Returns</p>
@@ -58,7 +73,7 @@
     <!--  Description  -->
     <div class="book-detail__description">
       <div class="book-detail__description--heading">
-        <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
+        <img alt="" src="@/assets/img/User/orange-before.svg" style="width: 15px">
         <span class="product-section__label">Mô tả sản phẩm</span>
       </div>
       <div class="book-detail__description--content" v-html="bookStore.book.description"></div>
@@ -67,7 +82,7 @@
     <!--  Details  -->
     <div class="book-detail__description">
       <div class="book-detail__description--heading">
-        <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
+        <img alt="" src="@/assets/img/User/orange-before.svg" style="width: 15px">
         <span class="product-section__label">Thông tin chi tiết</span>
       </div>
       <div class="book-detail__description--content">
@@ -89,7 +104,7 @@
     <!--  Review  -->
     <div class="book-detail__description">
       <div class="book-detail__description--heading">
-        <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
+        <img alt="" src="@/assets/img/User/orange-before.svg" style="width: 15px">
         <span class="product-section__label">Đánh giá</span>
       </div>
       <div class="book-detail__description--review">
@@ -99,9 +114,9 @@
             <h3>{{ bookStore.book.average_star }}</h3>
             <el-rate
               v-model="bookStore.book.average_star"
-              disabled
               allow-half
               class="average-star"
+              disabled
               size="large"
             />
             <div class="total-reviews">{{ bookStore.book.review_count }} đánh giá</div>
@@ -116,17 +131,17 @@
               <div class="star-label">
                 {{ 6 - targetStar }} sao
                 <el-rate
+                  :max="6 - targetStar"
                   :model-value="6 - targetStar"
                   disabled
-                  :max="6 - targetStar"
                 />
               </div>
               <div class="bar-container">
                 <el-progress
-                  :percentage="getStarPercentage(6 - targetStar)"
-                  :stroke-width="12"
-                  :show-text = false
                   :color="barColor"
+                  :percentage="getStarPercentage(6 - targetStar)"
+                  :show-text=false
+                  :stroke-width="12"
                 />
                 <div class="count">
                   {{ getStarCount(6 - targetStar) }} đánh giá
@@ -136,12 +151,36 @@
           </div>
         </div>
 
-        <div v-for="review in bookStore.reviews" :key="review.id" class="container">
-          <img src="@/assets/img/User/user-icon.svg" alt="">
+        <div v-for="(review, index) in bookStore.reviews" :key="review.id" class="container">
+          <img alt="" src="@/assets/img/User/user-icon.svg">
           <div>
             <div class="name">{{ review.user.full_name }}</div>
             <el-rate v-model="review.star" disabled></el-rate>
-            <div class="comment">{{ review.comment }}</div>
+            <!-- Comment section -->
+            <div class="comment-wrapper">
+              <div
+                :class="{
+                    'line-clamp-2': review.comment.length > 270 && !showFullComment[index],
+                    'expanded': showFullComment[index]
+                }"
+                class="comment"
+                v-html="review.comment"
+              ></div>
+
+              <button
+                v-if="review.comment.length > 270 && !showFullComment[index]"
+                class="show-more-btn"
+                @click="toggleComment(index)">
+                Xem thêm
+              </button>
+
+              <button
+                v-if="review.comment.length > 270 && showFullComment[index]"
+                class="show-more-btn"
+                @click="toggleComment(index)">
+                Thu gọn
+              </button>
+            </div>
             <div class="date">{{ review.created_at }}</div>
           </div>
         </div>
@@ -150,17 +189,20 @@
           :pagination="bookStore.reviewPagination"
           @changePage="(page: number) => bookStore.handleReviewPageChange(page)"
         />
-<!--        <div v-else class="list__empty">Chưa có đánh giá nào</div>-->
+        <!--        <div v-else class="list__empty">Chưa có đánh giá nào</div>-->
 
         <div class="review-input">
           <p class="review-input__title">Bình luận và đánh giá của bạn</p>
-          <el-rate v-model="userReview.star" size="large" class="star"></el-rate>
+          <el-rate v-model="userReview.star" class="star" size="large"></el-rate>
           <el-input
             v-model="userReview.comment"
-            class="review-input__content"
             :rows="4"
-            type="textarea"
+            class="review-input__content"
             placeholder="Nhập bình luận của bạn"
+            type="textarea"
+            maxlength="500"
+            :show-word-limit="true"
+
           />
           <button class="user-btn" @click="handleSubmitReview">Gửi</button>
         </div>
@@ -171,14 +213,22 @@
     <div class="product-section">
       <div class="product-section__header">
         <div style="display: flex; align-items: center; gap: 10px">
-          <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
+          <img alt="" src="@/assets/img/User/orange-before.svg" style="width: 15px">
           <span class="product-section__label">Gợi ý</span>
         </div>
         <div style="display: flex; align-items: center; margin-top: 15px; justify-content: space-between">
           <h2 class="product-section__title">Các sản phẩm có liên quan</h2>
           <div class="product-section__paginate">
-            <button @click="prevSlide"><el-icon size="large"><Back /></el-icon></button>
-            <button @click="nextSlide"><el-icon size="large"><Right /></el-icon></button>
+            <button @click="prevSlide">
+              <el-icon size="large">
+                <Back/>
+              </el-icon>
+            </button>
+            <button @click="nextSlide">
+              <el-icon size="large">
+                <Right/>
+              </el-icon>
+            </button>
           </div>
         </div>
       </div>
@@ -186,7 +236,7 @@
       <el-carousel ref="carouselRef" arrow="never" class="no-responsive" indicator-position="none">
         <el-carousel-item v-for="(group, index) in relatedBooksGroup" :key="index" class="no-text-decoration">
           <div class="product-section__category">
-            <ProductList :books="bookStore.relatedBooks" />
+            <ProductList :books="bookStore.relatedBooks"/>
           </div>
         </el-carousel-item>
       </el-carousel>
@@ -194,21 +244,20 @@
       <el-carousel ref="carouselRefForMobile" arrow="never" class="for-mobile" indicator-position="none">
         <el-carousel-item v-for="(group, index) in relatedBooksGroupForMobile" :key="index" class="no-text-decoration">
           <div class="product-section__category">
-            <ProductList :books="bookStore.relatedBooks" />
+            <ProductList :books="bookStore.relatedBooks"/>
           </div>
         </el-carousel-item>
       </el-carousel>
-
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import TheBreadCrumb from '@/components/User/Common/TheBreadCrumb.vue'
-import { onMounted, ref, computed, watch } from 'vue'
-import { useBookStore} from "@/stores/User/book.store";
+import {computed, onMounted, ref} from 'vue'
+import {useBookStore} from "@/stores/User/book.store";
 import {useWishlistStore} from "@/stores/User/wishlist.store";
-import { useRoute, useRouter } from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {useCartStore} from "@/stores/User/cart.store";
 import {notifyError, notifySuccess} from "@/composables/notifications";
 import Pagination from "@/components/User/Common/Pagination.vue";
@@ -226,6 +275,11 @@ const barColor = 'rgba(255,69,0,0.63)'
 const handleChange = (value: number) => {
   num.value = value;
 };
+const mainImage = ref('');
+const changeMainImage = (imageUrl: string) => {
+  mainImage.value = imageUrl;
+};
+const loading = ref(true)
 
 const addToCart = async () => {
   if (!bookStore.book) return;
@@ -282,7 +336,7 @@ const relatedBooksGroupForMobile = computed(() => {
 })
 
 const prevSlide = () => {
-  if (window.innerWidth > 768) {
+  if (window.innerWidth > 678) {
     carouselRef.value?.prev()
   } else {
     carouselRefForMobile.value?.prev()
@@ -306,15 +360,23 @@ const getStarPercentage = (star: number) => {
   return total > 0 ? Math.round((getStarCount(star) / total * 100)) : 0;
 };
 
+
+const showFullComment = ref<Record<number, boolean>>({});
+const toggleComment = (index: number) => {
+  showFullComment.value[index] = !showFullComment.value[index];
+};
+
 onMounted(async () => {
   const slug = route.params.slug as string;
   await bookStore.fetchBookBySlug(slug);
+  mainImage.value = bookStore.book?.image_url || '';
   await bookStore.fetchReviews(slug);
   await bookStore.fetchRelatedBooks(slug);
+  loading.value = false
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 :deep(.is-bordered-label) {
   background-color: #fff !important;
   font-weight: 500 !important;
@@ -333,6 +395,7 @@ onMounted(async () => {
   .el-input__wrapper {
     box-shadow: none !important;
     border: 1px solid #ccc;
+
   }
 }
 
@@ -343,40 +406,65 @@ onMounted(async () => {
     margin-top: 50px;
     height: 100%;
 
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
+      flex-direction: column;
+    }
+
+    @media (min-width: 767px) and (max-width: 1200px) {
       flex-direction: column;
     }
   }
+
   &__images {
     display: flex;
 
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
       flex-direction: column;
+      gap: 10px;
     }
 
     .additional-images {
       display: flex;
       flex-direction: column;
       gap: 15px;
+      justify-content: center;
 
-      @media (max-width: 768px) {
+      @media (max-width: 767px) {
         flex-direction: row;
         order: 2;
+      }
+      @media (max-width: 425px) {
+        flex-direction: row;
+        gap: 10px;
       }
     }
 
     .additional-image {
       width: 100px;
       height: 110px;
-      object-fit: fill;
+      object-fit: cover;
       padding: 15px 30px;
       background-color: #f5f5f5;
       border-radius: 5px;
 
-      @media (max-width: 768px) {
+      @media (max-width: 767px) {
         width: 61px;
         height: 80px;
         padding: 10px 15px;
+        margin-bottom: 30px;
+      }
+
+      @media (max-width: 430px) {
+        width: 58px;
+        height: 70px;
+        padding: 10px 17px;
+        margin-bottom: 30px;
+      }
+
+      @media (max-width: 376px) {
+        width: 61px;
+        height: 70px;
+        padding: 10px 17px;
         margin-bottom: 30px;
       }
     }
@@ -384,28 +472,45 @@ onMounted(async () => {
     .main-image {
       width: 400px;
       height: 542px;
-      margin: 0 60px 0 30px;
       padding: 32px 60px;
       background-color: #f5f5f5;
       border-radius: 5px;
       object-fit: cover;
 
-      @media (max-width: 768px) {
+      @media (min-width: 1440px) {
+        margin: 0 60px 0 30px;
+      }
+
+      @media (max-width: 767px) {
         width: 290px;
         height: 400px;
-        margin: -15px 0 15px 0;
+        //margin: -15px 0 15px 0;
+      }
+
+      //@media (max-width: 425px) {
+      //  width: 230px;
+      //  //margin: -15px 50px 15px 50px;
+      //  height: 300px;
+      //}
+
+      @media (max-width: 376px) {
+        width: 290px;
+        //margin: -15px 50px 15px 50px;
+        height: 350px;
+        padding: 20px 60px;
       }
     }
   }
 
   &__info {
     flex: 1;
+    //width: 80px;
     height: 600px;
 
     &--title {
       font-size: 24px;
       font-weight: 600;
-   }
+    }
 
     &--rate {
       margin: 10px 0 20px 0;
@@ -418,6 +523,9 @@ onMounted(async () => {
 
       .review-count {
         margin-top: 2px;
+        margin-right: 10px;
+        padding-right: 15px;
+        border-right: 1px solid #FF4500C7;
       }
     }
 
@@ -432,11 +540,30 @@ onMounted(async () => {
       justify-content: space-between;
       align-items: center;
       margin-top: 30px;
+      @media (max-width: 425px) {
+        .user-btn {
+          width: 140px !important;
+        }
+      }
+
+      @media (max-width: 325px) {
+        .user-btn {
+          width: 95px !important;
+        }
+      }
 
       .user-btn {
         width: 200px;
         height: 40px;
         justify-content: center;
+
+        @media (max-width: 376px) {
+          width: 170px !important;
+        }
+
+        @media (min-width: 377px) and (max-width: 431px) {
+          width: 180px !important;
+        }
       }
 
       .wishlist-btn {
@@ -446,13 +573,14 @@ onMounted(async () => {
         align-items: center;
         justify-content: center;
         height: 40px;
-        width: 40px;
+        width: 45px;
         background-color: #fff;
         cursor: pointer;
 
         &:hover {
           background-color: var(--user-theme-color);
           border-color: #fff;
+
           img {
             filter: invert(1);
           }
@@ -516,6 +644,7 @@ onMounted(async () => {
 
   &__description {
     margin-top: 50px;
+
     &--heading {
       display: flex;
       align-items: center;
@@ -549,10 +678,12 @@ onMounted(async () => {
           font-weight: 500;
           margin-bottom: 10px;
         }
+
         &__content {
           width: 100%;
           margin-top: 10px;
         }
+
         .user-btn {
           margin-top: 15px;
         }
@@ -590,6 +721,7 @@ onMounted(async () => {
       .comment {
         line-height: 24px;
         margin-top: 5px;
+        white-space: pre-wrap;
       }
 
       .date {
@@ -693,7 +825,7 @@ onMounted(async () => {
   align-items: center;
   gap: 15px;
   font-size: 15px;
- }
+}
 
 .bar-container {
   display: flex;
@@ -707,13 +839,35 @@ onMounted(async () => {
 .star-distribution {
   flex: 1;
 
+  @media (max-width: 430px) {
+    width: 100%;
+    padding: 0;
+
+    :deep(.el-progress--without-text) {
+      height: 10px;
+      width: 205px !important;
+    }
+
+    :deep(.el-progress-bar__outer) {
+      width: 205px !important;
+    }
+    .count {
+      flex: 1;
+    }
+
+    :deep(.bar-container) {
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  }
+
   @media (max-width: 768px) {
     width: 100%;
     padding: 0;
 
     :deep(.el-progress--without-text) {
       height: 10px;
-      width: 260px !important ;
+      width: 260px !important;
     }
 
     :deep(.el-progress-bar__outer) {
@@ -728,6 +882,28 @@ onMounted(async () => {
       margin-bottom: 10px;
     }
   }
+
+  //@media (max-width: 325px) {
+  //  width: 100%;
+  //  padding: 0;
+  //
+  //  :deep(.el-progress--without-text) {
+  //    height: 10px;
+  //    width: 151px !important;
+  //  }
+  //
+  //  :deep(.el-progress-bar__outer) {
+  //    width: 151px !important;
+  //  }
+  //  .count {
+  //    flex: 1;
+  //  }
+  //
+  //  :deep(.bar-container) {
+  //    align-items: center;
+  //    margin-bottom: 10px;
+  //  }
+  //}
 }
 
 .average-star {
@@ -741,13 +917,19 @@ onMounted(async () => {
   @media (max-width: 768px) {
     width: 48%;
   }
+  @media (max-width: 380px) {
+    width: 47.5%;
+  }
 }
 
 :deep(.el-carousel__container) {
   height: 390px;
 
   @media (max-width: 768px) {
-    height: 3900px;
+    height: 580px;
+  }
+  @media (max-width: 380px) {
+    height: 500px;
   }
 }
 
@@ -764,11 +946,105 @@ onMounted(async () => {
     width: 180px !important;
   }
 }
+
+@media (min-width: 768px) and (max-width: 1200px) {
+  .main-image {
+    width: 420px !important;
+    margin: 0 0 0 30px !important;
+  }
+
+  .book-detail__images {
+    justify-content: center !important;
+  }
+
+  .book-detail__info--title {
+    margin-top: 30px;
+  }
+}
+
+@media (min-width: 1023px) and (max-width: 1200px) {
+  .main-image {
+    width: 570px !important;
+    height: 745px !important;
+    margin: 0 0 0 30px !important;
+  }
+
+  .additional-image {
+    width: 150px !important;
+    height: 160px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1000px) {
+  :deep(.el-progress) {
+    width: 76% !important;
+  }
+}
+
+@media (min-width: 1000px) and (max-width: 1200px) {
+  :deep(.el-progress) {
+    width: 84% !important;
+  }
+}
+
+@media (min-width: 480px) {
+  .book-detail__info--function {
+    justify-content: start;
+    gap: 20px;
+  }
+}
+
+//@media (min-width: 1440px) {
+//  .book-detail__info--function {
+//    justify-content: start;
+//    gap: 15px;
+//  }
+//}
+
+.availability-status {
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.in-stock {
+  color: #00FF66;
+  font-weight: 400;
+}
+
+.pagination-container {
+  margin-bottom: 1px;
+}
+
+.show-more-btn {
+  background: none;
+  color: var(--user-theme-color);
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.comment-wrapper {
+  position: relative;
+}
+
+.comment {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comment.expanded {
+  -webkit-line-clamp: unset;
+}
 </style>
 
 <style lang="scss">
 .el-input-number__decrease:hover, .el-input-number__increase:hover {
   background-color: var(--user-theme-color);
+
   .el-icon {
     color: #fff;
   }

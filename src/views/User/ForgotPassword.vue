@@ -21,15 +21,7 @@
 
         <div class="btn-group">
           <button type="submit" class="user-btn" :disabled="loading">
-            <template v-if="loading">
-              <div style="display: flex; align-items: center; justify-content: center; gap: 10px">
-                <span>Gửi link khôi phục</span>
-                <span class="loading-spinner"></span>
-              </div>
-            </template>
-            <template v-else>
               Gửi link khôi phục
-            </template>
           </button>
           <router-link to="/login" class="back-login no-text-decoration__strong">Quay lại Đăng nhập</router-link>
         </div>
@@ -79,18 +71,34 @@ const submit = async () => {
     img {
       width: 90%;
     }
+
+    @media (max-width: 1200px) {
+      display: none;
+    }
   }
 
   &__signup-form {
     flex: 1;
-    padding: 0 40px;
+    padding: 0 0 0 40px;
+
+    @media (max-width: 380px) {
+      padding: 0 5px;
+    }
   }
 
   &__title {
-    font-size: 38px;
+    font-size: 34px;
     font-weight: 500;
     margin-bottom: 20px;
     font-family: Inter, sans-serif;
+
+    @media (max-width: 768px) {
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 380px) {
+      font-size: 34px;
+    }
   }
 
   &__sub-title {
@@ -111,7 +119,7 @@ const submit = async () => {
 
   .form-input {
     width: 91.5%;
-    padding: 17px 15px;
+    padding: 17px 0 17px 0;
     border: none;
     border-bottom: 1px solid #000;
     font-size: 16px;
@@ -139,6 +147,16 @@ const submit = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  @media (max-width: 380px) {
+    gap: 0;
+    margin-bottom: 30px;
+  }
   button {
     margin: 30px 0;
   }

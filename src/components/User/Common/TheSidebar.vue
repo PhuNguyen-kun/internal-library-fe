@@ -1,84 +1,181 @@
 <template>
-  <div class="sidebar">
-    <!-- Danh mục -->
-    <div class="sidebar__item">
-      <div class="sidebar__item--title">
-        <el-icon class="sidebar-icon"><Grid /></el-icon>
-        <span>Danh mục</span>
-      </div>
-      <div class="sidebar__item--content">
-        <el-scrollbar ref="scrollbarRef" height="400px">
-          <ul>
-            <li
-              v-for="category in bookStore.categories"
-              :key="category.id"
-              ref="categoryRefs"
-            >
-              <label
-                :class="{ 'active': selectedCategory === category.slug }"
-                :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+  <div class="sidebar-container">
+    <div class="sidebar no-responsive">
+      <!-- Danh mục -->
+      <div class="sidebar__item">
+        <div class="sidebar__item--title">
+          <el-icon class="sidebar-icon"><Grid /></el-icon>
+          <span>Danh mục</span>
+        </div>
+        <div class="sidebar__item--content">
+          <el-scrollbar ref="scrollbarRef" height="400px">
+            <ul>
+              <li
+                v-for="category in bookStore.categories"
+                :key="category.id"
+                ref="categoryRefs"
               >
-                <input
-                  type="checkbox"
-                  :value="category.slug"
-                  :checked="selectedCategory === category.slug"
-                  @change="toggleFilter('category', category.slug)"
-                />
-                {{ category.name }}
-              </label>
-            </li>
-          </ul>
-        </el-scrollbar>
+                <label
+                  :class="{ 'active': selectedCategory === category.slug }"
+                  :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+                >
+                  <input
+                    type="checkbox"
+                    :value="category.slug"
+                    :checked="selectedCategory === category.slug"
+                    @change="toggleFilter('category', category.slug)"
+                  />
+                  {{ category.name }}
+                </label>
+              </li>
+            </ul>
+          </el-scrollbar>
+        </div>
+      </div>
+
+      <!-- Tác giả -->
+      <div class="sidebar__item">
+        <div class="sidebar__item--title">
+          <el-icon class="sidebar-icon"><StarFilled /></el-icon>
+          <span>Tác giả</span>
+        </div>
+        <div class="sidebar__item--content">
+          <el-scrollbar height="400px">
+            <ul>
+              <li v-for="author in bookStore.authors" :key="author.id">
+                <label :class="{ 'active': selectedAuthor === author.slug }">
+                  <input
+                    type="checkbox"
+                    :value="author.slug"
+                    :checked="selectedAuthor === author.slug"
+                    @change="toggleFilter('author', author.slug)"
+                  />
+                  {{ author.name }}
+                </label>
+              </li>
+            </ul>
+          </el-scrollbar>
+        </div>
+      </div>
+
+      <!-- Nhà xuất bản -->
+      <div class="sidebar__item">
+        <div class="sidebar__item--title">
+          <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
+          <span>Nhà xuất bản</span>
+        </div>
+        <div class="sidebar__item--content">
+          <el-scrollbar height="400px">
+            <ul>
+              <li v-for="publisher in bookStore.publishers" :key="publisher.id">
+                <label :class="{ 'active': selectedPublisher === publisher.slug }">
+                  <input
+                    type="checkbox"
+                    :value="publisher.slug"
+                    :checked="selectedPublisher === publisher.slug"
+                    @change="toggleFilter('publisher', publisher.slug)"
+                  />
+                  {{ publisher.name }}
+                </label>
+              </li>
+            </ul>
+          </el-scrollbar>
+        </div>
       </div>
     </div>
 
-    <!-- Tác giả -->
-    <div class="sidebar__item">
-      <div class="sidebar__item--title">
-        <el-icon class="sidebar-icon"><StarFilled /></el-icon>
-        <span>Tác giả</span>
+    <div class="sidebar responsive">
+      <!-- Danh mục -->
+      <div class="sidebar__item">
+        <div class="sidebar__item--header" @click="toggleContent('category')">
+          <div class="sidebar__item--title">
+            <el-icon class="sidebar-icon"><Grid /></el-icon>
+            <span class="sidebar__item--name">Danh mục</span>
+          </div>
+          <el-icon :class="{'rotate-180': isContentVisible.category}" class="arrow-down" size="large"><ArrowDown /></el-icon>
+        </div>
+        <transition name="slide">
+          <div v-show="isContentVisible.category" class="sidebar__item--content">
+            <el-scrollbar ref="scrollbarRef">
+              <ul>
+                <li
+                  v-for="category in bookStore.categories"
+                  :key="category.id"
+                  ref="categoryRefs"
+                >
+                  <label
+                    :class="{ 'active': selectedCategory === category.slug }"
+                    :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="category.slug"
+                      :checked="selectedCategory === category.slug"
+                      @change="toggleFilter('category', category.slug)"
+                    />
+                    {{ category.name }}
+                  </label>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </transition>
       </div>
-      <div class="sidebar__item--content">
-        <el-scrollbar height="400px">
-          <ul>
-            <li v-for="author in bookStore.authors" :key="author.id">
-              <label :class="{ 'active': selectedAuthor === author.slug }">
-                <input
-                  type="checkbox"
-                  :value="author.slug"
-                  :checked="selectedAuthor === author.slug"
-                  @change="toggleFilter('author', author.slug)"
-                />
-                {{ author.name }}
-              </label>
-            </li>
-          </ul>
-        </el-scrollbar>
-      </div>
-    </div>
 
-    <!-- Nhà xuất bản -->
-    <div class="sidebar__item">
-      <div class="sidebar__item--title">
-        <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
-        <span>Nhà xuất bản</span>
+      <!-- Tác giả -->
+      <div class="sidebar__item">
+        <div class="sidebar__item--header" @click="toggleContent('author')">
+          <div class="sidebar__item--title">
+            <el-icon class="sidebar-icon"><StarFilled /></el-icon>
+            <span class="sidebar__item--name">Tác giả</span>
+          </div>
+          <el-icon :class="{'rotate-180': isContentVisible.author}" class="arrow-down" size="large"><ArrowDown /></el-icon>
+        </div>
+        <div v-show="isContentVisible.author" class="sidebar__item--content">
+          <el-scrollbar>
+            <ul>
+              <li v-for="author in bookStore.authors" :key="author.id">
+                <label :class="{ 'active': selectedAuthor === author.slug }">
+                  <input
+                    type="checkbox"
+                    :value="author.slug"
+                    :checked="selectedAuthor === author.slug"
+                    @change="toggleFilter('author', author.slug)"
+                  />
+                  {{ author.name }}
+                </label>
+              </li>
+            </ul>
+          </el-scrollbar>
+        </div>
       </div>
-      <div class="sidebar__item--content">
-        <el-scrollbar height="400px">
-          <ul>
-            <li v-for="publisher in bookStore.publishers" :key="publisher.id">
-              <label :class="{ 'active': selectedPublisher === publisher.slug }">
-                <input
-                  type="checkbox"
-                  :value="publisher.slug"
-                  :checked="selectedPublisher === publisher.slug"
-                  @change="toggleFilter('publisher', publisher.slug)"
-                />
-                {{ publisher.name }}
-              </label>
-            </li>
-          </ul>
-        </el-scrollbar>
+
+      <!-- Nhà xuất bản -->
+      <div class="sidebar__item">
+        <div class="sidebar__item--header" @click="toggleContent('publisher')">
+          <div class="sidebar__item--title">
+            <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
+            <span class="sidebar__item--name">Nhà xuất bản</span>
+          </div>
+          <el-icon :class="{'rotate-180': isContentVisible.publisher}" class="arrow-down" size="large"><ArrowDown /></el-icon>
+        </div>
+        <div v-show="isContentVisible.publisher" class="sidebar__item--content">
+          <el-scrollbar>
+            <ul>
+              <li v-for="publisher in bookStore.publishers" :key="publisher.id">
+                <label :class="{ 'active': selectedPublisher === publisher.slug }">
+                  <input
+                    type="checkbox"
+                    :value="publisher.slug"
+                    :checked="selectedPublisher === publisher.slug"
+                    @change="toggleFilter('publisher', publisher.slug)"
+                  />
+                  {{ publisher.name }}
+                </label>
+              </li>
+            </ul>
+          </el-scrollbar>
+        </div>
       </div>
     </div>
   </div>
@@ -96,6 +193,14 @@ const bookStore = useBookStore();
 const selectedCategory = ref<string | null>(null);
 const selectedAuthor = ref<string | null>(null);
 const selectedPublisher = ref<string | null>(null);
+const isContentVisible = ref({
+  category: false,
+  author: false,
+  publisher: false,
+});
+const toggleContent = (type: string) => {
+  isContentVisible.value[type] = !isContentVisible.value[type];
+};
 
 const scrollbarRef = ref<HTMLElement | null>(null);
 const activeCategoryRef = ref<HTMLElement | null>(null);
@@ -151,13 +256,19 @@ watch(selectedCategory, () => {
 
 <style lang="scss" scoped>
 .sidebar {
-  @media (max-width: 768px) {
-    display: none;
-  }
-
   &__item {
     margin-bottom: 30px;
     border: 1px solid #ccc;
+
+    &--header {
+      display: flex;
+      justify-content: space-between;
+      padding-right: 10px;
+      .arrow-down {
+        margin-top: 8px;
+        margin-left: 8px;
+      }
+    }
 
     &--title {
       font-size: 16px;
@@ -174,6 +285,7 @@ watch(selectedCategory, () => {
 
       & > span {
         background-color: #eee;
+        width: 100%;
         padding: 9px 20px;
       }
     }
@@ -182,6 +294,7 @@ watch(selectedCategory, () => {
       ul {
         list-style: none;
         padding: 0;
+        margin-top: 0;
 
         li {
           list-style: none;
@@ -203,10 +316,10 @@ watch(selectedCategory, () => {
             input {
               cursor: pointer;
               appearance: none;
-              width: 16px;
-              height: 16px;
+              min-width: 17px;
+              height: 17px;
               border: 2px solid #999;
-              border-radius: 3px;
+              border-radius: 99999px;
               display: flex;
               align-items: center;
               justify-content: center;
@@ -237,6 +350,49 @@ watch(selectedCategory, () => {
           }
         }
       }
+    }
+  }
+}
+
+.sidebar__item--name {
+  width: 35%;
+}
+
+.sidebar__item--title {
+  width: 100%;
+}
+
+.slide-enter-active, .slide-leave-active {
+  transition: max-height 0.5s ease-in-out;
+}
+
+.slide-enter, .slide-leave-to {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.slide-enter-to, .slide-leave {
+  max-height: 500px;
+}
+
+@media (max-width: 1200px) {
+  .sidebar__item--title {
+    font-size: 13px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .sidebar__item--content ul li label {
+    font-size: 13px;
+    padding: 3px 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .sidebar__item {
+    .rotate-180 {
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
     }
   }
 }

@@ -34,8 +34,9 @@ import {
   ArcElement
 } from 'chart.js';
 import BarChart from "@/components/Admin/Chart/BarChart.vue";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(LineElement, PointElement, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(LineElement, PointElement, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const lineChartInstance: ChartJS | null = null;
 const pieChartInstance: ChartJS | null = null;
@@ -110,6 +111,7 @@ const chartOptionsOne = {
         bottom: 10,
       },
     },
+    datalabels: false,
   },
 };
 
@@ -139,6 +141,7 @@ const chartOptionsTwo = {
         bottom: 10,
       },
     },
+    datalabels: false,
   },
 };
 
@@ -180,6 +183,7 @@ function renderLineChart() {
           bottom: 10,
         },
       },
+      datalabels: false,
     },
   };
 
@@ -201,7 +205,7 @@ function renderLineChart() {
 }
 
 // Pie chart
-function renderPieChart() {
+function  renderPieChart() {
   const pieChartData = {
     labels: booksByCategory.value.map(category => category.name),
     datasets: [
@@ -214,6 +218,7 @@ function renderPieChart() {
         hoverBackgroundColor: [
           '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
         ],
+        hoverOffset: 10,
       },
     ],
   };
@@ -234,6 +239,22 @@ function renderPieChart() {
           top: 10,
           bottom: 10,
         },
+      },
+      datalabels: {
+        color: '#fff', // Màu chữ
+        formatter: (value, context) => {
+          const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+          const percentage = ((value / total) * 100).toFixed(2);
+          return `${percentage}%`;
+        },
+        font: {
+          weight: 'bold',
+          size: 12,
+          family: 'Nunito Sans, sans-serif',
+        },
+        anchor: 'end',
+        align: 'start',
+        offset: 35,
       },
     },
   };
@@ -293,6 +314,7 @@ function renderFavoriteBooksChart() {
           bottom: 10,
         },
       },
+      datalabels: false,
     },
   };
 

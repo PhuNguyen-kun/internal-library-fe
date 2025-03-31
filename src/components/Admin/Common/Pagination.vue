@@ -1,7 +1,7 @@
 <template>
   <div class="pagination-container">
     <div class="pagination-info">
-      Showing {{ start }}-{{ end }} of {{ pagination.total }}
+      Trang {{ start }}-{{ end }} của {{ pagination.total }}
     </div>
 
     <el-pagination

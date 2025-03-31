@@ -41,20 +41,8 @@
 
       <div class="btn-group">
         <button type="submit" class="btn" :disabled="authStore.loading">
-          <template v-if="authStore.loading">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px">
-              <span>Signing in...</span>
-              <span class="loading-spinner"></span>
-            </div>
-          </template>
-          <template v-else>
             Sign in
-          </template>
         </button>
-        <div class="link-to-signup">
-          <p>Don't have an account?</p>
-          <a href="#" style="text-decoration: underline; color: #5a8cff">Create Account</a>
-        </div>
       </div>
     </form>
   </div>
@@ -189,15 +177,6 @@ input:focus {
   font-weight: 500;
 }
 
-.link-to-signup {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 15px;
-  font-size: 14px;
-  gap: 5px;
-}
-
 .btn:hover {
   cursor: pointer;
 }
@@ -227,5 +206,9 @@ input:focus {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.error-message {
+  margin-top: 0;
 }
 </style>

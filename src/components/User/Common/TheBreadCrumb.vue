@@ -1,9 +1,9 @@
 <template>
   <div class="layout">
-    <el-breadcrumb separator="/">
+    <el-breadcrumb separator="/" class="breadcrumb">
       <el-breadcrumb-item v-for="(item, index) in breadcrumbItems" :key="index">
         <router-link v-if="item.link" :to="item.link">{{ item.text }}</router-link>
-        <span v-else>{{ item.text }}</span>
+        <span v-else :title="item.text" class="breadcrumb-text">{{ item.text }}</span>
       </el-breadcrumb-item>
     </el-breadcrumb>
   </div>
@@ -26,6 +26,7 @@ const routeToVietnameseMap: Record<string, string> = {
   register: 'Đăng ký',
   books: 'Sách',
   wishlist: 'Danh sách yêu thích',
+  'my-profile': 'Hồ sơ của tôi',
   'borrowing-history': 'Lịch sử mượn',
   'account-manage': 'Quản lý tài khoản',
   'edit-profile': 'Chỉnh sửa hồ sơ',
@@ -92,7 +93,7 @@ const breadcrumbItems = computed(() => {
   padding-top: 40px;
   border: none !important;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1200px) {
     padding-top: 0;
     margin-top: -20px;
   }
@@ -109,6 +110,24 @@ a {
   line-height: 1.3125rem;
   a {
     font-weight: 400;
+  }
+}
+
+.breadcrumb-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  max-height: 3em;
+  line-height: 1.5em;
+}
+
+.el-breadcrumb {
+  @media (min-width: 768px) {
+    margin-top: 20px;
+    margin-bottom: 60px;
   }
 }
 </style>

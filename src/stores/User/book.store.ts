@@ -1,10 +1,9 @@
 import {defineStore} from "pinia";
 import {reactive, ref} from "vue";
 import * as bookService from "@/services/User/bookService";
-import type {Book} from "@/types/Admin/book";
 import * as homepageService from "@/services/User/homepageService";
 import {defaultPagination} from "@/constants/Admin/pagination";
-import {notifyError, notifySuccess} from "@/composables/notifications";
+import {notifyError } from "@/composables/notifications";
 
 export const useBookStore = defineStore("book", () => {
   const books = ref([]);
@@ -17,6 +16,7 @@ export const useBookStore = defineStore("book", () => {
   const publishers = ref([]);
   const searchTerm = ref<string>('');
   const borrowedBooks = ref([]);
+  const statusFilter = ref<number[]>([]);
 
   const pagination = reactive({
     current_page: defaultPagination.current_page,
@@ -29,12 +29,24 @@ export const useBookStore = defineStore("book", () => {
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,
-    per_page: 1,
+    per_page: 3,
+  });
+
+  const historyPagination = reactive({
+    current_page: defaultPagination.current_page,
+    total: defaultPagination.total,
+    total_pages: defaultPagination.total_pages,
+    per_page: 5,
   });
 
   const handlePageChange = (page: number) => {
     pagination.current_page = page;
     fetchBooks();
+  }
+
+  const handleHistoryPageChange = (page: number) => {
+    historyPagination.current_page = page;
+    fetchBorrowedBooks();
   }
 
   const handleReviewPageChange = (page: number) => {
@@ -93,10 +105,17 @@ export const useBookStore = defineStore("book", () => {
     }
   }
 
-  const fetchReviews = async (slug: string) => {
+  const fetchReviews = async (slug: string, filter = {}) => {
     try {
-      const response = await bookService.getReviews(slug);
+      const response = await bookService.getReviews(slug, {
+        per_page: reviewPagination.per_page,
+        page: reviewPagination.current_page,
+        ...filter
+      });
       reviews.value = response.data.filter((review: any) => review.status === "Approved");
+      reviewPagination.total = response.pagination.total;
+      reviewPagination.total_pages = response.pagination.total_pages;
+
       console.log(reviews.value);
     } catch (error) {
       console.error("Failed to fetch reviews", error);
@@ -149,8 +168,14 @@ export const useBookStore = defineStore("book", () => {
 
   const fetchBorrowedBooks = async (filters = {}) => {
     try {
-      const response = await bookService.getBorrowedBooks(filters);
+      const response = await bookService.getBorrowedBooks({
+        per_page: historyPagination.per_page,
+        page: historyPagination.current_page,
+        ...filters
+      });
       borrowedBooks.value = response.data;
+      historyPagination.total = response.pagination.total;
+      historyPagination.total_pages = response.pagination.total_pages;
       console.log(borrowedBooks.value);
     } catch (error) {
       console.error("Failed to fetch borrowed books", error);
@@ -181,6 +206,8 @@ export const useBookStore = defineStore("book", () => {
     searchTerm,
     borrowedBooks,
     reviewPagination,
+    historyPagination,
+    statusFilter,
     fetchBooks,
     fetchBook,
     fetchTopBorrowedBooks,
@@ -193,6 +220,7 @@ export const useBookStore = defineStore("book", () => {
     handlePageChange,
     fetchBorrowedBooks,
     submitReview,
-    handleReviewPageChange
+    handleReviewPageChange,
+    handleHistoryPageChange,
   };
 });

@@ -59,7 +59,7 @@ axiosInstance.interceptors.response.use(
     // Xử lý lỗi 401
     if (error.response?.status === 401) {
       // Xóa token cũ
-      localStorage.removeItem('user_access_token');
+      // localStorage.removeItem('user_access_token');
 
       // Chỉ chuyển hướng nếu request thuộc API yêu cầu auth
       const isAuthRequiredApi = error.config.url.includes('/api/user/cart') ||

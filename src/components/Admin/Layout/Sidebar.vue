@@ -57,7 +57,6 @@ const handleMenuClick = async (item: any) => {
   display: flex;
   flex-direction: column;
   align-items: start;
-  border-right: 1px solid #ebebeb;
   margin-top: 10px;
   gap: 3px;
 }

@@ -14,8 +14,8 @@
         :model="formData"
         class="checkout__content--user-info"
       >
-        <el-form-item label="Họ và tên">
-          <el-input v-model="userStore.userInfo.full_name" disabled/>
+        <el-form-item label="Họ và tên" prop="full_name">
+          <el-input v-model="formData.full_name"/>
         </el-form-item>
         <el-form-item label="Email">
           <el-input v-model="userStore.userInfo.email" disabled/>
@@ -71,7 +71,7 @@
         <div v-for="item in cartStore.cart" :key="item.id" class="cart__item">
           <div class="cart__item--name">
             <img :src="item.book.image_url" alt="Book Image" class="cart__item--image">
-            <span>{{ item.book.title }}</span>
+            <span :title="item.book.title" class="line-clamp-2">{{ item.book.title }}</span>
           </div>
           <div class="cart__item--quantity">
             <div class="quantity-input">
@@ -87,6 +87,40 @@
         <div class="checkout__total--quantity">
             <p>Tổng số sản phẩm:</p>
             <p>{{ total }} quyển</p>
+        </div>
+
+        <div class="checkout__total--confirm">
+          <button class="user-btn" @click="handleCheckout">Xác nhận mượn sách</button>
+        </div>
+      </div>
+
+      <!--   For mobile   -->
+      <div class="checkout__total--mobile">
+        <div v-for="item in cartStore.cart" :key="item.id" class="cart__item">
+          <div class="cart__item--image">
+            <img :src="item.book.image_url" alt="Book Image" class="cart__item--image">
+          </div>
+          <div class="cart__item--right">
+            <div class="cart__item--name">
+              <span :title="item.book.title" class="line-clamp-2">{{ item.book.title }}</span>
+            </div>
+            <div class="cart__item--right-info">
+              <div class="cart__item--quantity">
+                <div class="quantity-input">
+                  <div class="input-field">{{ item.quantity }} quyển</div>
+                </div>
+              </div>
+              <div class="cart__item--date">
+                <p >Hạn trả: </p>
+                <p>{{ item.return_date_due }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkout__total--quantity">
+          <p>Tổng số sản phẩm:</p>
+          <p>{{ total }} quyển</p>
         </div>
 
         <div class="checkout__total--confirm">
@@ -189,15 +223,29 @@ onMounted(async () => {
 });
 
 onMounted(async () => {
-  await userStore.fetchUserInfo();
-  await userStore.fetchProvinces();
+  try {
+    await Promise.all([
+      userStore.fetchUserInfo(),
+      userStore.fetchProvinces()
+    ]);
 
-  if (formData.value.province_id) {
-    await userStore.fetchDistricts(formData.value.province_id);
-  }
+    if (formData.value.province_id) {
+      await userStore.fetchDistricts(formData.value.province_id);
+    }
 
-  if (formData.value.district_id) {
-    await userStore.fetchWards(formData.value.district_id);
+    if (formData.value.district_id) {
+      await userStore.fetchWards(formData.value.district_id);
+    }
+
+    const savedInfo = localStorage.getItem("savedUserInfo");
+    if (savedInfo) {
+      formData.value = JSON.parse(savedInfo);
+      saveUserInfo.value = true;
+    } else {
+      saveUserInfo.value = false;
+    }
+  } catch (error) {
+    console.error('Error fetching user info:', error);
   }
 });
 </script>
@@ -223,6 +271,10 @@ onMounted(async () => {
   background-color: #F5F5F5 !important;
   box-shadow: none;
   border-radius: 2px;
+
+  @media (max-width: 768px) {
+    width: 100% !important;
+  }
 }
 
 .checkout {
@@ -232,9 +284,20 @@ onMounted(async () => {
     font-weight: 500;
   }
 
+  @media (min-width: 768px) and (max-width: 1023px) {
+    width: 730px;
+  }
+  @media (min-width: 1024px) and (max-width: 1439px) {
+    width: 930px;
+  }
+
   &__content {
     margin-top: 40px;
     display: flex;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
 
     &--remember {
       display: flex;
@@ -301,15 +364,30 @@ onMounted(async () => {
 
 .cart__item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
   margin-left: 60px;
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 
     &--name {
-      width: 370px;
+      width: 360px;
       display: flex;
       align-items: center;
+
+      @media (max-width: 380px) {
+      }
+
+      @media (min-width: 360px) and (max-width: 768px) {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 10px;
+        width: 100%;
+      }
+
+      @media (min-width: 768.2px)  and  (max-width: 1200px) {
+      }
     }
 
     &--stock {
@@ -321,6 +399,7 @@ onMounted(async () => {
       width: 50px;
       height: 70px;
       margin-right: 20px;
+      object-fit: cover;
     }
 
     &--quantity {
@@ -331,5 +410,119 @@ onMounted(async () => {
       display: flex;
       gap: 10px;
     }
+}
+
+.checkout__total--mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .checkout__total {
+    display: none;
+  }
+
+  .checkout__total--mobile {
+    display: block;
+    margin-top: 40px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 0 10px;
+  }
+
+  .cart__item--right {
+    width: 80% !important;
+  }
+
+  .cart__item--image {
+    width: 60px;
+    height: 85px;
+    margin-right: 20px;
+  }
+
+  .cart__item--right-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #858585;
+  }
+
+  .checkout__total--quantity {
+    margin-left: 0;
+  }
+
+  .checkout__total--confirm {
+    margin-left: 0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 768.2px) and (max-width: 1200px) {
+  .checkout__content {
+    gap: 30px;
+  }
+
+  :deep(.el-select__wrapper) {
+    width: 100% !important;
+  }
+
+  .checkout__content--user-info {
+    width: 60%;
+  }
+
+  .checkout__total {
+    display: none;
+  }
+
+  .cart__item {
+    margin-left: 10px;
+  }
+
+  .checkout__total--mobile {
+    display: block;
+    width: 100%;
+    margin-top: 30px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 0 10px;
+  }
+
+  .cart__item--right {
+    width: 80% !important;
+  }
+
+  .cart__item--name {
+    margin-bottom: 5px;
+    width: 100%;
+  }
+
+  .cart__item--image {
+    width: 60px;
+    height: 85px;
+    margin-right: 20px;
+  }
+
+  .cart__item--right-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #858585;
+  }
+
+  .checkout__total--quantity {
+    margin-left: 0;
+  }
+
+  .checkout__total--confirm {
+    margin-left: 0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.cart__item--date {
+  @media (max-width: 1439px  ) {
+    margin-left: 0 !important;
+  }
 }
 </style>

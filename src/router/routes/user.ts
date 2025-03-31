@@ -5,10 +5,10 @@ const userRoutes: RouteRecordRaw[] = [
     path: '/',
     name: 'user',
     component: () => import('@/components/User/Layout/Layout.vue'),
-    redirect: '/homepage',
+    redirect: '/',
     children: [
       {
-        path: '/homepage',
+        path: '/',
         name: 'homepage',
         component: () => import('@/views/User/Homepage.vue')
       },
@@ -20,7 +20,7 @@ const userRoutes: RouteRecordRaw[] = [
       {
         path: '/signup',
         name: 'signup',
-        component: () => import('@/views/User/Signup.vue')
+        component: () => import('@/views/User/Signup.vue'),
       },
       {
         path: '/login',
@@ -58,8 +58,8 @@ const userRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/User/Wishlist.vue')
       },
       {
-        path: '/profile',
-        name: 'profile',
+        path: '/my-profile',
+        name: 'my-profile',
         component: () => import('@/components/User/Layout/Profile.vue'),
         children: [
           {

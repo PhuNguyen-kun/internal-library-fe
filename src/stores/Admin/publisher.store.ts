@@ -67,10 +67,11 @@ export const usePublisherStore = defineStore('publisher', () => {
   const deletePublisher = async (id: number) => {
     try {
       await publisherService.deletePublisher(id);
-      notifySuccess("Tác giả đã được xóa thành công");
+      notifySuccess("Nhà xuất bản đã được xóa thành công");
       await fetchPublishers();
     } catch (error) {
-      handleError(error, 'Failed to delete publisher');
+      console.log(error);
+      notifyError('Không thể xóa vì tồn tại sách thuộc NXB này!');
     }
   }
 
@@ -83,7 +84,8 @@ export const usePublisherStore = defineStore('publisher', () => {
       notifySuccess("Đã xóa nhà xuất bản được chọn");
       await fetchPublishers();
     } catch (error) {
-      handleError(error, 'Failed to delete selected publishers');
+      console.log(error);
+      notifyError('Không thể xóa vì tồn tại sách thuộc NXB được chọn!');
     } finally {
       loading.value = false;
     }

@@ -27,7 +27,7 @@
       </div>
       <div class="product-section__header--title">
         <h2 class="product-section__title">Top các sách được mượn nhiều nhất</h2>
-        <router-link to="/books?sort=most_borrowed" class="user-btn show-all">Xem tất cả</router-link>
+        <router-link to="/books?sort=most_borrowed" class="user-btn no-responsive">Xem tất cả</router-link>
       </div>
     </div>
 
@@ -35,8 +35,10 @@
     <router-link to="/books?sort=most_borrowed" class="user-btn show-all">Xem tất cả</router-link>
   </div>
 
+  <div class="seperator"></div>
+
   <!-- Category row -->
-  <div class="product-section">
+  <div class="product-section category-section">
     <div class="product-section__header">
       <div style="display: flex; align-items: center; gap: 10px">
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
@@ -55,7 +57,7 @@
       <el-carousel-item v-for="(group, index) in categoryGroups" :key="index" class="no-text-decoration">
         <div class="product-section__category">
           <router-link :to="'/books?category=' + category.slug" class="category-card" v-for="(category, idx) in group" :key="category.id">
-            <img :src="categoryImages[idx % categoryImages.length]" alt="Category image" class="category-image">
+            <img :src="getRandomCategoryImage()" alt="Category image" class="category-image">
             <span>{{ category.name }}</span>
           </router-link>
         </div>
@@ -66,7 +68,18 @@
       <el-carousel-item v-for="(group, index) in categoryGroupsForMobile" :key="index" class="no-text-decoration">
         <div class="product-section__category">
           <router-link :to="'/books?category=' + category.slug" class="category-card" v-for="(category, idx) in group" :key="category.id">
-            <img :src="categoryImages[idx % categoryImages.length]" alt="Category image" class="category-image">
+            <img :src="getRandomCategoryImage()" alt="Category image" class="category-image">
+            <span>{{ category.name }}</span>
+          </router-link>
+        </div>
+      </el-carousel-item>
+    </el-carousel>
+
+    <el-carousel ref="carouselRefForTablet" arrow="never" class="for-tablet">
+      <el-carousel-item v-for="(group, index) in categoryGroupsForTablet" :key="index" class="no-text-decoration">
+        <div class="product-section__category">
+          <router-link :to="'/books?category=' + category.slug" class="category-card" v-for="(category, idx) in group" :key="category.id">
+            <img :src="getRandomCategoryImage()" alt="Category image" class="category-image">
             <span>{{ category.name }}</span>
           </router-link>
         </div>
@@ -78,7 +91,7 @@
   <img src="@/assets/img/User/homepage-banner.svg" alt="" class="homepage__banner">
 
   <!-- All books -->
-  <div class="product-section">
+  <div class="product-section all-books-section">
     <div class="product-section__header">
       <div style="display: flex; align-items: center; gap: 10px">
         <img src="@/assets/img/User/orange-before.svg" alt="" style="width: 15px">
@@ -142,8 +155,6 @@
       </router-link>
     </div>
   </div>
-
-  <!-- Benefits -->
 </template>
 
 <script setup lang="ts">
@@ -161,9 +172,11 @@ const bookStore = useBookStore();
 const wishlistStore = useWishlistStore();
 const categoriesPerPage = 6;
 const categoriesPerPageForMobile = 3
+const categoriesPerPageForTablet = 4
 
 const carouselRef = ref()
 const carouselRefForMobile = ref()
+const carouselRefForTablet = ref()
 const first8Books = computed(() => bookStore.books.slice(0, 8))
 const firstRows = computed(() => first8Books.value.slice(0, 4))
 const secondRows = computed(() => first8Books.value.slice(4, 8))
@@ -183,6 +196,10 @@ const categoryImages = [
   "/category-icon-4.svg",
   "/category-icon-5.svg",
 ]
+const getRandomCategoryImage = () => {
+  const randomIndex = Math.floor(Math.random() * categoryImages.length);
+  return categoryImages[randomIndex];
+}
 
 const categoryGroups = computed(() => {
   const groups = []
@@ -200,18 +217,38 @@ const categoryGroupsForMobile = computed(() => {
   return groups
 })
 
+const categoryGroupsForTablet = computed(() => {
+  const groups = []
+  for (let i = 0; i < homepageStore.categories.length; i += categoriesPerPageForTablet) {
+    groups.push(homepageStore.categories.slice(i, i + categoriesPerPageForTablet))
+  }
+  return groups
+})
+
 const prevSlide = () => {
-  if (window.innerWidth > 768) {
+  if (window.innerWidth > 1200) {
     carouselRef.value?.prev()
-  } else {
+  }
+
+  if (window.innerWidth <= 1200 && window.innerWidth > 678) {
+    carouselRefForTablet.value?.prev()
+  }
+
+  if (window.innerWidth <= 678) {
     carouselRefForMobile.value?.prev()
   }
 }
 
 const nextSlide = () => {
-  if (window.innerWidth > 768) {
+  if (window.innerWidth > 1200) {
     carouselRef.value?.next()
-  } else {
+  }
+
+  if (window.innerWidth <= 1200 && window.innerWidth > 678) {
+    carouselRefForTablet.value?.next()
+  }
+
+  if (window.innerWidth <= 678) {
     carouselRefForMobile.value?.next()
   }
 }
@@ -292,12 +329,12 @@ onMounted( () => {
     }
 
     &--categories {
-      padding-top: 20px;
+      padding-top: 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
       border-right: 1px solid #ddd;
-      height: 380px;
+      height: 344px;
 
       @media (max-width: 768px) {
         border: none;
@@ -305,7 +342,7 @@ onMounted( () => {
     }
 
     &--items {
-      padding: 9px 50px 9px 0;
+      padding: 4.1px 50px 4.1px 0;
 
       &:hover {
         text-decoration: underline;
@@ -313,9 +350,9 @@ onMounted( () => {
       }
     }
 
-    &--items:first-child {
-      margin-top: 10px;
-    }
+    //&--items:first-child {
+    //  margin-top: 10px;
+    //}
 
     &--carousel {
       width: 78%;
@@ -342,6 +379,7 @@ onMounted( () => {
 
   &__banner {
     width: 100%;
+    margin-top: 40px;
   }
 }
 
@@ -359,10 +397,40 @@ ol, ul {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 
   @media (max-width: 768px) {
     display: none;
   }
+}
+
+@media (min-width: 768px) and (max-width: 821px){
+  .homepage__hero--categories {
+    display: none !important;
+  }
+
+  .homepage__hero--carousel {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0;
+  }
+
+  .header__nav.active {
+    width: 500px;
+  }
+}
+
+.seperator {
+  border: 0.5px solid #000;
+  opacity: 10%;
+  margin-top: 60px;
+}
+
+.category-section {
+  margin-top: 80px;
+}
+
+.all-books-section {
+  margin-top: 71px;
 }
 </style>

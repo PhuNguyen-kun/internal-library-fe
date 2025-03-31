@@ -20,11 +20,12 @@ export const useBookStore = defineStore('book', () => {
   const selectedBook = ref<Book | null>(null);
 
   const columns = [
-    {prop: "title", label: "Tên sách", width: 200, type: "string", fixed: "left"},
+    {prop: "title", label: "Tên sách", width: 200, type: "string", fixed: "left", lineClamp: 2},
     {prop: "image_url", label: "Ảnh", width: 180, align: "center"},
     {prop: "author", label: "Tác giả", width: 300, type: "string"},
     {prop: "publisher", label: "Nhà xuất bản", width: 210},
     {prop: "category", label: "Danh mục", width: 200},
+    {prop: "published_year", label: "Năm xuất bản", width: 150, align: "center"},
     {prop: "stock_quantity", label: "Số lượng", width: 100, align: "center"},
     {prop: "page", label: "Số trang", width: 170, align: "center"},
     {prop: "short_description", label: "Mô tả ngắn", width: 300, lineClamp: 2},
@@ -37,15 +38,23 @@ export const useBookStore = defineStore('book', () => {
   const fetchBooks = async () => {
     try {
       loading.value = true;
-      const response = await bookService.fetchBooks(searchTerm.value.trim(), pagination.per_page, pagination.current_page, includeDeleted.value);
+
+      const response = await bookService.fetchBooks(
+        searchTerm.value.trim(),
+        pagination.per_page,
+        pagination.current_page,
+        includeDeleted.value,
+        filters
+      );
+
       books.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
-      loading.value=false;
+      loading.value = false;
     } catch (error) {
       handleError(error, 'Failed to fetch books');
     }
-  }
+  };
 
   const handlePageChange = (page: number) => {
     pagination.current_page = page;
@@ -84,7 +93,8 @@ export const useBookStore = defineStore('book', () => {
       notifySuccess("Sách đã được xóa thành công");
       await fetchBooks();
     } catch (error) {
-      handleError(error, 'Failed to delete book');
+      console.log(error);
+      notifyError("Không thể xóa vì sách đang tồn tại trong đơn mượn!");
     }
   }
 
@@ -97,7 +107,23 @@ export const useBookStore = defineStore('book', () => {
       notifySuccess("Đã xóa sách được chọn");
       await fetchBooks();
     } catch (error) {
-      handleError(error, 'Failed to delete selected books');
+      console.log(error);
+      notifyError("Không thể xóa vì sách đang tồn tại trong đơn mượn!");
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  const restoreSelectedBooks = async (ids: number[]) => {
+    try {
+      loading.value = true;
+      for (const id of ids) {
+        await bookService.restoreBook(id);
+      }
+      notifySuccess("Đã khôi phục sách được chọn");
+      await fetchBooks();
+    } catch (error) {
+      handleError(error, 'Failed to restore selected books');
     } finally {
       loading.value = false;
     }
@@ -169,6 +195,17 @@ export const useBookStore = defineStore('book', () => {
     }
   };
 
+  const filters = reactive({
+    author: null,
+    publisher: null,
+    category: null,
+  });
+
+  const setFilters = (newFilters: any) => {
+    filters.author = newFilters.author;
+    filters.publisher = newFilters.publisher;
+    filters.category = newFilters.category;
+  };
 
 
   return {
@@ -189,6 +226,8 @@ export const useBookStore = defineStore('book', () => {
     deleteBook,
     deleteSelectedBooks,
     fetchAuthorsCategoriesPublishers,
-    restoreBook
+    restoreBook,
+    restoreSelectedBooks,
+    setFilters
   }
 });

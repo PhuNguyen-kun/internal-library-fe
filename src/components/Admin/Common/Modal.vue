@@ -10,7 +10,7 @@
 
     <template v-slot:footer>
       <div class="dialog-footer">
-        <el-button @click="handleCancel">Cancel</el-button>
+        <el-button @click="handleCancel">Hủy</el-button>
         <el-button type="primary" @click="handleSubmit">{{ confirmText }}</el-button>
       </div>
     </template>
@@ -31,7 +31,7 @@ const props = defineProps({
   },
   confirmText: {
     type: String,
-    default: "Submit",
+    default: "Xác nhận",
   },
   formRef: {
     type: Object,
@@ -65,7 +65,6 @@ const handleSubmit = () => {
     });
   } else {
     emit("submit");
-    emit("update:visible", false);
     emit("reset");
   }
 };

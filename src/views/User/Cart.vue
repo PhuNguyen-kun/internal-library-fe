@@ -3,7 +3,87 @@
     <TheBreadCrumb/>
   </div>
 
-  <div class="cart">
+  <div class="cart-for-pc">
+    <el-row :gutter="20" class="cart__title">
+      <el-col :span="10">Tên sách</el-col>
+      <el-col :span="4" align="center">SL trong kho</el-col>
+      <el-col :span="4" align="center">Số lượng mượn</el-col>
+      <el-col :span="6" align="center">Ngày trả</el-col>
+    </el-row>
+
+    <div v-if="cartStore.cart.length === 0" class="cart__empty">Giỏ hàng trống</div>
+      <template v-for="item in cartStore.cart" :key="item.id" >
+    <el-row :gutter="20" class="cart__item" :class="{'out-of-stock': !isStockAvailable(item) }">
+<!--        <div :class="{'out-of-stock': !isStockAvailable(item) }" class="cart__item">-->
+          <el-col :span="10">
+            <router-link
+              :to="'/books/' + item.book.slug"
+              class="cart__item--name no-text-decoration__strong"
+              @mouseleave="hideDeleteButton(item.id)"
+              @mouseover="showDeleteButton(item.id)"
+            >
+              <div class="image-container">
+                <img :src="item.book.image_url" alt="Book Image" class="cart__item--image"/>
+                <!--  Delete button -->
+                <div
+                  v-show="hoveredItemId === item.id"
+                  class="delete-btn"
+                  @click.prevent.stop="showDeleteDialog(item)"
+                >
+                  <img alt="Delete" src="@/assets/img/User/delete-cart-item-btn.svg"/>
+                </div>
+              </div>
+              <span :title="item.book.title" class="line-clamp-2">{{ item.book.title }}</span>
+            </router-link>
+          </el-col>
+          <el-col :span="4" align="center">
+            <span>{{ item.book.stock_quantity }}</span>
+          </el-col>
+          <el-col :span="4" class="" align="center">
+            <div class="quantity-input">
+              <div class="input-field">{{ item.quantity }}</div>
+              <div class="button">
+                <button class="btn" @click="increaseQuantity(item.id)">
+                  <el-icon>
+                    <ArrowUp/>
+                  </el-icon>
+                </button>
+                <button class="btn" @click="handleDecreaseQuantity(item)">
+                  <el-icon>
+                    <ArrowDown/>
+                  </el-icon>
+                </button>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="6" class="cart__item--date">
+            <el-date-picker
+              v-model="item.return_date_due"
+              :class="{ 'error-border': errors[item.id] }"
+              :disabled-date="disablePastDates"
+              format="YYYY-MM-DD"
+              placeholder="Chọn ngày trả"
+              type="date"
+              value-format="YYYY-MM-DD"
+              @change="handleDateChange(item.id, item.return_date_due)"
+            />
+            <div v-if="errors[item.id]" class="error-message">
+              {{ errors[item.id] }}
+            </div>
+          </el-col>
+<!--        </div>-->
+
+        <div
+          v-if="cartStore.outOfStockItems.includes(item.book.id)"
+          class="quantity__error-message"
+        >
+          Số lượng tồn kho không đủ (Còn {{ item.book.stock_quantity }} quyển)
+        </div>
+    </el-row>
+      </template>
+  </div>
+
+  <div class="cart cart-container">
     <div class="cart__title">
       <div class="cart__item--name">Tên sách</div>
       <div class="cart__item--stock">SL trong kho</div>
@@ -13,8 +93,8 @@
 
     <div v-if="cartStore.cart.length === 0" class="cart__empty">Giỏ hàng trống</div>
     <div class="cart__items">
-      <div v-for="item in cartStore.cart" :key="item.id">
-        <div class="cart__item" :class="{'out-of-stock': !isStockAvailable(item) }">
+      <div v-for="item in cartStore.cart" :key="item.id" class="cart__items">
+        <div :class="{'out-of-stock': !isStockAvailable(item) }" class="cart__item">
           <router-link
             :to="'/books/' + item.book.slug"
             class="cart__item--name no-text-decoration__strong"
@@ -32,56 +112,118 @@
                 <img alt="Delete" src="@/assets/img/User/delete-cart-item-btn.svg"/>
               </div>
             </div>
-            <span>{{ item.book.title }}</span>
+            <span :title="item.book.title" class="line-clamp-2">{{ item.book.title }}</span>
           </router-link>
-          <div class="cart__item--stock">
-            <span>{{ item.book.stock_quantity }}</span>
-          </div>
-          <div class="cart__item--quantity">
-            <div class="quantity-input">
-              <div class="input-field">{{ item.quantity }}</div>
-              <div class="button">
-                <button class="btn" @click="increaseQuantity(item.id)">
-                  <el-icon>
-                    <ArrowUp/>
-                  </el-icon>
-                </button>
-                <button class="btn" @click="handleDecreaseQuantity(item)">
-                  <el-icon>
-                    <ArrowDown/>
-                  </el-icon>
-                </button>
+          <div class="cart__item--right-container">
+            <div class="cart__item--stock">
+              <span>{{ item.book.stock_quantity }}</span>
+            </div>
+            <div class="cart__item--quantity">
+              <div class="quantity-input">
+                <div class="input-field">{{ item.quantity }}</div>
+                <div class="button">
+                  <button class="btn" @click="increaseQuantity(item.id)">
+                    <el-icon>
+                      <ArrowUp/>
+                    </el-icon>
+                  </button>
+                  <button class="btn" @click="handleDecreaseQuantity(item)">
+                    <el-icon>
+                      <ArrowDown/>
+                    </el-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="cart__item--date">
+              <el-date-picker
+                v-model="item.return_date_due"
+                :class="{ 'error-border': errors[item.id] }"
+                :disabled-date="disablePastDates"
+                format="YYYY-MM-DD"
+                placeholder="Chọn ngày trả"
+                type="date"
+                value-format="YYYY-MM-DD"
+                @change="handleDateChange(item.id, item.return_date_due)"
+              />
+              <div v-if="errors[item.id]" class="error-message">
+                {{ errors[item.id] }}
               </div>
             </div>
           </div>
-          <div class="cart__item--date">
-            <el-date-picker
-              v-model="item.return_date_due"
-              :class="{ 'error-border': errors[item.id] }"
-              :disabled-date="disablePastDates"
-              format="YYYY-MM-DD"
-              placeholder="Chọn ngày trả"
-              type="date"
-              value-format="YYYY-MM-DD"
-              @change="handleDateChange(item.id, item.return_date_due)"
-            />
-            <div v-if="errors[item.id]" class="error-message">
-              {{ errors[item.id] }}
+        </div>
+        <!--   Mobile     -->
+        <div :class="{'out-of-stock': !isStockAvailable(item) }" class="cart__item--mobile">
+          <router-link
+            :to="'/books/' + item.book.slug"
+            class="cart__item--image no-text-decoration__strong"
+            @mouseleave="hideDeleteButton(item.id)"
+            @mouseover="showDeleteButton(item.id)"
+          >
+            <div class="image-container">
+              <img :src="item.book.image_url" alt="Book Image" class="cart__item--image"/>
+              <!--  Delete button -->
+              <div
+                v-show="hoveredItemId === item.id"
+                class="delete-btn"
+                @click.prevent.stop="showDeleteDialog(item)"
+              >
+                <img alt="Delete" src="@/assets/img/User/delete-cart-item-btn.svg"/>
+              </div>
+            </div>
+          </router-link>
+          <div class="cart__item--right-container">
+            <div :title="item.book.title" class="cart__item--name">{{ item.book.title }}</div>
+            <div class="cart__item--stock">Số lượng trong kho: {{ item.book.stock_quantity }}</div>
+            <div class="cart__item--action">
+              <div class="cart__item--quantity">
+                <div class="quantity-input">
+                  <div class="input-field">{{ item.quantity }}</div>
+                  <div class="button">
+                    <button class="btn" @click="increaseQuantity(item.id)">
+                      <el-icon>
+                        <ArrowUp/>
+                      </el-icon>
+                    </button>
+                    <button class="btn" @click="handleDecreaseQuantity(item)">
+                      <el-icon>
+                        <ArrowDown/>
+                      </el-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="cart__item--date">
+                <el-date-picker
+                  v-model="item.return_date_due"
+                  :class="{ 'error-border': errors[item.id] }"
+                  :disabled-date="disablePastDates"
+                  format="YYYY-MM-DD"
+                  placeholder="Chọn ngày trả"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+                  @change="handleDateChange(item.id, item.return_date_due)"
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          v-if="cartStore.outOfStockItems.includes(item.book.id)"
-          class="quantity__error-message"
-        >
-          Số lượng tồn kho không đủ (Còn {{ item.book.stock_quantity }} quyển)
+          <div v-if="errors[item.id]" class="error-message responsive">
+            {{ errors[item.id] }}
+          </div>
+
+          <div
+            v-if="cartStore.outOfStockItems.includes(item.book.id)"
+            class="quantity__error-message"
+          >
+            Số lượng tồn kho không đủ (Còn {{ item.book.stock_quantity }} quyển)
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="cart__functions">
-    <router-link class="cart__functions--btn" to="/homepage">Tiếp tục mua hàng</router-link>
+    <router-link class="cart__functions--btn" to="/">Tiếp tục mua hàng</router-link>
     <div class="cart__functions--btn" @click="updateCart">Cập nhật giỏ hàng</div>
   </div>
 
@@ -99,6 +241,7 @@
   <el-dialog
     v-model="isDeleteDialogVisible"
     center
+    class="delete-dialog"
     title="Xác nhận xóa"
     top="20vh"
     width="30%"
@@ -220,7 +363,6 @@ const updateCart = async () => {
     }));
 
     if (!validateCart()) {
-      notifyError("Vui lòng chọn ngày trả sách!");
       return;
     }
 
@@ -232,7 +374,7 @@ const updateCart = async () => {
     const isStockAvailable = await cartStore.checkStocks(itemsToCheck);
 
     if (!isStockAvailable) {
-      notifyError("Một số sản phẩm trong giỏ hàng đã hết hàng. Vui lòng kiểm tra lại!");
+      await cartStore.fetchCart();
       return;
     }
 
@@ -246,9 +388,16 @@ const updateCart = async () => {
 };
 
 const checkout = async () => {
-  await cartStore.fetchCart();
+
+  const updates = cartStore.cart.map((item) => ({
+    id: item.id,
+    quantity: item.quantity,
+    return_date_due: item.return_date_due,
+  }));
+
+  await cartStore.updateCart(updates);
+
   if (!validateCart()) {
-    notifyError("Vui lòng chọn ngày trả sách!");
     return;
   }
 
@@ -260,12 +409,10 @@ const checkout = async () => {
   const isStockAvailable = await cartStore.checkStocks(itemsToCheck);
 
   if (!isStockAvailable) {
-    notifyError("Một số sản phẩm trong giỏ hàng đã hết hàng. Vui lòng kiểm tra lại!");
     return;
   }
 
-  await updateCart();
-  router.push("/checkout");
+  await router.push("/checkout");
 };
 
 onMounted(() => {
@@ -302,6 +449,14 @@ onMounted(() => {
 
 .cart {
   width: 100%;
+  @media (min-width: 1440px) {
+    display: none;
+  }
+
+  &__title, &__items, &__item {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 
   &__title, &__item {
     display: flex;
@@ -328,17 +483,18 @@ onMounted(() => {
     color: #888888;
     text-align: center;
     margin-top: 100px;
+    margin-bottom: 100px;
   }
 
   &__item {
 
     &--name {
-      width: 400px;
+      min-width: 40%;
       display: flex;
       align-items: center;
       position: relative;
 
-      @media (max-width: 768px) {
+      @media (max-width: 1200px) {
         display: flex;
         flex-direction: column;
         width: 120px;
@@ -346,7 +502,7 @@ onMounted(() => {
     }
 
     &--stock {
-      width: 100px;
+      max-width: 200px;
       text-align: center;
     }
 
@@ -354,12 +510,28 @@ onMounted(() => {
       width: 50px;
       height: 70px;
       margin-right: 30px;
+      object-fit: cover;
     }
 
     &--quantity {
-      display: flex;
-      justify-content: center;
-      width: 150px;
+      @media (min-width: 1200.2px) {
+        display: flex;
+        justify-content: center;
+        width: 300px;
+      }
+
+      @media (max-width: 380px) {
+        gap: 10px;
+        justify-content: space-between;
+      }
+
+      @media (min-width: 380.2px) and (max-width: 768px) {
+        justify-content: space-between;
+      }
+
+      @media (min-width: 768.2px) and (max-width: 1200px) {
+        justify-content: space-between;
+      }
     }
 
     &--date {
@@ -367,7 +539,7 @@ onMounted(() => {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      width: 200px;
+      width: 300px;
 
       .error-message {
         font-size: 13px;
@@ -406,6 +578,7 @@ onMounted(() => {
     border: 1.5px solid #000;
     border-radius: 5px;
     padding: 20px;
+    margin-bottom: 70px;
 
     @media (max-width: 768px) {
       width: auto;
@@ -469,9 +642,15 @@ onMounted(() => {
 }
 
 .quantity__error-message {
-  font-size: 14px;
+  font-size: 13px !important;
   color: red;
-  padding: 10px 30px 0 30px;
+  padding: 10px 30px 0 10px;
+  margin-top: 10px;
+  width: 100%;
+
+  @media (max-width: 1200px) {
+    text-align: left;
+  }
 }
 
 .cart__item.out-of-stock {
@@ -479,8 +658,265 @@ onMounted(() => {
 }
 
 :deep(.el-input) {
-  @media (max-width: 768px) {
-    max-width: 150px !important;
+  .el-input__inner {
+    text-align: center;
   }
+
+  @media (max-width: 380px) {
+    width: 160px;
+
+    .el-input__inner {
+      text-align: center;
+    }
+  }
+
+  @media (min-width: 380.2px) and (max-width: 768px) {
+    width: 200px;
+
+    .el-input__inner {
+      text-align: center;
+    }
+  }
+
+  @media (min-width: 768.2px) and (max-width: 1200px) {
+  }
+
+}
+
+
+.cart__item--right-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart__item--mobile {
+  display: none;
+  flex-wrap: wrap;
+}
+
+
+// Responsive for mobile
+@media (max-width: 380px) {
+  .cart__item--image {
+    margin-right: 20px !important;
+  }
+
+  .cart__item--right-container {
+    display: flex;
+    flex-direction: column;
+    width: 50% !important;
+  }
+
+  .cart__functions--btn {
+    padding: 15px 15px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .cart__item {
+    display: none;
+  }
+  .cart__title {
+    display: none;
+  }
+
+  .cart__item--mobile {
+    display: flex;
+    padding: 15px 10px;
+    box-shadow: 2px 2px 8px #efefef;
+    margin-top: 30px;
+  }
+
+  .cart__item--name {
+    display: block;
+    width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-height: 3em;
+    line-height: 1.5em;
+  }
+
+  .cart__item--right-container {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+  }
+
+  .cart__item--name {
+    font-size: 16px;
+    font-weight: 500;
+
+    @media (max-width: 380px) {
+      font-size: 13.5px;
+    }
+
+    @media (min-width: 380.2px) and (max-width: 768px) {
+      font-size: 15px;
+    }
+  }
+
+  .cart__item--stock {
+    width: 100%;
+    color: #6b6b6b;
+    text-align: left;
+    font-size: 14px;
+    margin: 10px 0;
+
+    @media (max-width: 380px) {
+      font-size: 13px;
+      margin: 5px 0;
+    }
+
+    @media (min-width: 380.2px) and (max-width: 768px) {
+    }
+
+    @media (min-width: 768.2px) and (max-width: 1200px) {
+    }
+
+  }
+
+  .cart__item--image {
+    width: 70px;
+    height: 100px;
+  }
+
+  .cart__item--action {
+    display: flex;
+    width: 100%;
+    justify-content: start;
+    align-items: center;
+
+    @media (max-width: 380px) {
+      gap: 20px;
+    }
+
+    @media (min-width: 380.2px) and (max-width: 768px) {
+      gap: 20px;
+    }
+
+    @media (min-width: 768.2px) and (max-width: 1200px) {
+      gap: 20px;
+    }
+  }
+
+  :deep(.el-input__wrapper) {
+    height: 40px !important;
+  }
+
+  .error-message {
+    margin-top: 15px;
+    @media (max-width: 380px) {
+      font-size: 13px;
+      margin-top: 17px;
+      margin-bottom: -3px;
+    }
+
+    @media (min-width: 380.2px) and (max-width: 768px) {
+      margin-top: 17px;
+      margin-bottom: -3px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1200px) {
+      text-align: left;
+      margin-left: 10px;
+      font-size: 13px;
+    }
+  }
+}
+
+:deep(.el-dialog) {
+  @media (max-width: 768px) {
+    width: 80% !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .quantity-input {
+    width: 60px;
+    margin-top: 10px;
+
+    .input-field {
+      width: 39px;
+    }
+  }
+}
+
+@media (min-width: 380.2px) and (max-width: 768px) {
+}
+
+@media (min-width: 768.2px) and (max-width: 1200px) {
+}
+
+@media (min-width: 1200.2px) and (max-width: 1500px) {
+
+}
+
+.cart-for-pc {
+  display: none;
+  width: 1170px;
+  @media (min-width: 1440px) {
+    display: block;
+  }
+}
+
+@media (max-width: 430px) {
+  .cart__item--right-container {
+    width: 100px;
+  }
+
+  .cart__item--stock {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .cart__item--date {
+    margin-left: -50px;
+  }
+}
+
+@media (max-width: 430px) {
+  .cart__item--image {
+    height: 110px;
+  }
+
+  .cart__item--stock {
+    margin-bottom: 0;
+  }
+}
+
+:deep(.el-input__inner::placeholder) {
+  opacity: 1 !important;
+  color: #a8abb2 !important;
+  text-align: center;
+}
+</style>
+
+<style lang="scss">
+.el-dialog__header {
+  padding-bottom: 20px;
+}
+
+.el-dialog__footer {
+  padding-top: 20px;
+}
+
+.delete-dialog {
+  width: 26.5% !important;
+  @media (max-width: 768px) {
+    width: 80% !important;
+  }
+}
+
+.error-message {
+  width: 100%;
+  text-align: center;
 }
 </style>

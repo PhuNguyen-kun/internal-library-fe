@@ -1,24 +1,35 @@
 import axiosInstance from "@/utils/axiosInstance";
 import type {Book} from "@/types/Admin/book";
 
-export const fetchBooks = async (searchTerm: string = '', perPage: number, page: number, includeDeleted: boolean = false) => {
+export const fetchBooks = async (
+  searchTerm: string = '',
+  perPage: number,
+  page: number,
+  includeDeleted: boolean = false,
+  filters: any = {}
+) => {
   try {
     const response = await axiosInstance.get('/admin/books', {
       params: {
         search_term: searchTerm,
         per_page: perPage,
-        page: page,
+        page,
         include_deleted: includeDeleted ? 1 : 0,
+        author_slug: filters.author,
+        publisher_slug: filters.publisher,
+        category_slug: filters.category,
       }
     });
+
     return {
-      data: response.data.data, pagination: response.data.pagination
+      data: response.data.data,
+      pagination: response.data.pagination
     };
   } catch (error) {
     console.error('Failed to fetch books', error);
     throw error;
   }
-}
+};
 
 export const createBook = async (book: Book) => {
   try {

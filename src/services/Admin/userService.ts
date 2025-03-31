@@ -1,23 +1,38 @@
 import axiosInstance from "@/utils/axiosInstance";
 import type { User } from '@/types/Admin/user';
 
-export const getUsers = async (searchTerm: string = '', perPage: number, page: number) => {
+export const getUsers = async (params: {
+  search_term?: string;
+  status?: number[];
+  page?: number;
+  per_page?: number;
+}) => {
   try {
     const response = await axiosInstance.get("/admin/users", {
-      params: {
-        search_term: searchTerm,
-        per_page: perPage,
-        page: page
+      params,
+      paramsSerializer: (params) => {
+        const query = new URLSearchParams();
+        for (const key in params) {
+          const value = params[key];
+          if (Array.isArray(value)) {
+            value.forEach(v => query.append(`${key}[]`, String(v)));
+          } else if (value !== undefined && value !== null) {
+            query.append(key, String(value));
+          }
+        }
+        return query.toString();
       }
     });
+
     return {
-      data: response.data.data, pagination: response.data.pagination
+      data: response.data.data,
+      pagination: response.data.pagination
     };
   } catch (error) {
-    console.error('Failed to fetch users', error);
+    console.error("Failed to fetch users", error);
     throw error;
   }
-}
+};
 
 export const createUser = async (user: User) => {
   try {

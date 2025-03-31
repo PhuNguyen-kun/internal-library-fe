@@ -17,6 +17,7 @@
     "@ckeditor/ckeditor5-vue": "^7.3.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.7",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "dayjs": "^1.11.13",
     "element-plus": "^2.8.8",
     "papaparse": "^5.4.1",

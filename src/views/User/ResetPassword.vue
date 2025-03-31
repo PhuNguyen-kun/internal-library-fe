@@ -5,7 +5,7 @@
     </div>
 
     <div class="auth__signup-form">
-      <h1 class="auth__title">Reset Password</h1>
+      <h1 class="auth__title">Đặt lại mật khẩu</h1>
 
       <form @submit.prevent="submit">
         <div class="form-group">
@@ -111,11 +111,19 @@ const submit = async () => {
     img {
       width: 90%;
     }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &__signup-form {
     flex: 1;
     padding: 0 40px;
+
+    @media (max-width: 768px) {
+      padding: 0 10px;
+    }
   }
 
   &__title {
@@ -123,6 +131,10 @@ const submit = async () => {
     font-weight: 500;
     margin-bottom: 20px;
     font-family: Inter, sans-serif;
+
+    @media (max-width: 768px) {
+      margin-bottom: 40px;
+    }
   }
 
   &__sub-title {
@@ -150,6 +162,10 @@ const submit = async () => {
     outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
+    @media (max-width: 768px) {
+      width: 75%;
+    }
+
     &:focus {
       border-color: #ff6600;
     }
@@ -171,6 +187,12 @@ const submit = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 768px) {
+    width: 80%;
+    justify-content: center;
+  }
+
   button {
     margin: 30px 0;
   }

@@ -27,5 +27,5 @@ export const menuItems: MenuItems[] = [
   { name: 'Quản lý đơn mượn', icon: OrderListsIcon, href: "/admin/orders" },
   { name: 'Đánh giá', icon: UiElementsIcon, href: '/admin/reviews' },
   { separator: true },
-  { name: 'Logout', icon: LogoutIcon, action: 'logout' }
+  { name: 'Đăng xuất', icon: LogoutIcon, action: 'logout' }
 ]

@@ -22,7 +22,9 @@
         <div class="action-buttons"><img src="@/assets/img/User/eye-icon.svg" alt=""></div>
       </div>
       <div class="product-card__info">
-        <h3 class="product-card__info--title no-text-decoration">{{ book.title }}</h3>
+          <h3 class="product-card__info--title no-text-decoration" :title="book.title">
+            {{ book.title }}
+          </h3>
         <div class="product-card__info--review">
           <el-rate v-model="book.average_star" disabled disabled-void-color="#E5E5E5"></el-rate>
           <div class="review-count">({{book.review_count}})</div>
@@ -48,7 +50,6 @@ const handleWishlistClick = async (bookId: number, event: MouseEvent) => {
     const startX = buttonRect.left + buttonRect.width / 2;
     const startY = buttonRect.top + buttonRect.height / 2;
 
-    // Tính toán chính xác vị trí wishlist icon
     const wishlistIcon = document.querySelector('.header__action--icon [href="/wishlist"]');
     if (wishlistIcon) {
       const iconRect = wishlistIcon.getBoundingClientRect();
@@ -131,5 +132,24 @@ const addToCart = async (book: any) => {
     }
   }
 }
+</style>
+
+<style lang="scss">
+.product-card__info--title {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  max-height: 3em;
+  line-height: 1.5em;
+}
+
+//@media (max-width: 768px) {
+//  .product-card__info--title {
+//    font-size: ;
+//  }
+//}
 </style>
 

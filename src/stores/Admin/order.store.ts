@@ -18,6 +18,7 @@ export const useOrderStore = defineStore("order", () => {
   const searchTerm = ref<string>("");
   const loading = ref<boolean>(false);
   const selectedOrder = ref<Order | null>(null);
+  const selectedStatus = ref<number[]>([]);
 
   const formRef = ref();
   const modalTitle = ref<string>("");
@@ -27,14 +28,16 @@ export const useOrderStore = defineStore("order", () => {
     selectedOrder.value = null;
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (extraParams: { start_date?: string; end_date?: string } = {}) => {
     try {
       loading.value = true;
-      const response = await orderService.fetchOrders(
-        searchTerm.value.trim(),
-        pagination.per_page,
-        pagination.current_page
-      );
+      const response = await orderService.fetchOrders({
+        search_term: searchTerm.value.trim(),
+        status: selectedStatus.value,
+        per_page: pagination.per_page,
+        page: pagination.current_page,
+        ...extraParams,
+      });
       orders.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
@@ -120,6 +123,7 @@ export const useOrderStore = defineStore("order", () => {
     selectedOrder,
     formRef,
     modalTitle,
+    selectedStatus,
     resetForm,
     fetchOrders,
     handlePageChange,

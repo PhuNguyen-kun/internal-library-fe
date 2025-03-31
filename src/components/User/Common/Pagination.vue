@@ -47,7 +47,7 @@ const scrollToTop = () => {
 
 function handlePageChange(page: number) {
   emit('changePage', page);
-  scrollToTop();
+  // scrollToTop();
 }
 </script>
 

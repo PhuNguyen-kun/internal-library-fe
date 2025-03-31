@@ -25,7 +25,19 @@
         <slot :name="column.prop" :row="scope.row" :index="scope.$index"/>
       </template>
       <template v-else #default="scope" >
-        <span :class="{'is-line-clamp': column.lineClamp}" :title="scope.row[column.prop]" style="white-space: pre-wrap;" v-html="scope.row[column.prop]"></span>
+        <el-tooltip
+          effect="customized"
+          placement="top"
+          :content="scope.row[column.prop]"
+          raw-content
+          popper-class="custom-tooltip"
+        >
+          <span
+            :class="{ 'is-line-clamp': column.lineClamp }"
+            style="white-space: pre-wrap;"
+            v-html="scope.row[column.prop]"
+          ></span>
+        </el-tooltip>
       </template>
     </el-table-column>
   </el-table>
@@ -60,6 +72,13 @@ defineProps({
     default: true
   }
 });
+
+const stripHtml = (html: string) => {
+  if (!html) return "";
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+};
 </script>
 
 <style lang="scss">
@@ -100,5 +119,24 @@ defineProps({
 
 .el-table__header, .el-table__body {
   width: 100% !important;
+}
+
+.custom-tooltip {
+  max-width: 400px !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  text-align: left !important;
+}
+
+.el-popper.is-customized {
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+
+.el-popper.is-customized .el-popper__arrow::before {
+  background: #fff;
+  right: 0;
+  border: 1px solid #ccc;
 }
 </style>

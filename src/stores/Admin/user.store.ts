@@ -18,11 +18,17 @@ export const useUserStore = defineStore('user', () => {
   const formError = ref<string>('');
   const loading = ref<boolean>(false);
   const selectedUser = ref<User | null>(null);
+  const selectedStatus = ref<number[]>([]);
 
   const fetchUsers = async () => {
     try {
       loading.value=true;
-      const response = await userService.getUsers(searchTerm.value.trim(), pagination.per_page, pagination.current_page);
+      const response = await userService.getUsers({
+        search_term: searchTerm.value.trim(),
+        status: selectedStatus.value,
+        page: pagination.current_page,
+        per_page: pagination.per_page
+      });
       users.value = response.data;
       pagination.total = response.pagination.total;
       pagination.total_pages = response.pagination.total_pages;
@@ -98,6 +104,7 @@ export const useUserStore = defineStore('user', () => {
     loading,
     selectedUser,
     searchTerm,
+    selectedStatus,
     createUser,
     updateUser,
     fetchUsers,

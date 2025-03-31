@@ -8,25 +8,72 @@
           v-model="bookStore.searchTerm"
           class="admin-page__search-input"
           clearable
-          placeholder="Tìm kiếm sách theo tên sách, tên tác giả, nhà xuất bản, danh mục"
+          placeholder="Tìm kiếm theo tên sách"
           @change="handleSearch"
         />
+
+        <button class="admin-icon-white" @click="toggleFilter">
+          <el-icon size="medium"><Filter/></el-icon>
+        </button>
+
+        <transition name="fade-popover">
+        <div
+          v-show="filterVisible"
+          ref="filterPopoverRef"
+          class="custom-popover"
+        >
+          <div class="popover-inner">
+            <el-select v-model="tempFilters.author" clearable filterable multiple placeholder="Chọn tác giả"
+                       style="width: 100%; margin-bottom: 10px;">
+              <el-option
+                v-for="item in bookStore.authors"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+
+            <el-select v-model="tempFilters.publisher" clearable filterable multiple placeholder="Chọn NXB"
+                       style="width: 100%; margin-bottom: 10px;">
+              <el-option
+                v-for="item in bookStore.publishers"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+
+            <el-select v-model="tempFilters.category" clearable filterable multiple placeholder="Chọn danh mục"
+                       style="width: 100%;">
+              <el-option
+                v-for="item in bookStore.categories"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+
+            <el-checkbox
+              v-model="tempIncludeDeleted"
+              size="default"
+              style="margin-top: 15px"
+            >
+              Bao gồm sách đã xóa
+            </el-checkbox>
+
+            <div style="text-align: right;">
+              <el-button size="small" @click="resetFilters">Xóa lọc</el-button>
+              <el-button size="small" type="primary" @click="applyFilters">Áp dụng</el-button>
+            </div>
+          </div>
+        </div>
+        </transition>
 
         <Button class=" btn--primary" @click="handleSearch">
           <el-icon class="icon--nicer">
             <Search/>
           </el-icon>
         </Button>
-
-        <el-checkbox
-          v-model="bookStore.includeDeleted"
-          @change="handleSearch"
-          style="margin-left: 15px"
-          size="default" border
-        >
-          Bao gồm sách đã xóa
-        </el-checkbox>
-
       </div>
       <div class="admin-page__heading--right">
         <Button v-if="selectedRows.length" class="btn btn--danger" @click="openDeleteSelectedConfirm"
@@ -35,6 +82,13 @@
             <Delete/>
           </el-icon>
           <span>Xóa các mục đã chọn</span>
+        </Button>
+        <Button v-if="selectedRows.length" class="btn btn--success" @click="openRestoreSelectedConfirm"
+        >
+          <el-icon class="btn--nicer">
+            <RefreshLeft/>
+          </el-icon>
+          <span>Khôi phục các mục đã chọn</span>
         </Button>
         <Button class="btn btn--primary" @click="openCreateModal">
           <el-icon class="btn--nicer" style="margin-top: -3px;">
@@ -46,9 +100,9 @@
     </div>
 
     <Table :columns="bookStore.columns" :data="bookStore.books" :loading="fetchLoading"
-           @selection-change="handleSelectionChange" :row-class-name="getRowClass">
+           :row-class-name="getRowClass" @selection-change="handleSelectionChange">
       <template #image_url="{ row }">
-        <div style="width: 98px; height: 98px; margin: 0 auto">
+        <div class="image" style="width: 98px; height: 98px; margin: 0 auto">
           <img :src="row.image_url" alt="Book Image" style="width: 80px; height: 100px; object-fit: cover">
         </div>
       </template>
@@ -79,8 +133,8 @@
         <div class="action-buttons">
           <el-button
             v-if="row.deleted_at"
-            type="text"
             size="small"
+            type="text"
             @click="bookStore.restoreBook(row.id)"
           >
             Khôi phục
@@ -122,21 +176,22 @@
       require-asterisk-position="right"
     >
       <el-form-item label="Tên sách" prop="title">
-        <el-input @input="book.title=book.title.trimStart()" v-model="book.title" placeholder="Nhập tên sách"></el-input>
+        <el-input v-model="book.title" placeholder="Nhập tên sách"
+                  @input="book.title=book.title.trimStart()"></el-input>
       </el-form-item>
-      <el-form-item label="Avatar" prop="image_url">
+      <el-form-item label="Thumbnail" prop="image_url">
         <el-upload
           :auto-upload="false"
           :file-list="uploadFileList"
+          :limit="1"
+          :on-change="handleFileChange"
+          :on-exceed="handleExceed"
           :on-preview="handlePictureCardPreview"
           :on-remove="handleRemove"
-          :on-exceed="handleExceed"
-          :on-change="handleFileChange"
-          action="#"
-          list-type="picture-card"
-          :limit="1"
           :show-file-list="true"
-          accept="image/png, image/jpeg">
+          accept=".png, .jpeg, .webp, .jpg"
+          action="#"
+          list-type="picture-card">
           <el-icon>
             <Plus/>
           </el-icon>
@@ -168,18 +223,20 @@
 
       <el-form-item label="Ảnh phụ" prop="additional_images">
         <el-upload
-          multiple
-          :limit="4"
-          :file-list="uploadAdditionalFileList"
-          list-type="picture-card"
-          :on-change="handleAdditionalFileChange"
-          :on-remove="handleAdditionalFileRemove"
-          :on-exceed="handleAdditionalFileExceed"
-          action="#"
           :auto-upload="false"
+          :file-list="uploadAdditionalFileList"
+          :limit="4"
+          :on-change="handleAdditionalFileChange"
+          :on-exceed="handleAdditionalFileExceed"
+          :on-remove="handleAdditionalFileRemove"
           :show-file-list="true"
-          accept="image/png, image/jpeg"        >
-          <el-icon><Plus/></el-icon>
+          accept="image/png, image/jpeg"
+          action="#"
+          list-type="picture-card"
+          multiple>
+          <el-icon>
+            <Plus/>
+          </el-icon>
         </el-upload>
       </el-form-item>
       <el-form-item label="Tác giả" prop="author">
@@ -200,8 +257,8 @@
       </el-form-item>
       <el-form-item label="Nhà xuất bản" prop="publisher">
         <el-select
-          filterable
           v-model="book.publisher"
+          filterable
           placeholder="Chọn nhà xuất bản"
           style="width: 100%;"
         >
@@ -216,8 +273,8 @@
       <el-form-item label="Danh mục" prop="category">
         <el-select
           v-model="book.category"
-          multiple
           filterable
+          multiple
           placeholder="Chọn danh mục"
           style="width: 100%;"
         >
@@ -229,30 +286,48 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="Số lượng" prop="stock_quantity">
-        <el-input-number
-          v-model="book.stock_quantity"
-          :min="1"
-          :max="100"
-          placeholder="Nhập số lượng"
-          controls-position="right"
-        />
-      </el-form-item>
-      <el-form-item label="Số trang" prop="page">
-        <el-input-number
-          v-model="book.page"
-          :min="1"
-          :max="10000"
-          placeholder="Nhập số trang"
-          controls-position="right"
-        />
-      </el-form-item>
+      <el-row>
+        <el-col :span="9">
+          <el-form-item label="Năm xuất bản" prop="published_year">
+            <el-date-picker
+              v-model="book.published_year"
+              :disabledDate="time => time.getFullYear() < 1901 || time.getTime() > Date.now()"
+              placeholder="Chọn năm xuất bản"
+              type="year"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="7">
+          <el-form-item label="Số lượng" prop="stock_quantity">
+            <el-input-number
+              v-model="book.stock_quantity"
+              :max="100"
+              :min="1"
+              controls-position="right"
+              placeholder="Nhập số lượng"
+              step-strictly
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="7">
+          <el-form-item label="Số trang" prop="page">
+            <el-input-number
+              v-model="book.page"
+              :max="10000"
+              :min="1"
+              controls-position="right"
+              placeholder="Nhập số trang"
+              step-strictly
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
       <el-form-item label="Mô tả ngắn" prop="short_description">
-<!--        <el-input v-model="book.short_description" placeholder="Nhập mô tả ngắn" rows="4" type="textarea"></el-input>-->
+        <!--        <el-input v-model="book.short_description" placeholder="Nhập mô tả ngắn" rows="4" type="textarea"></el-input>-->
         <ckeditor
           v-model="book.short_description"
-          :editor="editor"
           :config="config"
+          :editor="editor"
         />
 
       </el-form-item>
@@ -260,8 +335,8 @@
         <!-- <el-input v-model="book.description" placeholder="Nhập mô tả đầy đủ" rows="6" type="textarea"></el-input> -->
         <ckeditor
           v-model="book.description"
-          :editor="editor"
           :config="config"
+          :editor="editor"
         />
       </el-form-item>
     </el-form>
@@ -286,11 +361,20 @@
   >
     <span>Bạn có chắc chắn muốn xóa sách này?</span>
   </Modal>
+  <Modal
+    :title="'Xác nhận khôi phục'"
+    :visible="restoreSelectedConfirmVisible"
+    style="width: 500px"
+    @submit="confirmRestoreSelectedBooks"
+    @update:visible="restoreSelectedConfirmVisible = $event"
+  >
+    <span>Bạn có chắc chắn muốn khôi phục sách này?</span>
+  </Modal>
 
 </template>
 
 <script lang="ts" setup>
-import {onMounted, reactive, ref, watch} from "vue";
+import {onMounted, reactive, ref, watch, onBeforeUnmount} from "vue";
 import Button from "@/components/Admin/Common/Button.vue";
 import Table from "@/components/Admin/Common/Table.vue";
 import Pagination from "@/components/Admin/Common/Pagination.vue";
@@ -300,7 +384,7 @@ import {useBookStore} from "@/stores/Admin/book.store";
 import {Delete, Plus, ZoomIn} from '@element-plus/icons-vue'
 import type {UploadFile} from 'element-plus'
 import {notifyError} from "@/composables/notifications";
-import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+import {Ckeditor} from '@ckeditor/ckeditor5-vue';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const editor = ref(ClassicEditor)
@@ -308,6 +392,64 @@ const bookStore = useBookStore();
 const fetchLoading = ref<boolean>(false);
 const isAllDeleted = ref(false);
 const isAllNotDeleted = ref(false);
+const filterVisible = ref(false);
+const filterPopoverRef = ref(null);
+
+// const filters = reactive({
+//   author: null,
+//   publisher: null,
+//   category: null,
+// });
+
+const toggleFilter = () => {
+  filterVisible.value = !filterVisible.value;
+
+  tempFilters.author = bookStore.filters.author;
+  tempFilters.publisher = bookStore.filters.publisher;
+  tempFilters.category = bookStore.filters.category;
+  tempIncludeDeleted.value = bookStore.includeDeleted;
+};
+
+const tempIncludeDeleted = ref(false);
+
+const tempFilters = reactive({
+  author: null,
+  publisher: null,
+  category: null,
+  includeDeleted: false,
+});
+
+const resetFilters = () => {
+  tempFilters.author = null;
+  tempFilters.publisher = null;
+  tempFilters.category = null;
+  tempIncludeDeleted.value = false;
+};
+
+const applyFilters = () => {
+  bookStore.includeDeleted = tempIncludeDeleted.value;
+  bookStore.setFilters(tempFilters);
+
+  filterVisible.value = false;
+  bookStore.pagination.current_page = 1;
+  bookStore.fetchBooks();
+};
+
+// Xử lý click outside
+// onMounted(() => {
+//   document.addEventListener("click", handleClickOutside);
+// });
+
+// onBeforeUnmount(() => {
+//   document.removeEventListener("click", handleClickOutside);
+// });
+
+const handleClickOutside = (event: MouseEvent) => {
+  const popover = filterPopoverRef.value;
+  if (popover && !popover.contains(event.target as Node)) {
+    filterVisible.value = false;
+  }
+};
 
 const config = {
   toolbar: [
@@ -327,6 +469,7 @@ const book = reactive({
   author: "",
   publisher: "",
   category: "",
+  published_year: "",
   stock_quantity: 0,
   page: 0,
   short_description: "",
@@ -366,6 +509,9 @@ const formRules = {
   category: [
     {required: true, message: 'Không để trống tên danh mục', trigger: 'blur'},
   ],
+  published_year: [
+    {required: true, message: 'Không để trống năm xuất bản', trigger: 'blur'},
+  ],
   stock_quantity: [
     {required: true, message: 'Không để trống số lượng', trigger: 'blur'},
     {type: 'number', message: 'Số lượng phải là số', trigger: 'blur'}
@@ -376,16 +522,16 @@ const formRules = {
   ],
   short_description: [
     {required: true, message: 'Không để trống mô tả ngắn', trigger: 'blur'},
-    {max: 255, message: 'Mô tả ngắn không vượt quá 255 ký tự'}
+    {max: 1000, message: 'Mô tả ngắn không vượt quá 1000 ký tự'}
   ],
   description: [
     {required: true, message: 'Không để trống mô tả đầy đủ', trigger: 'blur'},
-    {max: 1000, message: 'Mô tả đầy đủ không vượt quá 1000 ký tự'}
+    {max: 100000, message: 'Mô tả đầy đủ không vượt quá 100000 ký tự'}
   ]
 }
 
 // Fetch deleted books
-const getRowClass = ({ row }: { row: Book }) => {
+const getRowClass = ({row}: { row: Book }) => {
   return row.deleted_at ? "row-deleted" : "";
 };
 
@@ -426,7 +572,7 @@ const handleAdditionalFileChange = (file, fileList) => {
 
 const deletedImageIds = ref<number[]>([]);
 
-const handleAdditionalFileRemove = (file) => {
+const handleAdditionalFileRemove = (file: any) => {
   if (!file.raw) {
     deletedImageIds.value.push(parseInt(file.uid));
   }
@@ -466,6 +612,7 @@ const openCreateModal = () => {
     author: "",
     publisher: "",
     category: "",
+    published_year: "",
     stock_quantity: "",
     page: "",
     short_description: "",
@@ -489,6 +636,7 @@ const openEditModal = (selectedBook: Book) => {
     author: selectedBook.author,
     publisher: selectedBook.publisher,
     category: selectedBook.category,
+    published_year: selectedBook.published_year,
     stock_quantity: selectedBook.stock_quantity,
     page: selectedBook.page,
     short_description: selectedBook.short_description,
@@ -547,6 +695,18 @@ const confirmDeleteSelectedBooks = async () => {
   deleteSelectedConfirmVisible.value = false;
 };
 
+// Restore selected
+const restoreSelectedConfirmVisible = ref<boolean>(false);
+const openRestoreSelectedConfirm = async () => {
+  restoreSelectedConfirmVisible.value = true;
+}
+
+const confirmRestoreSelectedBooks = async () => {
+  const selectedIds = selectedRows.value.map((book: any) => book.id);
+  await bookStore.restoreSelectedBooks(selectedIds);
+  restoreSelectedConfirmVisible.value = false;
+};
+
 const handleSearch = async () => {
   bookStore.pagination.current_page = 1;
   await bookStore.fetchBooks();
@@ -558,8 +718,9 @@ const handleSubmit = async () => {
   formData.append('author', book.author.join(', '));
   formData.append('category', book.category.join(', '));
   formData.append('publisher', book.publisher);
-  formData.append('stock_quantity', book.stock_quantity);
-  formData.append('page', book.page);
+  formData.append('stock_quantity', book.stock_quantity.toString());
+  formData.append('page', book.page.toString());
+  formData.append('published_year', new Date(book.published_year).getFullYear().toString());
   formData.append('short_description', book.short_description);
   formData.append('description', book.description);
   formData.append('deleted_image_ids', JSON.stringify(deletedImageIds.value));
@@ -602,7 +763,7 @@ const handleSubmit = async () => {
   isModalVisible.value = false;
 };
 
-onMounted( () => {
+onMounted(() => {
   bookStore.fetchBooks();
   bookStore.fetchAuthorsCategoriesPublishers()
 });
@@ -646,16 +807,62 @@ watch(isModalVisible, (value) => {
 });
 </script>
 
+<style lang="scss" scoped>
+.admin-page__search-input {
+  width: 300px;
+}
+</style>
+
 <style lang="scss">
 .el-upload-list__item {
   display: flex;
   justify-content: center;
 }
-</style>
 
-<style scoped lang="scss">
 .row-deleted {
-  color: #b2b2b2;
-  background-color: #f9f9f9;
+  color: #c7c7c7;
+
+  .image, .el-tag {
+    opacity: 0.4;
+  }
+}
+
+.ck-content {
+  min-height: 200px !important;
+}
+
+.custom-popover {
+  position: absolute;
+  top: 200px; /* chỉnh theo vị trí nút filter */
+  left: 270px; /* chỉnh lại tuỳ layout */
+  z-index: 999;
+  background-color: white;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  width: 400px;
+}
+
+.popover-inner {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.fade-popover-enter-active,
+.fade-popover-leave-active {
+  transition: all 0.25s ease;
+}
+
+.fade-popover-enter-from,
+.fade-popover-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.fade-popover-enter-to,
+.fade-popover-leave-from {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

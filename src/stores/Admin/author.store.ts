@@ -32,9 +32,9 @@ export const useAuthorStore = defineStore('author', () => {
     }
   }
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = async (page: number) => {
     pagination.current_page = page;
-    fetchAuthors();
+    await fetchAuthors();
   }
 
   const createAuthor = async (author: Author) => {
@@ -74,7 +74,7 @@ export const useAuthorStore = defineStore('author', () => {
       notifySuccess("Tác giả đã được xóa thành công");
       await fetchAuthors();
     } catch (error) {
-      handleError(error, "Failed to delete author");
+      notifyError("Không thể xóa vì tồn tại sách thuộc tác giả này!");
     } finally {
       loading.value = false;
     }
@@ -89,7 +89,7 @@ export const useAuthorStore = defineStore('author', () => {
         notifySuccess("Đã xóa các tác giả được chọn");
         await fetchAuthors();
       } catch (error) {
-        handleError(error, "Failed to delete selected authors");
+        notifyError("Không thể xóa vì tồn tại sách thuộc tác giả này!");
       } finally {
         loading.value = false;
       }

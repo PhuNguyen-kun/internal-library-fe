@@ -5,19 +5,22 @@ import { useRouter } from 'vue-router';
 import { logout as logoutService } from '@/services/Common/auth'
 import { signup as signupService } from '@/services/Common/auth'
 import {notifyError, notifySuccess} from "@/composables/notifications";
+import {useUserStore} from "@/stores/User/user.store";
+
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
+  const userStore = useUserStore();
 
   const name = ref<string>('');
   const email = ref<string>('');
   const password = ref<string>('');
-  const errors = ref<{ email?: string; password?: string }>({});
+  const errors = ref<{ email?: string; password?: string; name?: string }>({});
   const formError = ref<string>('');
   const loading = ref<boolean>(false);
   const isLoggedIn = ref(!!localStorage.getItem("user_access_token"));
 
   const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^(kiaisoft\..+|.+@kiaisoft\.com)$/;
     return emailRegex.test(email);
   };
 
@@ -27,12 +30,35 @@ export const useAuthStore = defineStore('auth', () => {
     formError.value = '';
 
     if (!isValidEmail(email.value)) {
-      errors.value.email = 'Please enter a valid email';
+      errors.value.email = 'Nhập có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft';
       isValid = false;
     }
 
     if (password.value.length < 8) {
-      errors.value.password = 'Password must be at least 8 characters';
+      errors.value.password = 'Mật khẩu ít nhất 8 ký tự';
+      isValid = false;
+    }
+
+    if (!name.value.trim()) {
+      errors.value.name = 'Vui lòng nhập tên';
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+  const validateFormLogin = (): boolean => {
+    let isValid = true;
+    errors.value = {};
+    formError.value = '';
+
+    if (!isValidEmail(email.value)) {
+      errors.value.email = 'Nhập có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft';
+      isValid = false;
+    }
+
+    if (password.value.length < 8) {
+      errors.value.password = 'Mật khẩu ít nhất 8 ký tự';
       isValid = false;
     }
 
@@ -40,13 +66,15 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const login = async () => {
-    const isValid = validateForm();
+    const isValid = validateFormLogin();
     if (!isValid) return;
 
     loading.value = true;
 
     try {
       const response = await loginService({ email: email.value, password: password.value });
+      await userStore.fetchUserInfo();
+      console.log("User info:", userStore.userInfo);
 
       console.log("API response:", response.data);
 
@@ -58,13 +86,18 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem("user_access_token", access_token);
       console.log("User token saved");
       isLoggedIn.value = true;
-      router.push('/homepage');
+      await router.push('/');
     } catch (error: any) {
       if (error.response) {
-        formError.value = 'Email or Password is incorrect!';
+        if (error.response.data.error === 'Tài khoản đã bị chặn') {
+          notifyError('Tài khoản này đã bị chặn!');
+        } else {
+          formError.value = 'Email hoặc mật khẩu không đúng!';
+        }
       } else {
         console.error('An unexpected error occurred:', error);
       }
+
     } finally {
       loading.value = false;
     }
@@ -78,10 +111,14 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (currentPath.startsWith('/admin')) {
         localStorage.removeItem('admin_access_token');
+
         await router.push('/admin/login');
       } else {
         localStorage.removeItem('user_access_token');
-        await router.push('/homepage');
+        console.log(1)
+        localStorage.removeItem('userInfo');
+        console.log(2)
+        await router.push('/');
       }
     } catch (error) {
       console.error('Failed to logout:', error);
@@ -101,7 +138,9 @@ export const useAuthStore = defineStore('auth', () => {
         password: password.value,
       });
 
-      console.log("Signup response:", response.data); // Debug API response
+      await userStore.fetchUserInfo();
+
+      console.log("Signup response:", response.data);
 
       const access_token = response.data.access_token;
       if (!access_token) {
@@ -112,11 +151,15 @@ export const useAuthStore = defineStore('auth', () => {
       console.log("User token saved");
       notifySuccess("Đăng ký thành công!");
 
-      router.push('/homepage');
+      await router.push('/login');
     } catch (error: any) {
       if (error.response) {
-        formError.value = error.response.data.message || 'An error occurred during signup';
-        notifyError('Đăng ký thất bại!');
+        if (error.response.data.errors?.email && error.response.data.errors.email[0] === "The email has already been taken.") {
+          formError.value = "Người dùng đã tồn tại.";
+        } else {
+          formError.value = error.response.data.error || error.response.data.message;
+        }
+        notifyError(formError.value);
       } else {
         console.error("Signup error:", error);
         notifyError('Đăng ký thất bại!');

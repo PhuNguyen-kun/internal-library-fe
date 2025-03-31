@@ -44,9 +44,9 @@
   <el-dialog
     v-model="isDeleteDialogVisible"
     title="Xác nhận xóa"
-    width="45%"
     center
     top="20vh"
+    class="delete-dialog"
   >
     <span>Bạn có chắc muốn xóa sản phẩm khỏi danh sách yêu thích?</span>
     <template #footer>
@@ -131,20 +131,70 @@ onMounted(() => {
 .product-section {
   &__items {
     flex-wrap: wrap;
+
+    @media (max-width: 992px) {
+      justify-content: space-between;
+      gap: 10px;
+    }
   }
 
   .product-card {
-    width: calc(25% - 30px);
+    //width: calc(25% - 30px);
 
-    @media (max-width: 768px) {
-      width: calc(55% - 30px);
+    @media (max-width: 374.8px) {
+        width: 100%;
     }
+
+    //@media (min-width: 375px) and (max-width: 393px) {
+    //    width: calc(55% - 25px);
+    //}
+    @media (min-width: 393px) and (max-width: 480px) {
+        width: calc(55% - 30px);
+    }
+    @media (min-width: 480px) and (max-width: 678px) {
+        width: calc(55% - 40px);
+    }
+    @media (min-width: 678px) and (max-width: 768px) {
+        width: calc(55% - 50px);
+    }
+    @media (min-width: 768px) and (max-width: 826px) {
+        width: calc(55% - 190px);
+    }
+
+    @media (min-width: 826px)  and  (max-width: 932.2px) {
+      width: calc(55% - 210px);
+    }
+    @media (min-width: 932.2px)  and  (max-width: 1033px) {
+      width: calc(55% - 231px);
+    }
+    @media (min-width: 1033px)  and  (max-width: 1100px) {
+      width: calc(55% - 232.5px);
+    }
+    @media (min-width: 1100px)  and  (max-width: 1200px) {
+      width: calc(55% - 231px);
+    }
+
+    //@media (max-width: 375px) {
+    //  width: 100% !important;
+    //}
+    //@media (max-width: 768px) {
+    //  width: calc(55% - 30px);
+    //}
+    //@media (max-width: 992px) {
+    //  width: calc(50% - 30px);
+    //}
   }
 }
 
 .action-buttons:hover {
   img {
     filter: none;
+  }
+}
+
+.product-card__image {
+  @media (max-width: 992px) {
+    height: 200px;
   }
 }
 
@@ -155,5 +205,41 @@ onMounted(() => {
   color: #888888;
   text-align: center;
   margin-top: 100px;
+}
+
+@media (min-width: 1440px) {
+  .product-section {
+    width: 1170px;
+  }
+
+  .product-card {
+    width: calc(25% - 23px);
+  }
+}
+
+.user-white-btn {
+  width: 120px !important;
+  border: 1px solid #00000080;
+  padding: 5px 20px;
+  line-height: 18px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.product-section {
+  margin-top: 60px !important;
+}
+
+.product-section__items {
+  @media (min-width: 992px) and (max-width: 1200px) {
+    flex-wrap: wrap;
+    gap: 41px;
+  }
+}
+
+:deep(.product-card__image) {
+  @media (min-width: 1023px) {
+    height: 250px !important;
+  }
 }
 </style>

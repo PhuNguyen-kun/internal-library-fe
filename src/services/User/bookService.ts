@@ -53,17 +53,21 @@ export const getTopBorrowedBooks = async () => {
   }
 }
 
-export const getReviews = async (slug: string) => {
+export const getReviews = async (slug: string, pagination: { per_page: number; page: number }) => {
   try {
-    const response = await axiosInstance.get(`/user/books/${slug}/reviews`);
+    const response = await axiosInstance.get(`/user/books/${slug}/reviews`, {
+      params: pagination
+    });
+
     return {
-      data: response.data.data
+      data: response.data.data,
+      pagination: response.data.pagination
     };
   } catch (error) {
     console.error("Failed to fetch reviews", error);
     throw error;
   }
-}
+};
 
 export const getRelatedBooks = async (slug: string) => {
   try {
@@ -106,7 +110,7 @@ export const getPublishers = async ()=> {
 }
 
 export const getBorrowedBooks = async (params = {}) => {
-  try {
+try {
     const response = await axiosInstance.get("/admin/orders/history", { params });
     return {
       data: response.data.data,

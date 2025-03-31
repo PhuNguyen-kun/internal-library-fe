@@ -105,7 +105,7 @@ const cards = [
   }
 }
 
-@media screen and (max-width: 48rem) {
+@media screen and (max-width: 1200px) {
   .content__intro {
     flex-wrap: wrap;
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <TheBreadCrumb style="padding-bottom: 80px" />
+    <TheBreadCrumb />
     <div class="section">
       <div class="page-wrapper">
         <div class="contact-section">
@@ -63,13 +63,13 @@
           </div>
           <form class="contact-form">
             <div class="contact-form__top">
-              <input type="text" name="" id="" placeholder="Your Name" />
-              <input type="email" name="" id="" placeholder="Your Email" />
-              <input type="text" name="" id="" placeholder="Your Phone" />
+              <input type="text" name="" id="" placeholder="Your Name" class="contact-form__top--item"/>
+              <input type="email" name="" id="" placeholder="Your Email" class="contact-form__top--item"/>
+              <input type="text" name="" id="" placeholder="Your Phone" class="contact-form__top--item"/>
             </div>
-            <textarea name="" id="" placeholder="Your Message"></textarea>
-            <div class="form-btn">
-              <button type="submit">Send Message</button>
+            <textarea name="" id="" placeholder="Your Message" class="contact-form__top--message"></textarea>
+            <div class="send-message">
+              <div type="submit" class="user-btn">Send Message</div>
             </div>
           </form>
         </div>
@@ -83,6 +83,14 @@ import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
 </script>
 
 <style scoped lang="scss">
+.section {
+  margin-top: 80px;
+
+  @media screen and (max-width: 48rem) {
+    margin-top: 40px;
+  }
+}
+
 .contact-section {
   display: grid;
   column-gap: 1.88rem;
@@ -92,7 +100,11 @@ import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
   form {
     border-radius: 0.25rem;
     background: var(--white-coor);
-    box-shadow: 0px 1px 13px 0px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
+  }
+
+  @media (max-width: 1200px) {
+    gap: 40px;
   }
 
   .contact-info {
@@ -173,19 +185,10 @@ import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
       margin: 2rem 0;
     }
 
-    .form-btn {
+    .send-message {
+      width: 100%;
       display: flex;
       justify-content: flex-end;
-
-      button {
-        background: var(--primary-color);
-        color: white;
-        padding: 1rem 3rem;
-        border: none;
-        outline: none;
-        display: block;
-        border-radius: 0.25rem;
-      }
     }
   }
 }
@@ -218,5 +221,33 @@ import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
       }
     }
   }
+}
+
+.contact-form__top--item {
+  width: 210px !important;
+  font-family: Poppins, sans-serif !important;
+  font-size: 15px !important;
+}
+
+.contact-form__top--message {
+  @media (min-width: 1440px) {
+    width: 710px !important;
+    font-family: Poppins, sans-serif !important;
+    font-size: 15px !important;
+  }
+  @media (max-width: 767px) {
+    width: 315px !important;
+    font-family: Poppins, sans-serif !important;
+    font-size: 15px !important;
+  }
+  @media (min-width: 768px) and (max-width: 1200px) {
+    width: 638px !important;
+    font-family: Poppins, sans-serif !important;
+    font-size: 15px !important;
+  }
+}
+
+.send-message {
+  width: 100px;
 }
 </style>

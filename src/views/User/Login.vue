@@ -5,8 +5,8 @@
     </div>
 
     <div class="auth__signup-form">
-      <h1 class="auth__title">Log in to Kiai Library</h1>
-      <h2 class="auth__sub-title">Enter your details below</h2>
+      <h1 class="auth__title">Đăng nhập Kiai Library</h1>
+      <h2 class="auth__sub-title">Điền thông tin của bạn bên dưới</h2>
 
       <form @submit.prevent="authStore.login" id="form">
         <!-- Email -->
@@ -18,7 +18,7 @@
             placeholder="Email"
             class="form-input"
             :class="{ error: authStore.errors.email || authStore.formError }"
-            @input="authStore.validateForm"
+            @input="validateEmail"
           />
           <div class="error-message" v-if="authStore.errors.email">{{ authStore.errors.email }}</div>
         </div>
@@ -32,7 +32,7 @@
             placeholder="Password"
             class="form-input"
             :class="{ error: authStore.errors.password || authStore.formError }"
-            @input="authStore.validateForm"
+            @input="validatePassword"
           />
           <div class="error-message" v-if="authStore.errors.password">{{ authStore.errors.password }}</div>
         </div>
@@ -43,17 +43,17 @@
           <button type="submit" class="user-btn" :disabled="authStore.loading">
             <template v-if="authStore.loading">
               <div style="display: flex; align-items: center; justify-content: center; gap: 10px">
-                <span>Logging in...</span>
+                <span>Đang đăng nhập...</span>
                 <span class="loading-spinner"></span>
               </div>
             </template>
             <template v-else>
-              Log in
+              Đăng nhập
             </template>
           </button>
 
           <div>
-            <router-link to="/forgot-password" class="forgot-password">Forgot Password?</router-link>
+            <router-link to="/forgot-password" class="forgot-password">Quên mật khẩu?</router-link>
           </div>
         </div>
       </form>
@@ -66,6 +66,20 @@
 import { useAuthStore } from '@/stores/User/auth.store';
 
 const authStore = useAuthStore();
+
+const validateEmail = () => {
+  authStore.errors.email = '';
+  if (!authStore.isValidEmail(authStore.email)) {
+    authStore.errors.email = 'Nhập email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
+  }
+};
+
+const validatePassword = () => {
+  authStore.errors.password = '';
+  if (authStore.password.length < 8) {
+    authStore.errors.password = 'Mật khẩu ít nhất 8 ký tự';
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -75,35 +89,49 @@ const authStore = useAuthStore();
   align-items: center;
   padding-top: 50px;
 
+  @media (max-width: 380px) {
+    padding: 20px 0 0 0;
+  }
+
   &__side-image {
     flex: 2;
-    img {
-      width: 90%;
+
+    @media (max-width: 1200px) {
+      display: none;
     }
 
-    @media (max-width: 768px) {
-      display: none;
+    img {
+      width: 90%;
     }
   }
 
   &__signup-form {
     flex: 1;
-    padding: 0 40px;
+    padding: 0 0 0 40px;
 
       @media (max-width: 768px) {
         padding: 0 20px;
-    }
+      }
+
+      @media (max-width: 380px) {
+        padding: 0 5px !important;
+      }
   }
 
   &__title {
-    font-size: 38px;
+    font-size: 34px;
     font-weight: 500;
+    line-height: 43px;
     margin-bottom: 20px;
     font-family: Inter, sans-serif;
+    @media (max-width: 380px) {
+      font-size: 37px;
+      line-height: 47px;
+    }
   }
 
   &__sub-title {
-    margin-bottom: 50px;
+    margin-bottom: 40px;
     font-weight: 400;
   }
 }
@@ -120,20 +148,23 @@ const authStore = useAuthStore();
   }
 
   .form-input {
-    width: 91.5%;
-    padding: 17px 15px;
+    width: 100%;
+    padding: 17px 0 17px 0;
     border: none;
     border-bottom: 1px solid #000;
     font-size: 16px;
     outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 
-    &:focus {
-      border-color: #ff6600;
-    }
-
-    &.error {
-      border-color: red;
+    &::placeholder {
+      //position: absolute;
+      //top: 50%;
+      //left: 0;
+      //transform: translateY(-50%);
+      //font-size: 16px;
+      //transition: all 0.3s ease;
+      color: #aaa;
     }
   }
 }
@@ -141,7 +172,7 @@ const authStore = useAuthStore();
 .error-message {
   margin-top: 10px;
   margin-bottom: 10px;
-  font-size: 15px;
+  font-size: 13px;
   color: red;
 }
 
@@ -154,7 +185,7 @@ const authStore = useAuthStore();
   }
 
   .forgot-password {
-    color: #000;
+    color: #DB4444;
 
     &:hover {
       color: var(--user-theme-color);
@@ -182,4 +213,12 @@ const authStore = useAuthStore();
     transform: rotate(360deg);
   }
 }
+
+//.auth__signup-form {
+//  margin-top: 190px !important;
+//}
+//
+//.auth {
+//  margin-bottom: 326px !important;
+//}
 </style>

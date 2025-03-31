@@ -1,25 +1,29 @@
 import axiosInstance from "@/utils/axiosInstance";
 import type {Order} from "@/types/Admin/order";
 
-export const fetchOrders = async (searchTerm: string = '', perPage: number, page: number) => {
+export const fetchOrders = async (params: {
+  search_term?: string;
+  status?: number[];
+  per_page: number;
+  page: number;
+}) => {
   try {
     const response = await axiosInstance.get('/admin/orders', {
       params: {
-        search_term: searchTerm,
-        per_page: perPage,
-        page: page
-      }
+        ...params,
+        status: params.status?.join(','),
+      },
     });
     return {
-      data: response.data.data, pagination: response.data.pagination
+      data: response.data.data,
+      pagination: response.data.pagination,
     };
   } catch (error) {
-    console.error('Failed to fetch authors', error);
+    console.error('Failed to fetch orders', error);
     throw error;
   }
-}
 
-export const fetchOrderWithDetails = async (id: number) => {
+};export const fetchOrderWithDetails = async (id: number) => {
   try {
     const response = await axiosInstance.get(`/admin/orders/${id}`);
     return response.data;
