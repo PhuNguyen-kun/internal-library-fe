@@ -1,35 +1,62 @@
-import { ElNotification } from 'element-plus'
+import {ElMessage, ElNotification} from 'element-plus'
 
-const notifySuccess = (message: string, title = 'Success') => {
+const notifySuccess = (message: string, title = 'Thành công') => {
   ElNotification({
     title: title,
     message: message,
-    type: 'success'
+    type: 'success',
+    offset: 80
   })
 }
 
-const notifyWarning = (message: string, title = 'Warning') => {
+const notifyWarning = (message: string, title = 'Cảnh báo') => {
   ElNotification({
     title: title,
     message: message,
-    type: 'warning'
+    type: 'warning',
+    offset: 80
   })
 }
 
-const notifyInfo = (message: string, title = 'Info') => {
+const notifyInfo = (message: string, title = 'Thông báo') => {
   ElNotification({
     title: title,
     message: message,
-    type: 'info'
+    type: 'info',
+    offset: 80
   })
 }
 
-const notifyError = (message: string, title = 'Error') => {
+const notifyError = (message: string, title = 'Có lỗi xảy ra') => {
   ElNotification({
     title: title,
     message: message,
-    type: 'error'
+    type: 'error',
+    offset: 80
   })
 }
 
-export { notifySuccess, notifyWarning, notifyInfo, notifyError }
+const message = (message: string) => {
+  ElMessage({
+    message: message,
+    offset: 90
+  })
+}
+
+const messageSuccess = (message: string) => {
+  ElMessage({
+    message: message,
+    type: 'success',
+    offset: 90
+  })
+}
+
+const messageError = (message: string, title = 'Error') => {
+  ElMessage({
+    message: message,
+    type: 'error',
+    offset: 90
+  })
+}
+
+export { notifySuccess, notifyWarning, notifyInfo, notifyError, message, messageSuccess, messageError}

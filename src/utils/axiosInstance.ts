@@ -1,10 +1,11 @@
-import axios from 'axios'
-import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
-import router from '@/router'
+import axios from 'axios';
+import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import router from '@/router';
+import { useLoadingStore } from '@/stores/Common/loading.store';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
-  onStart?: () => void
-  onEnd?: () => void
+  onStart?: () => void;
+  onEnd?: () => void;
 }
 
 const axiosInstance = axios.create({
@@ -14,50 +15,65 @@ const axiosInstance = axios.create({
     Accept: 'application/json'
   },
   timeout: 99999999
-})
+});
+
+const loadingStore = useLoadingStore();
 
 axiosInstance.interceptors.request.use(
   (config: CustomAxiosRequestConfig) => {
-    const token = localStorage.getItem('access_token')
+    loadingStore.startLoading();
+    const currentPath = window.location.pathname;
+    let token: string | null = null;
+
+    if (currentPath.startsWith('/admin')) {
+      token = localStorage.getItem('admin_access_token');
+    } else {
+      token = localStorage.getItem('user_access_token');
+    }
 
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
 
     if (config.onStart) {
-      config.onStart()
+      config.onStart();
     }
 
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
+    loadingStore.finishLoading();
+    return Promise.reject(error);
   }
-)
+);
 
+// axiosInstance.ts
 axiosInstance.interceptors.response.use(
-  (response: AxiosResponse) => {
-    const config = response.config as CustomAxiosRequestConfig
-
-    if (config.onEnd) {
-      config.onEnd()
-    }
-    return response
+  (response) => {
+    loadingStore.finishLoading();
+    return response;
   },
-  (error) => {
-    const config = error.config as CustomAxiosRequestConfig
+  async (error) => {
+    loadingStore.finishLoading(); // Luôn dừng loading khi có lỗi
 
-    if (config && config.onEnd) {
-      config.onEnd()
+    // Xử lý lỗi 401
+    if (error.response?.status === 401) {
+      // Xóa token cũ
+      // localStorage.removeItem('user_access_token');
+
+      // Chỉ chuyển hướng nếu request thuộc API yêu cầu auth
+      const isAuthRequiredApi = error.config.url.includes('/api/user/cart') ||
+        error.config.url.includes('/api/user/wishlist') ||
+        error.config.url.includes('/api/user/info');
+
+      if (isAuthRequiredApi && !window.location.pathname.includes('/signup')) {
+        await router.replace('/signup');
+        window.alert('Vui lòng đăng nhập để tiếp tục');
+      }
     }
 
-    if (error.response && error.response.status === 403) {
-      localStorage.removeItem('authToken')
-      router.push('/login')
-    }
-
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
-export default axiosInstance
+export default axiosInstance;

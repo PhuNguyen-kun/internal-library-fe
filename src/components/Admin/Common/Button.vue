@@ -5,12 +5,13 @@
     @click="handleClick"
   >
     <slot name="icon"></slot>
-    <span><slot /></span>
+    <span><slot/></span>
   </button>
 </template>
 
 <script setup lang="ts">
 import {PropType} from "vue"
+
 type ButtonType = 'primary' | 'secondary' | 'danger' | 'success';
 type ButtonSize = 'large' | 'medium' | 'small';
 
@@ -35,11 +36,11 @@ defineProps({
 
 const emit = defineEmits(['click']);
 const handleClick = (event) => {
-    emit('click', event);
+  emit('click', event);
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .btn {
   display: inline-flex;
   align-items: center;
@@ -47,17 +48,9 @@ const handleClick = (event) => {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: background-color 300ms;
-
-  &--primary {
-
-  }
-
-  &--secondary {
-
-  }
 }
 
 .btn:hover {
@@ -77,6 +70,7 @@ const handleClick = (event) => {
 .btn--round {
   border-radius: 99px;
 }
+
 /* Type */
 .btn--primary {
   background-color: var(--admin-theme-color);
@@ -99,21 +93,27 @@ const handleClick = (event) => {
   color: white;
 }
 
+.btn--nicer {
+  position: relative;
+  top: 1px;
+  right: 6px;
+}
+
 /* Size */
-.btn--small {
-  font-size: 13px;
-  padding: 4px 8px;
-  width: 100px;
-}
-
-.btn--medium {
-  font-size: 16px;
-  padding: 8px 16px;
-  width: 150px;
-}
-
-.btn--large {
-  font-size: 19px;
-  padding: 12px 24px;
-}
+//.btn--small {
+//  font-size: 13px;
+//  padding: 4px 8px;
+//  //width: 100px;
+//}
+//
+//.btn--medium {
+//  font-size: 16px;
+//  padding: 8px 16px;
+//  //width: 150px;
+//}
+//
+//.btn--large {
+//  font-size: 19px;
+//  padding: 12px 24px;
+//}
 </style>

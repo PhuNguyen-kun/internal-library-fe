@@ -60,6 +60,7 @@ const toggleSidebar = () => {
   background-color: #fff;
   z-index: 999;
   transition: width 0.3s ease;
+  border-right: 1px solid #ebebeb;
 }
 
 .sidebar-collapsed {
@@ -81,3 +82,5 @@ const toggleSidebar = () => {
   margin-left: 70px;
 }
 </style>
+
+

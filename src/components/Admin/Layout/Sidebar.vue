@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { ref, defineProps } from 'vue'
 import { listSidebar } from "@/constants";
-import {useAuthStore} from "@/stores/Admin/auth";
+import {useAuthStore} from "@/stores/Admin/auth.store";
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -57,8 +57,8 @@ const handleMenuClick = async (item: any) => {
   display: flex;
   flex-direction: column;
   align-items: start;
-  border-right: 1px solid #ebebeb;
   margin-top: 10px;
+  gap: 3px;
 }
 
 .menu-items {
