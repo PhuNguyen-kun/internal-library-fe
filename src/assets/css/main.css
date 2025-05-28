@@ -22,3 +22,7 @@ body {
     --admin-theme-color: #4880FF;
     --user-theme-color: #FF4500C7;
 }
+
+a {
+    text-decoration: none;
+}
