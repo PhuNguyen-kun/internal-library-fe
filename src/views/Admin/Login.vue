@@ -7,7 +7,6 @@
           <p class="desc">Please enter your email and password to continue</p>
         </div>
       </div>
-      <div class="error-message" v-if="authStore.formError" style="text-align: center">{{ authStore.formError }}</div>
 
       <!-- Email -->
       <div class="form-group">
@@ -39,21 +38,19 @@
         <div class="error-message" v-if="authStore.errors.password">{{ authStore.errors.password }}</div>
       </div>
 
+      <div class="error-message" v-if="authStore.formError" style="text-align: center; margin-top: 15px; margin-bottom: 0;">{{ authStore.formError }}</div>
+
       <div class="btn-group">
-        <button type="submit" class="btn" v-loading.fullscreen.lock="authStore.fullscreenloading">
-          Sign in
+        <button type="submit" class="btn" :disabled="authStore.loading">
+            Sign in
         </button>
-        <div class="link-to-signup">
-          <p>Don't have an account?</p>
-          <a href="#" style="text-decoration: underline; color: #5a8cff">Create Account</a>
-        </div>
       </div>
     </form>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/Admin/auth';
+import { useAuthStore } from '@/stores/Admin/auth.store';
 
 const authStore = useAuthStore();
 </script>
@@ -181,15 +178,6 @@ input:focus {
   font-weight: 500;
 }
 
-.link-to-signup {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 15px;
-  font-size: 14px;
-  gap: 5px;
-}
-
 .btn:hover {
   cursor: pointer;
 }
@@ -199,5 +187,29 @@ input:focus {
   font-weight: 500;
   color: red;
   margin-bottom: 10px;
+}
+
+.loading-spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4880ff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  margin-top: 0;
 }
 </style>
