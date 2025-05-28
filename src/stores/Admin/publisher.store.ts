@@ -11,7 +11,7 @@ export const usePublisherStore = defineStore('publisher', () => {
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,
-    per_page: 10
+    per_page: 9
   });
 
   const searchTerm = ref<string>('');

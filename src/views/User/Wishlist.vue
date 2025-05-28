@@ -92,15 +92,17 @@ const addAllToCart = async () => {
   }
 
   try {
-    for (const item of wishlistStore.wishlists) {
-      await cartStore.addToCart(item.book.id, 1);
-    }
-    notifySuccess("Đã thêm tất cả sách vào giỏ hàng!");
+    const books = wishlistStore.wishlists.map(item => ({
+      id: item.book.id,
+      quantity: 1
+    }));
+
+    await cartStore.addAllToCart(books);
   } catch (error) {
     console.error("Failed to add all books to cart", error);
+    notifyError("Có lỗi xảy ra khi thêm sách vào giỏ hàng");
   }
 };
-
 onMounted(() => {
   wishlistStore.fetchWishlists();
 });

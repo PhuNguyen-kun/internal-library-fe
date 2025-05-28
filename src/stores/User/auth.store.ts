@@ -30,7 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
     formError.value = '';
 
     if (!isValidEmail(email.value)) {
-      errors.value.email = 'Nhập có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft';
+      errors.value.email = 'Email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
       isValid = false;
     }
 
@@ -53,7 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
     formError.value = '';
 
     if (!isValidEmail(email.value)) {
-      errors.value.email = 'Nhập có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft';
+      errors.value.email = 'Email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
       isValid = false;
     }
 

@@ -284,7 +284,10 @@ onMounted(async () => {
     font-weight: 500;
   }
 
-  @media (min-width: 768px) and (max-width: 1023px) {
+  @media (min-width: 768px) and (max-width: 819px) {
+    width: 745px;
+  }
+  @media (min-width: 820px) and (max-width: 1023px) {
     width: 730px;
   }
   @media (min-width: 1024px) and (max-width: 1439px) {

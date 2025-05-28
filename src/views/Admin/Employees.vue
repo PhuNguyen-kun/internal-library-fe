@@ -238,7 +238,6 @@ const handleError = (error: any, context: string) => {
 
 
 const perPage = ref<number>(12);
-const loading = ref<boolean>(false);
 const employees = ref([]);
 const searchTerm = ref<string>("");
 const pagination = ref({
@@ -562,6 +561,17 @@ const confirmDeleteSelectedEmployees = async () => {
 
 onMounted(fetchEmployees);
 </script>
+
+<style lang="scss" scoped>
+ol, ul {
+  list-style: none;
+  padding: 0;
+}
+
+.error-message {
+  font-size: 14px !important;
+}
+</style>
 
 <style lang="scss">
 .el-upload-list__item {

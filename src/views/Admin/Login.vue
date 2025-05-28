@@ -7,7 +7,6 @@
           <p class="desc">Please enter your email and password to continue</p>
         </div>
       </div>
-      <div class="error-message" v-if="authStore.formError" style="text-align: center">{{ authStore.formError }}</div>
 
       <!-- Email -->
       <div class="form-group">
@@ -38,6 +37,8 @@
         />
         <div class="error-message" v-if="authStore.errors.password">{{ authStore.errors.password }}</div>
       </div>
+
+      <div class="error-message" v-if="authStore.formError" style="text-align: center; margin-top: 15px; margin-bottom: 0;">{{ authStore.formError }}</div>
 
       <div class="btn-group">
         <button type="submit" class="btn" :disabled="authStore.loading">

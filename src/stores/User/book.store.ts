@@ -3,7 +3,8 @@ import {reactive, ref} from "vue";
 import * as bookService from "@/services/User/bookService";
 import * as homepageService from "@/services/User/homepageService";
 import {defaultPagination} from "@/constants/Admin/pagination";
-import {notifyError } from "@/composables/notifications";
+import {notifyError, notifyInfo, notifySuccess} from "@/composables/notifications";
+import {useAuthStore} from "@/stores/User/auth.store";
 
 export const useBookStore = defineStore("book", () => {
   const books = ref([]);
@@ -17,6 +18,7 @@ export const useBookStore = defineStore("book", () => {
   const searchTerm = ref<string>('');
   const borrowedBooks = ref([]);
   const statusFilter = ref<number[]>([]);
+  const authStore = useAuthStore();
 
   const pagination = reactive({
     current_page: defaultPagination.current_page,
@@ -38,6 +40,14 @@ export const useBookStore = defineStore("book", () => {
     total_pages: defaultPagination.total_pages,
     per_page: 5,
   });
+
+  const checkAuth = () => {
+    if (!authStore.isLoggedIn) {
+      notifyInfo("Vui lòng đăng nhập để sử dụng tính năng này");
+      return false;
+    }
+    return true;
+  };
 
   const handlePageChange = (page: number) => {
     pagination.current_page = page;
@@ -184,8 +194,11 @@ export const useBookStore = defineStore("book", () => {
   };
 
   const submitReview = async (bookId: number, star: number, comment: string) => {
+    if (!checkAuth()) return false;
+
     try {
       const response = await bookService.submitReview(bookId, star, comment);
+      notifySuccess("Cảm ơn bạn! Đánh giá sẽ hiển thị sau khi được Admin duyệt.");
       console.log(response);
     } catch (error) {
       console.error("Lỗi khi gửi đánh giá:", error);

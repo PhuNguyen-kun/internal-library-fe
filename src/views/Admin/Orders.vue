@@ -163,10 +163,10 @@
             placeholder="Chọn trạng thái"
             @change="handleStatusChange(row)"
           >
-            <el-option label="Đang mượn" value="Đang mượn" :disabled="isOptionDisabled('Đang mượn', row.status)"/>
-            <el-option label="Đã trả" value="Đã trả"/>
-            <el-option label="Quá hạn" value="Quá hạn"/>
-            <el-option label="Mất" value="Mất"/>
+            <el-option label="Đang mượn" :value="0" :disabled="isOptionDisabled('0', row.status)"/>
+            <el-option label="Đã trả" :value="1"/>
+            <el-option label="Quá hạn" :value="2"/>
+            <el-option label="Mất" :value="3"/>
           </el-select>
         </template>
       </el-table-column>
@@ -354,10 +354,10 @@ const handleSubmit = async () => {
         return returnDate.isAfter(dueDate);
       });
 
-      if (hasInvalidDate) {
-        notifyError("Ngày trả thực tế không được vượt quá ngày hẹn trả");
-        return;
-      }
+      // if (hasInvalidDate) {
+      //   notifyError("Ngày trả thực tế không được vượt quá ngày hẹn trả");
+      //   return;
+      // }
 
       const payload = {
         details: orderStore.selectedOrder.details.map((detail) => ({
@@ -379,6 +379,7 @@ const handleSubmit = async () => {
     console.log("handleSubmit error:", error);
   }
 };
+
 onMounted(() => {
   orderStore.fetchOrders();
 });

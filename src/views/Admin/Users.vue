@@ -82,7 +82,6 @@
       <el-form
         ref="userFormRef"
         :model="user"
-        :rules="formRules"
         label-position="top"
         require-asterisk-position="right"
       >
@@ -110,8 +109,8 @@
         </el-form-item>
         <el-form-item label="Trạng thái" prop="status">
           <el-radio-group v-model="user.status">
-            <el-radio label="Active">Hoạt động</el-radio>
-            <el-radio label="Inactive">Bị chặn</el-radio>
+            <el-radio :label="1">Hoạt động</el-radio>
+            <el-radio :label="0">Bị chặn</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -144,11 +143,15 @@ import Button from "@/components/Admin/Common/Button.vue";
 import Table from "@/components/Admin/Common/Table.vue";
 import Pagination from "@/components/Admin/Common/Pagination.vue";
 import type {User} from '@/types/Admin/user';
-import {onMounted, reactive, ref, watch} from "vue";
+import {onMounted, reactive, ref, watch, computed} from "vue";
 import Modal from "@/components/Admin/Common/Modal.vue";
 import {useUserStore} from "@/stores/Admin/user.store";
+import { useAuthStore } from '@/stores/Admin/auth.store';
+import {notifyError} from "@/composables/notifications";
 
 const userStore = useUserStore();
+const authStore = useAuthStore();
+const currentUserId = computed(() => authStore.user?.id);
 const fetchLoading = ref<boolean>(false);
 const columns = [
   {prop: "full_name", label: "Tên người dùng", width: 250, type: "string", fixed: "left"},
@@ -163,9 +166,9 @@ const columns = [
 ];
 
 const getStatusLabel = (status: string) => {
-  if (status === 'Inactive') {
+  if (status == '0') {
     return 'Bị chặn';
-  } else if (status === 'Active') {
+  } else if (status == '1') {
     return 'Hoạt động';
   }
   return status;
@@ -218,8 +221,8 @@ const user = reactive({
 
 const getStatusTagType = (status: string): { type: string, effect: string } => {
   const statusTagTypes: { [key: string]: { type: string, effect: string } } = {
-    'In active': { type: 'danger', effect: 'dark'},
-    'Active': { type: 'success', effect: 'dark' },
+    '0': { type: 'info', effect: 'dark'},
+    '1': { type: 'success', effect: 'dark' },
   };
   return statusTagTypes[status] ?? { type: 'info', effect: 'dark' };
 };
@@ -281,6 +284,15 @@ const openBlockConfirm = (id: number) => {
 };
 const handleBlock = async () => {
   if (blockUserId.value) {
+    console.log(blockUserId.value);
+    console.log(currentUserId.value);
+    // Check if trying to block self
+    if (blockUserId.value === currentUserId.value) {
+      notifyError('Không thể chặn tài khoản của chính bạn!');
+      blockConfirmVisible.value = false;
+      return;
+    }
+
     await userStore.blockUser(blockUserId.value);
     blockConfirmVisible.value = false;
   }
@@ -300,6 +312,14 @@ const openBlockSelectedConfirm = async () => {
 
 const confirmBlockSelectedCategories = async () => {
   const selectedIds = selectedRows.value.map((user: any) => user.id);
+
+  // Check if current user is in selection
+  if (selectedIds.includes(currentUserId.value)) {
+    notifyError('Không thể chặn tài khoản của chính bạn!');
+    blockSelectedConfirmVisible.value = false;
+    return;
+  }
+
   await userStore.blockSelectedUsers(selectedIds);
   blockSelectedConfirmVisible.value = false;
 };
@@ -316,6 +336,8 @@ const handleFilter = () => {
 
 onMounted(() => {
   userStore.fetchUsers();
+  authStore.fetchUserProfile();
+  console.log('Current user ID:', currentUserId.value);
 });
 
 watch(isModalVisible, (value) => {

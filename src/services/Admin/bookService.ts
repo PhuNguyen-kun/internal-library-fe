@@ -15,9 +15,9 @@ export const fetchBooks = async (
         per_page: perPage,
         page,
         include_deleted: includeDeleted ? 1 : 0,
-        author_slug: filters.author,
-        publisher_slug: filters.publisher,
-        category_slug: filters.category,
+        author_id: filters.author ? filters.author.join(', ') : undefined,
+        publisher_id: filters.publisher ? filters.publisher.join(', ') : undefined,
+        category_id: filters.category ? filters.category.join(', ') : undefined,
       }
     });
 

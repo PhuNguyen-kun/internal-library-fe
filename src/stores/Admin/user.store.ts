@@ -12,7 +12,7 @@ export const useUserStore = defineStore('user', () => {
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
     total_pages: defaultPagination.total_pages,
-    per_page: 9
+    per_page: 10
   });
   const searchTerm = ref<string>('');
   const formError = ref<string>('');
@@ -22,7 +22,7 @@ export const useUserStore = defineStore('user', () => {
 
   const fetchUsers = async () => {
     try {
-      loading.value=true;
+      loading.value = true;
       const response = await userService.getUsers({
         search_term: searchTerm.value.trim(),
         status: selectedStatus.value,

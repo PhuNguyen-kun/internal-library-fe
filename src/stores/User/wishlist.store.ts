@@ -10,10 +10,13 @@ import {
   notifyInfo,
   notifySuccess
 } from "@/composables/notifications";
+import {useAuthStore} from "@/stores/User/auth.store";
+
 
 export const useWishlistStore = defineStore("wishlist", () => {
   const wishlists = ref([]);
   const wishlist = ref(null);
+  const authStore = useAuthStore();
   const pagination = reactive({
     current_page: defaultPagination.current_page,
     total: defaultPagination.total,
@@ -22,6 +25,14 @@ export const useWishlistStore = defineStore("wishlist", () => {
   });
   const isInWishlist = (bookId: number): boolean => {
     return wishlists.value.some((item: any) => item.book?.id === bookId);
+  };
+
+  const checkAuth = () => {
+    if (!authStore.isLoggedIn) {
+      notifyInfo("Vui lòng đăng nhập để sử dụng tính năng này");
+      return false;
+    }
+    return true;
   };
 
   const handlePageChange = (page: number) => {
@@ -36,7 +47,7 @@ export const useWishlistStore = defineStore("wishlist", () => {
         message("Đã xóa khỏi danh sách yêu thích!");
       } else {
         await addToWishlist(bookId);
-        messageSuccess("Đã thêm vào danh sách yêu thích!");
+        // messageSuccess("Đã thêm vào danh sách yêu thích!");
       }
     } catch (error) {
       throw error;
@@ -72,14 +83,16 @@ export const useWishlistStore = defineStore("wishlist", () => {
   }
 
   const addToWishlist = async (bookId: number) => {
+    if (!checkAuth()) return false;
+
     try {
       const response = await wishlistService.addToWishlist(bookId);
       console.log("Sách đã được thêm vào danh sách yêu thích:", response);
       // notifySuccess("Thêm vào danh sách yêu thích thành công!");
+      messageSuccess("Đã thêm vào danh sách yêu thích!");
       await fetchWishlists();
     } catch (error) {
       console.error("Failed to add to wishlist", error);
-      notifyInfo("Sách đã được thêm vào danh sách yêu thích!");
       throw error;
     }
   }

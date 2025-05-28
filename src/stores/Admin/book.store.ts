@@ -207,7 +207,6 @@ export const useBookStore = defineStore('book', () => {
     filters.category = newFilters.category;
   };
 
-
   return {
     books,
     authors,

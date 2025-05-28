@@ -1,5 +1,5 @@
 <template>
-  <TheBreadCrumb/>
+  <TheBreadCrumb />
 
   <div class="history">
     <h1 class="history__title">Lịch sử các đơn mượn</h1>
@@ -14,12 +14,12 @@
           collapse-tags-tooltip
           multiple
           placeholder="Trạng thái"
-          style="width: 200px;"
+          style="width: 200px"
         >
-          <el-option :value="0" label="Đang mượn"/>
-          <el-option :value="1" label="Đã trả"/>
-          <el-option :value="2" label="Quá hạn"/>
-          <el-option :value="3" label="Mất"/>
+          <el-option :value="0" label="Đang mượn" />
+          <el-option :value="1" label="Đã trả" />
+          <el-option :value="2" label="Quá hạn" />
+          <el-option :value="3" label="Mất" />
         </el-select>
 
         <div class="date-range-pick">
@@ -32,6 +32,7 @@
           <el-date-picker
             :teleported="false"
             v-model="endDate"
+            :disabled-date="disableEndDates"
             placeholder="Ngày kết thúc"
             type="date"
           />
@@ -40,9 +41,7 @@
       </div>
 
       <div class="history__content--list">
-        <div v-if="bookStore.borrowedBooks.length === 0" class="list__empty">
-          Danh sách trống
-        </div>
+        <div v-if="bookStore.borrowedBooks.length === 0" class="list__empty">Danh sách trống</div>
 
         <div v-for="order in bookStore.borrowedBooks" :key="order.id" class="history__order">
           <div class="order__header">
@@ -50,8 +49,14 @@
             <p class="full_name"><span>Họ và tên:</span> {{ order.full_name }}</p>
             <p class="no-responsive"><span>Ngày tạo đơn:</span> {{ order.created_at }}</p>
             <p class="responsive">{{ order.created_at }}</p>
-            <p><span>Trạng thái: </span>
-              <el-tag :type="getStatusTagType(order.status)" effect="dark" round style="margin-bottom: 1px;">
+            <p>
+              <span>Trạng thái: </span>
+              <el-tag
+                :type="getStatusTagType(order.status)"
+                effect="dark"
+                round
+                style="margin-bottom: 1px"
+              >
                 {{ order.status }}
               </el-tag>
             </p>
@@ -68,7 +73,7 @@
 
             <div v-for="book in order.details" :key="book.id" class="history__item">
               <div class="list__item--name">
-                <img :src="book.image_url" alt="Book Image" class="list__item--image">
+                <img :src="book.image_url" alt="Book Image" class="list__item--image" />
                 <span :title="book.title" class="line-clamp-2">{{ book.title }}</span>
               </div>
               <div class="list__item--quantity">
@@ -85,10 +90,7 @@
                   placeholder="Chọn ngày trả thực tế"
                   type="date"
                 />
-                <div
-                  v-if="errors[order.id] && errors[order.id][index]"
-                  class="error-message"
-                >
+                <div v-if="errors[order.id] && errors[order.id][index]" class="error-message">
                   {{ errors[order.id][index] }}
                 </div>
               </div>
@@ -98,10 +100,14 @@
                   placeholder="Chọn trạng thái"
                   :disabled="isBookSelectDisabled[book.id]"
                 >
-                  <el-option label="Đang mượn" value="Đang mượn" :disabled="book.status === 'Quá hạn'"/>
-                  <el-option label="Quá hạn" value="Quá hạn"/>
-                  <el-option label="Mất" value="Mất"/>
-                  <el-option label="Đã trả" value="Đã trả"/>
+                  <el-option
+                    label="Đang mượn"
+                    value="Đang mượn"
+                    :disabled="book.status === 'Quá hạn'"
+                  />
+                  <el-option label="Quá hạn" value="Quá hạn" />
+                  <el-option label="Mất" value="Mất" />
+                  <el-option label="Đã trả" value="Đã trả" />
                 </el-select>
               </div>
             </div>
@@ -111,31 +117,28 @@
           <div class="order__details--mobile responsive">
             <div v-for="book in order.details" :key="book.id" class="history__item">
               <div class="list__item--image-container">
-                <img :src="book.image_url" alt="Book Image" class="list__item--image">
+                <img :src="book.image_url" alt="Book Image" class="list__item--image" />
               </div>
               <div class="list__item--info">
                 <div class="list__item--name">
                   <span :title="book.title" class="line-clamp-2">{{ book.title }}</span>
                 </div>
                 <div class="list__item--info-right">
-                    <div class="list__item--quantity">
-                      <span>Số lượng: {{ book.quantity }}</span>
-                    </div>
-                    <div class="list__item--return-due">
-                      <span>Ngày trả: {{ book.return_date_due }}</span>
-                    </div>
+                  <div class="list__item--quantity">
+                    <span>Số lượng: {{ book.quantity }}</span>
+                  </div>
+                  <div class="list__item--return-due">
+                    <span>Ngày trả: {{ book.return_date_due }}</span>
+                  </div>
                   <div class="list__item--return-real">
                     <el-date-picker
                       v-model="book.return_date_real"
-                          :disabled-date="disableDates(book.return_date_due)"
+                      :disabled-date="disableDates(book.return_date_due)"
                       placeholder="Chọn ngày trả thực tế"
                       type="date"
                       class="return-real-input"
                     />
-                    <div
-                      v-if="errors[order.id] && errors[order.id][index]"
-                      class="error-message"
-                    >
+                    <div v-if="errors[order.id] && errors[order.id][index]" class="error-message">
                       {{ errors[order.id][index] }}
                     </div>
                   </div>
@@ -143,13 +146,13 @@
                     <el-select
                       v-model="book.status"
                       placeholder="Chọn trạng thái"
-                      :disabled = "orderReturned(order)"
+                      :disabled="orderReturned(order)"
                       class="status-input"
                     >
-                      <el-option label="Đang mượn" value="Đang mượn"/>
-                      <el-option label="Quá hạn" value="Quá hạn"/>
-                      <el-option label="Mất" value="Mất"/>
-                      <el-option label="Đã trả" value="Đã trả"/>
+                      <el-option label="Đang mượn" value="Đang mượn" />
+                      <el-option label="Quá hạn" value="Quá hạn" />
+                      <el-option label="Mất" value="Mất" />
+                      <el-option label="Đã trả" value="Đã trả" />
                     </el-select>
                   </div>
                 </div>
@@ -173,72 +176,98 @@
 </template>
 
 <script lang="ts" setup>
-import TheBreadCrumb from "@/components/User/Common/TheBreadCrumb.vue";
-import {useBookStore} from "@/stores/User/book.store";
-import {useOrderStore} from "@/stores/Admin/order.store";
-import {onMounted, reactive, ref} from "vue";
-import dayjs from "dayjs";
-import {notifyError} from "@/composables/notifications";
-import Pagination from "@/components/User/Common/Pagination.vue";
+import TheBreadCrumb from '@/components/User/Common/TheBreadCrumb.vue'
+import { useBookStore } from '@/stores/User/book.store'
+import { useOrderStore } from '@/stores/Admin/order.store'
+import { onMounted, reactive, ref } from 'vue'
+import dayjs from 'dayjs'
+import { notifyError } from '@/composables/notifications'
+import Pagination from '@/components/User/Common/Pagination.vue'
 
-const bookStore = useBookStore();
-const orderStore = useOrderStore();
-const startDate = ref<Date | null>(null);
-const endDate = ref<Date | null>(null);
-const errors = reactive<Record<number, (string | null)[]>>({});
+const bookStore = useBookStore()
+const orderStore = useOrderStore()
+const startDate = ref<Date | null>(null)
+const endDate = ref<Date | null>(null)
+const errors = reactive<Record<number, (string | null)[]>>({})
 
 const getStatusTagType = (status: string): string => {
   const statusTagTypes: Record<string, string> = {
-    "Đang mượn": "primary",
-    "Đã trả": "success",
-    "Quá hạn": "warning",
-    "Mất": "danger",
-  };
-  return statusTagTypes[status] ?? "info";
-};
+    'Đang mượn': 'primary',
+    'Đã trả': 'success',
+    'Quá hạn': 'warning',
+    Mất: 'danger',
+  }
+  return statusTagTypes[status] ?? 'info'
+}
 
 const orderReturned = (order: any) => {
-  return order.status === 'Đã trả';
-};
+  return order.status === 'Đã trả'
+}
 
 const filterByDate = async () => {
-  const formattedStartDate = startDate.value ? startDate.value.toISOString().split("T")[0] : null;
-  const formattedEndDate = endDate.value ? endDate.value.toISOString().split("T")[0] : null;
-  const status = bookStore.statusFilter.length > 0 ? bookStore.statusFilter.join(",") : null;
+  if (startDate.value && endDate.value && startDate.value > endDate.value) {
+    notifyError('Ngày bắt đầu không thể lớn hơn ngày kết thúc')
+    return
+  }
+
+  const formatDate = (date: Date | null): string | null => {
+    if (!date) return null
+
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+  }
+
+  const formattedStartDate = formatDate(startDate.value)
+  const formattedEndDate = formatDate(endDate.value)
+  const status = bookStore.statusFilter.length > 0 ? bookStore.statusFilter.join(',') : null
 
   await bookStore.fetchBorrowedBooks({
     start_date: formattedStartDate,
     end_date: formattedEndDate,
     status: status,
-  });
-};
+  })
+}
 
-let isBookSelectDisabled = reactive<Record<number, boolean>>({});
+const disableEndDates = (time: Date) => {
+  if (!startDate.value) {
+    return false
+  }
+
+  const start = new Date(startDate.value)
+  start.setHours(0, 0, 0, 0)
+
+  return time.getTime() < start.getTime()
+}
+
+let isBookSelectDisabled = reactive<Record<number, boolean>>({})
 
 const handleUpdateOrder = async (order: any) => {
   try {
-    errors[order.id] = [];
+    errors[order.id] = []
 
     const hasError = order.details.some((detail: any, index: number) => {
       if (detail.status === 'Đã trả' && !detail.return_date_real) {
         if (!errors[order.id]) {
-          errors[order.id] = [];
+          errors[order.id] = []
         }
-        errors[order.id][index] = "Vui lòng chọn ngày trả thực tế";
-        return true;
+        errors[order.id][index] = 'Vui lòng chọn ngày trả thực tế'
+        return true
       }
 
       if (detail.status === 'Đã trả' && detail.return_date_real) {
-        errors[order.id][index] = null;
+        errors[order.id][index] = null
       }
 
-      errors[order.id][index] = null;
+      errors[order.id][index] = null
 
-      return false;
-    });
+      return false
+    })
     if (hasError) {
-      notifyError("Vui lòng chọn ngày trả thực tế");
-      return;
+      notifyError('Vui lòng chọn ngày trả thực tế')
+      return
     }
 
     const payload = {
@@ -247,49 +276,46 @@ const handleUpdateOrder = async (order: any) => {
         status: detail.status,
         return_date_real: detail.return_date_real
           ? dayjs(detail.return_date_real).format('YYYY-MM-DD')
-          : null
-      }))
-    };
+          : null,
+      })),
+    }
 
-    await orderStore.updateOrder(order.id, payload);
+    await orderStore.updateOrder(order.id, payload)
 
     order.details.forEach((detail: any) => {
       if (detail.status === 'Đã trả') {
-        isBookSelectDisabled[detail.id] = true;
+        isBookSelectDisabled[detail.id] = true
       }
-    });
+    })
 
-    localStorage.setItem('isBookSelectDisabled', JSON.stringify(isBookSelectDisabled));
+    localStorage.setItem('isBookSelectDisabled', JSON.stringify(isBookSelectDisabled))
 
-    await bookStore.fetchBorrowedBooks();
+    await bookStore.fetchBorrowedBooks()
   } catch (error) {
-    notifyError("Cập nhật thất bại");
+    notifyError('Cập nhật thất bại')
   }
-};
+}
 
 const disableDates = (dueDate: string) => (time: Date) => {
-  const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
-  const due = new Date(dueDate);
-  due.setHours(23, 59, 59, 999);
+  const currentDate = new Date()
+  currentDate.setHours(0, 0, 0, 0)
+  const due = new Date(dueDate)
+  due.setHours(23, 59, 59, 999)
 
-  return (
-    time.getTime() < currentDate.getTime() ||
-    time.getTime() > due.getTime()
-  );
-};
+  return time.getTime() < currentDate.getTime() || time.getTime() > due.getTime()
+}
 const cancelUpdateOrder = () => {
-  bookStore.fetchBorrowedBooks();
-};
+  bookStore.fetchBorrowedBooks()
+}
 
 onMounted(async () => {
-  const savedDisabledState = localStorage.getItem('isBookSelectDisabled');
+  const savedDisabledState = localStorage.getItem('isBookSelectDisabled')
   if (savedDisabledState) {
-    isBookSelectDisabled = JSON.parse(savedDisabledState);
+    isBookSelectDisabled = JSON.parse(savedDisabledState)
   }
 
-  await bookStore.fetchBorrowedBooks();
-});
+  await bookStore.fetchBorrowedBooks()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -449,7 +475,7 @@ onMounted(async () => {
   }
 
   &__empty {
-    padding: 1.3rem 2rem;
+    padding: 4.5rem 2rem;
     font-size: 1rem;
     font-weight: 400;
     color: #888888;
@@ -463,7 +489,8 @@ onMounted(async () => {
     padding: 10px;
   }
 
-  .employee-code, .full_name {
+  .employee-code,
+  .full_name {
     display: none;
   }
 
@@ -527,7 +554,8 @@ onMounted(async () => {
     font-size: 15px;
   }
 
-  .list__item--quantity, .list__item--return-due {
+  .list__item--quantity,
+  .list__item--return-due {
     font-size: 13px;
   }
 
@@ -566,9 +594,9 @@ onMounted(async () => {
 }
 
 @media (min-width: 768.2px) and (max-width: 1199.8px) {
-  .date-range-pick, .date-range-text {
-    width: 100%;
-  }
+  //.date-range-pick, .date-range-text {
+  //  width: 100%;
+  //}
 
   .history__content--date-range {
     width: 100%;
@@ -643,7 +671,7 @@ onMounted(async () => {
   }
 }
 
-@media (min-width: 1023px) {
+@media (min-width: 1025px) {
   .history {
     width: 800px;
   }

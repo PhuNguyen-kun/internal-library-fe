@@ -2,7 +2,7 @@ import axiosInstance from "@/utils/axiosInstance";
 
 export const getCategories = async () => {
   try {
-    const response = await axiosInstance.get("/user/homepage/categories", {
+    const response = await axiosInstance.get("/admin/categories", {
       params: { per_page: 100 },
     });
     return {

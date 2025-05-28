@@ -8,14 +8,14 @@
       <h1 class="auth__title">Tạo tài khoản</h1>
       <h2 class="auth__sub-title">Nhập thông tin của bạn bên dưới</h2>
 
-      <form id="form" @submit.prevent="authStore.signup">
+      <form id="form" @submit.prevent="handleSubmit">
         <!-- Name -->
         <div class="form-group">
           <input
             v-model="authStore.name"
             :class="{ error: authStore.errors.name }"
             class="form-input"
-            placeholder="Name"
+            placeholder="Họ và tên"
             type="text"
             @input="validateName"
           />
@@ -41,11 +41,24 @@
             v-model="authStore.password"
             :class="{ error: authStore.errors.password || authStore.formError }"
             class="form-input"
-            placeholder="Password"
+            placeholder="Mật khẩu"
             type="password"
-            @input="validatePassword"
+            @input="() => { validatePassword(); validateConfirmPassword(); }"
           />
           <div v-if="authStore.errors.password" class="error-message">{{ authStore.errors.password }}</div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <input
+            v-model="confirmPassword"
+            :class="{ error: confirmPasswordError }"
+            class="form-input"
+            placeholder="Xác nhận mật khẩu"
+            type="password"
+            @input="validateConfirmPassword"
+          />
+          <div v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</div>
         </div>
 
         <div class="btn-group">
@@ -60,15 +73,15 @@
               Xác nhận tạo tài khoản
             </template>
           </button>
-
-          <GoogleLogin :callback="callback" class="gg-login-container" popup-type="TOKEN">
-            <button class="user-white-btn">
-              <img alt="Google Icon" class="gg-icon" src="@/assets/img/User/google-icon.svg"/>
-              <span>Đăng nhập với Google</span>
-            </button>
-          </GoogleLogin>
         </div>
       </form>
+
+      <GoogleLogin :callback="callback" class="gg-login-container" popup-type="TOKEN">
+        <button class="user-white-btn">
+          <img alt="Google Icon" class="gg-icon" src="@/assets/img/User/google-icon.svg"/>
+          <span>Đăng nhập với Google</span>
+        </button>
+      </GoogleLogin>
 
       <div class="link-to-login">
         Đã có tài khoản?
@@ -89,10 +102,32 @@ import type {CallbackTypes} from "vue3-google-login";
 import {GoogleLogin} from 'vue3-google-login';
 import {notifyError} from "@/composables/notifications";
 import {useUserStore} from "@/stores/User/user.store";
+import { ref } from "vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const userStore = useUserStore();
+const confirmPassword = ref('');
+const confirmPasswordError = ref('');
+
+const validateConfirmPassword = () => {
+  confirmPasswordError.value = '';
+  if (confirmPassword.value && confirmPassword.value !== authStore.password) {
+    confirmPasswordError.value = 'Mật khẩu xác nhận không khớp';
+  }
+};
+
+const handleSubmit = () => {
+  validateName();
+  validateEmail();
+  validatePassword();
+  validateConfirmPassword();
+
+  if (!confirmPasswordError.value && !authStore.errors.name &&
+    !authStore.errors.email && !authStore.errors.password) {
+    authStore.signup();
+  }
+};
 
 const callback: CallbackTypes.TokenResponseCallback = async (response) => {
   console.log("Access token", response.access_token);
@@ -125,14 +160,18 @@ const callback: CallbackTypes.TokenResponseCallback = async (response) => {
     }
   } catch (e: any) {
     console.log(e);
-    notifyError('Bạn hãy đăng nhập bằng email công ty cấp phát!');
+    if (e.response && e.response.data.error === 'Tài khoản đã bị chặn') {
+      notifyError('Tài khoản này đã bị chặn!');
+    } else {
+      notifyError('Bạn hãy đăng nhập bằng email công ty cấp phát!');
+    }
   }
 };
 
 const validateEmail = () => {
   authStore.errors.email = '';
   if (!authStore.isValidEmail(authStore.email)) {
-    authStore.errors.email = 'Nhập email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
+    authStore.errors.email = 'Email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
   }
 };
 
@@ -183,7 +222,7 @@ const validateName = () => {
     flex: 1;
     padding: 0 0 0 40px;
 
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       padding: 0 20px;
       margin-left: -4px;
     }
@@ -323,5 +362,10 @@ const validateName = () => {
 .user-long-btn {
   width: 370px;
   padding: 0;
+}
+
+.error-message {
+  line-height: 20px !important;
+  text-align: left !important;
 }
 </style>

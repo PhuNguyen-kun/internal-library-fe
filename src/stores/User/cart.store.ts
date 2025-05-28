@@ -3,14 +3,24 @@ import { ref } from "vue";
 import * as cartService from "@/services/User/cartService";
 import * as bookService from "@/services/User/bookService";
 import {handleError} from "@/utils/Admin/handleError";
-import {notifyError, notifySuccess} from "@/composables/notifications";
+import {notifyError, notifyInfo, notifySuccess} from "@/composables/notifications";
 import type {CartItem} from "@/types/User/cart";
+import {useAuthStore} from "@/stores/User/auth.store";
 
 export const useCartStore = defineStore("cart", () => {
   const cart = ref<CartItem[]>([]);
   const cartItem = ref(null);
   const loading = ref(false);
   const outOfStockItems = ref<number[]>([]);
+  const authStore = useAuthStore();
+
+  const checkAuth = () => {
+    if (!authStore.isLoggedIn) {
+      notifyInfo("Vui lòng đăng nhập để sử dụng tính năng này");
+      return false;
+    }
+    return true;
+  };
 
   const fetchCart = async () => {
     try {
@@ -39,6 +49,8 @@ export const useCartStore = defineStore("cart", () => {
   };
 
   const addToCart = async (bookId: number, quantity: number = 1) => {
+    if (!checkAuth()) return false;
+
     try {
       await fetchCart();
 
@@ -64,6 +76,51 @@ export const useCartStore = defineStore("cart", () => {
     }
   };
 
+  const addAllToCart = async (books: { id: number, quantity?: number }[]) => {
+    if (!checkAuth()) return false;
+
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const book of books) {
+        const bookId = book.id;
+        const quantity = book.quantity || 1;
+
+        // Check current cart to get existing quantity
+        const existingItem = cart.value.find((item) => item.book.id === bookId);
+        const currentQuantity = existingItem ? existingItem.quantity : 0;
+        const totalQuantity = currentQuantity + quantity;
+
+        // Validate stock and quantity limits
+        const isStockAvailable = await cartService.checkStock(bookId, totalQuantity);
+        if (!isStockAvailable || totalQuantity > 5) {
+          failCount++;
+          continue; // Skip this book but continue with others
+        }
+
+        // Add to cart without notification
+        await cartService.addToCart(bookId, quantity);
+        successCount++;
+      }
+
+      // Refresh cart after adding all items
+      await fetchCart();
+
+      // Show appropriate notification based on results
+      if (successCount > 0) {
+        notifySuccess(`Đã thêm ${successCount} sách vào giỏ hàng!`);
+      }
+      if (failCount > 0) {
+        notifyInfo(`${failCount} sách không thể thêm do số lượng tồn kho không đủ hoặc vượt quá giới hạn.`);
+      }
+
+      return successCount > 0;
+    } catch (error) {
+      console.error("Failed to add all to cart", error);
+      return false;
+    }
+  }
   const updateCart = async (cartUpdates: any) => {
     try {
       const response = await cartService.updateCart(cartUpdates);
@@ -140,5 +197,6 @@ export const useCartStore = defineStore("cart", () => {
     removeCartItem,
     checkoutCart,
     checkStocks,
+    addAllToCart,
   };
 });

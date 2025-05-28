@@ -248,13 +248,21 @@
           </div>
         </el-carousel-item>
       </el-carousel>
+
+      <el-carousel ref="carouselRefForTablet" arrow="never" class="for-tablet" indicator-position="none">
+        <el-carousel-item v-for="(group, index) in relatedBooksGroupForTablet" :key="index" class="no-text-decoration">
+          <div class="product-section__category">
+            <ProductList :books="bookStore.relatedBooks"/>
+          </div>
+        </el-carousel-item>
+      </el-carousel>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import TheBreadCrumb from '@/components/User/Common/TheBreadCrumb.vue'
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useBookStore} from "@/stores/User/book.store";
 import {useWishlistStore} from "@/stores/User/wishlist.store";
 import {useRoute, useRouter} from 'vue-router'
@@ -269,6 +277,7 @@ const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const carouselRef = ref()
 const carouselRefForMobile = ref()
+const carouselRefForTablet = ref()
 const num = ref(1);
 const router = useRouter()
 const barColor = 'rgba(255,69,0,0.63)'
@@ -313,11 +322,12 @@ const handleSubmitReview = async () => {
 
   userReview.value.star = 0;
   userReview.value.comment = "";
-  notifySuccess("Cảm ơn bạn! Đánh giá sẽ hiển thị sau khi được Admin duyệt.");
+  // notifySuccess("Cảm ơn bạn! Đánh giá sẽ hiển thị sau khi được Admin duyệt.");
 };
 
 const booksPerSlide = 4
 const booksPerSlideForMobile = 2
+const booksPerSlideForTablet  = 3
 const relatedBooksGroup = computed(() => {
   const groups = []
   for (let i = 0; i < bookStore.relatedBooks.length; i += booksPerSlide) {
@@ -330,6 +340,15 @@ const relatedBooksGroupForMobile = computed(() => {
   const groups = []
   for (let i = 0; i < bookStore.relatedBooks.length; i += booksPerSlideForMobile) {
     groups.push(bookStore.relatedBooks.slice(i, i + booksPerSlideForMobile))
+  }
+  console.log('relatedBooksGroup:', groups)
+  return groups
+})
+
+const relatedBooksGroupForTablet = computed(() => {
+  const groups = []
+  for (let i = 0; i < bookStore.relatedBooks.length; i += booksPerSlideForTablet) {
+    groups.push(bookStore.relatedBooks.slice(i, i + booksPerSlideForTablet))
   }
   console.log('relatedBooksGroup:', groups)
   return groups
@@ -365,6 +384,20 @@ const showFullComment = ref<Record<number, boolean>>({});
 const toggleComment = (index: number) => {
   showFullComment.value[index] = !showFullComment.value[index];
 };
+
+watch(
+  () => route.params.slug,
+  async (newSlug) => {
+    if (newSlug) {
+      loading.value = true;
+      await bookStore.fetchBookBySlug(newSlug as string);
+      mainImage.value = bookStore.book?.image_url || '';
+      await bookStore.fetchReviews(newSlug as string);
+      await bookStore.fetchRelatedBooks(newSlug as string);
+      loading.value = false;
+    }
+  }
+);
 
 onMounted(async () => {
   const slug = route.params.slug as string;
@@ -478,7 +511,7 @@ onMounted(async () => {
       object-fit: cover;
 
       @media (min-width: 1440px) {
-        margin: 0 60px 0 30px;
+        margin: 0 70px 0 30px;
       }
 
       @media (max-width: 767px) {
@@ -523,6 +556,7 @@ onMounted(async () => {
 
       .review-count {
         margin-top: 2px;
+        font-size: 14px;
         margin-right: 10px;
         padding-right: 15px;
         border-right: 1px solid #FF4500C7;
@@ -531,7 +565,7 @@ onMounted(async () => {
 
     &--short-desc {
       line-height: 24px;
-      border-bottom: 1px solid #000;
+      border-bottom: 1px solid #00000080;
       padding-bottom: 30px;
     }
 
@@ -568,7 +602,7 @@ onMounted(async () => {
 
       .wishlist-btn {
         border-radius: 5px;
-        border: 1px solid #969696;
+        border: 1px solid #00000080;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -604,7 +638,7 @@ onMounted(async () => {
     &--delivery {
       display: flex;
       flex-direction: column;
-      margin-top: 50px;
+      margin-top: 40px;
       border: 1px solid #969696;
       border-radius: 5px;
 
@@ -781,7 +815,7 @@ onMounted(async () => {
   align-items: center;
   border-bottom: 1px solid #ccc;
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     flex-direction: column;
     padding: 20px;
   }
@@ -794,7 +828,11 @@ onMounted(async () => {
   flex: 0.3;
   padding-right: 60px;
 
-  @media (max-width: 768px) {
+  @media (min-width: 1023px) and (max-width: 1024px) {
+    padding-right: 30px;
+  }
+
+  @media (max-width: 767px) {
     padding-right: 0;
   }
 
@@ -861,7 +899,7 @@ onMounted(async () => {
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     width: 100%;
     padding: 0;
 
@@ -913,24 +951,53 @@ onMounted(async () => {
 
 :deep(.product-card) {
   width: 268px;
+  //
+  //@media (max-width: 768px) {
+  //  width: 48%;
+  //}
 
   @media (max-width: 768px) {
-    width: 48%;
-  }
-  @media (max-width: 380px) {
     width: 47.5%;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    width: 46.8% !important;
+  }
+
+  @media (min-width: 1024px) and (max-width: 1200px) {
+    width: 31% !important;
   }
 }
 
 :deep(.el-carousel__container) {
   height: 390px;
 
-  @media (max-width: 768px) {
-    height: 580px;
+  @media (max-width: 376px) {
+    height: 590px;
   }
-  @media (max-width: 380px) {
-    height: 500px;
+
+  @media (min-width: 377px) and (max-width: 368px) {
+    height: 630px;
   }
+
+  @media (min-width: 369px) and (max-width: 428px) {
+    height: 590px;
+  }
+
+  @media (min-width: 429px) and (max-width: 768px) {
+    height: 600px;
+  }
+
+  @media (min-width: 767px) and (max-width: 1023px) {
+    height: 470px;
+  }
+
+  @media (min-width: 1024px) and (max-width: 1024px) {
+    height: 350px;
+  }
+  //@media (max-width: 380px) {
+  //  height: 500px;
+  //}
 }
 
 :deep(.product-section__category) {
@@ -994,21 +1061,23 @@ onMounted(async () => {
   }
 }
 
-//@media (min-width: 1440px) {
-//  .book-detail__info--function {
-//    justify-content: start;
-//    gap: 15px;
-//  }
-//}
+@media (min-width: 1440px) {
+  .book-detail__info--function {
+    justify-content: start;
+    gap: 16px !important;
+  }
+}
 
 .availability-status {
   margin-top: 2px;
   font-weight: 400;
+  font-size: 14px;
 }
 
 .in-stock {
   color: #00FF66;
   font-weight: 400;
+  font-size: 14px;
 }
 
 .pagination-container {
@@ -1048,5 +1117,9 @@ onMounted(async () => {
   .el-icon {
     color: #fff;
   }
+}
+
+.product-section {
+  margin-top: 100px;
 }
 </style>

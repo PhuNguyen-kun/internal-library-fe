@@ -15,9 +15,13 @@
       </el-form-item>
 
       <el-form-item label="Mật khẩu mới" prop="new_password">
-        <el-input type="password" v-model="passwordData.new_password" show-password />
+        <el-input
+          type="password"
+          v-model="passwordData.new_password"
+          show-password
+          @input="validateNewPasswordConfirmation"
+        />
       </el-form-item>
-
       <el-form-item label="Nhập lại mật khẩu mới" prop="new_password_confirmation">
         <el-input type="password" v-model="passwordData.new_password_confirmation" show-password />
       </el-form-item>
@@ -49,7 +53,7 @@ const formRules = {
   old_password: [{ required: true, message: "Vui lòng nhập mật khẩu cũ", trigger: "blur" }],
   new_password: [
     { required: true, message: "Vui lòng nhập mật khẩu mới", trigger: "blur" },
-    { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự", trigger: "blur" },
+    { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự", trigger: "blur" },
   ],
   new_password_confirmation: [
     { required: true, message: "Vui lòng nhập lại mật khẩu mới", trigger: "blur" },
@@ -64,6 +68,12 @@ const formRules = {
       trigger: "blur",
     },
   ],
+};
+
+const validateNewPasswordConfirmation = () => {
+  if (passwordData.value.new_password_confirmation) {
+    passwordForm.value.validateField('new_password_confirmation');
+  }
 };
 
 const clearOldPasswordError = () => {

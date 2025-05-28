@@ -17,7 +17,6 @@ export  const profile = () => {
   return axiosInstance.get('/auth/profile')
 }
 
-
 export const loginGoogle = (token: string) => {
   return axiosInstance.post('/auth/login-google', {token})
 }

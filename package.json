@@ -10,7 +10,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "swagger": "docker run --rm -v $PWD/../:/local openapitools/openapi-generator-cli:v7.8.0 generate -i /local/kiai-library-swagger/src/swagger.yaml -g typescript-axios -o /local/kiai-library-frontend/src/services/api"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^43.3.1",

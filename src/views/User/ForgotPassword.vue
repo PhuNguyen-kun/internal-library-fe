@@ -50,8 +50,9 @@ const submit = async () => {
     console.log(response)
 
     notifySuccess('Link khôi phục đã được gửi tới Email của bạn!');
-    router.push('/login');
+    await router.push('/login');
   } catch (err: any) {
+    console.error(err);
     error.value = 'Tài khoản không hợp lệ!';
   } finally {
     loading.value = false;
@@ -82,7 +83,11 @@ const submit = async () => {
     padding: 0 0 0 40px;
 
     @media (max-width: 380px) {
-      padding: 0 5px;
+      padding: 0 15px;
+    }
+
+    @media (min-width: 380px) and (max-width: 768px) {
+      padding: 0 15px;
     }
   }
 

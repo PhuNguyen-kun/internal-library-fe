@@ -29,7 +29,7 @@
           <input
             v-model="authStore.password"
             type="password"
-            placeholder="Password"
+            placeholder="Mật khẩu"
             class="form-input"
             :class="{ error: authStore.errors.password || authStore.formError }"
             @input="validatePassword"
@@ -70,7 +70,7 @@ const authStore = useAuthStore();
 const validateEmail = () => {
   authStore.errors.email = '';
   if (!authStore.isValidEmail(authStore.email)) {
-    authStore.errors.email = 'Nhập email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
+    authStore.errors.email = 'Email có hậu tố "@kiaisoft.com" hoặc tiền tố "kiaisoft"';
   }
 };
 
@@ -125,7 +125,7 @@ const validatePassword = () => {
     margin-bottom: 20px;
     font-family: Inter, sans-serif;
     @media (max-width: 380px) {
-      font-size: 37px;
+      font-size: 34px;
       line-height: 47px;
     }
   }
@@ -221,4 +221,9 @@ const validatePassword = () => {
 //.auth {
 //  margin-bottom: 326px !important;
 //}
+
+.error-message {
+  line-height: 20px !important;
+  text-align: left !important;
+}
 </style>

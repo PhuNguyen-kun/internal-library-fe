@@ -147,12 +147,16 @@ onMounted(() => {
 }
 
 .profile {
-  @media (min-width: 768px) and (max-width: 1023px) {
-    width: 700px !important;
+  @media (min-width: 768px) and (max-width: 819px) {
+    width: 743px !important;
   }
 
-  @media (min-width: 1024px) and (max-width: 1200px) {
-    width: 800px !important;
+  @media (min-width: 820px) and (max-width: 820px) {
+    width: 731px !important;
   }
+
+  //@media (min-width: 1024px) and (max-width: 1200px) {
+  //  width: 800px !important;
+  //}
 }
 </style>

@@ -15,7 +15,7 @@ export const getUsers = async (params: {
         for (const key in params) {
           const value = params[key];
           if (Array.isArray(value)) {
-            value.forEach(v => query.append(`${key}[]`, String(v)));
+            query.append(key, value.join(','));
           } else if (value !== undefined && value !== null) {
             query.append(key, String(value));
           }

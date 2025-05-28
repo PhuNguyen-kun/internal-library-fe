@@ -143,13 +143,8 @@ const toggleFilter = () => {
     }
   }
 
-  // Chuyển trạng thái mở/đóng của filter
   isFilterOpen.value = !isFilterOpen.value;
 };
-
-// const closeFilter = () => {
-//   isFilterOpen.value = false;
-// }
 
 const toggleSort = (sortType: string) => {
   selectedSort.value = selectedSort.value === sortType ? undefined : sortType;
@@ -160,20 +155,8 @@ const selectedFilters = ref({
   sort: selectedSort.value,
 });
 
-const toggleSortForMobile = (sortType: string) => {
-  if (selectedFilters.value.sort === sortType) {
-    selectedFilters.value.sort = undefined;
-  } else {
-    selectedFilters.value.sort = sortType;
-  }
-};
-
 const applyFilters = () => {
-  // selectedSort.value = selectedFilters.value.sort;
   isFilterOpen.value = !isFilterOpen.value;
-  //
-  // updateFilters();
-  // bookStore.fetchBooks({ sort: selectedSort.value });
 };
 
 const updateFilters = () => {
@@ -191,7 +174,6 @@ const scrollToTop = () => {
 
 onMounted(() => {
   bookStore.fetchTopBorrowedBooks();
-  // bookStore.fetchBooks();
 });
 
 watchEffect(() => {

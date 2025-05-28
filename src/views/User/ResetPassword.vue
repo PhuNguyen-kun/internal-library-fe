@@ -162,6 +162,9 @@ const submit = async () => {
     outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
+    @media (min-width: 374px) and (max-width: 430px) {
+      width: 94% !important;
+    }
     @media (max-width: 768px) {
       width: 75%;
     }

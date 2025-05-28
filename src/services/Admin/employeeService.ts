@@ -1,7 +1,7 @@
 import axiosInstance from "@/utils/axiosInstance";
-import {notifyError} from "@/composables/notifications";
 
 export interface Employee {
+  data: Employee[];
   id: number;
   employee_code: string;
   full_name: string;
@@ -10,7 +10,10 @@ export interface Employee {
   updated_at: string;
 }
 
-export const getEmployees = async (searchTerm: string = '', perPage: number, page: number): Promise<Employee[]> => {
+export const getEmployees = async (searchTerm: string = '', perPage: number, page: number): Promise<{
+  pagination: any;
+  data: any
+}> => {
   try {
     const response = await axiosInstance.get("/admin/employees", {
       params: {
@@ -84,7 +87,7 @@ export const updateEmployee = async (id: number, employee: Partial<Employee>): P
   try {
     const response = await axiosInstance.put(`/admin/employees/${id}`, employee);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     if (error.response && error.response.status === 422) {
        console.error('Failed to update employee', error.response.data);
     } else {

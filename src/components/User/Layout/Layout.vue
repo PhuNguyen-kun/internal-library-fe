@@ -105,7 +105,7 @@
                     </li>
                     <li>
                       <img alt="" src="@/assets/img/User/borrow-history-icon.svg">
-                      <router-link to="/borrowing-history">Lịch sử mượn</router-link>
+                      <router-link to="/borrowing-history" @click.prevent>Lịch sử mượn</router-link>
                     </li>
                     <li @click="logout">
                       <img alt="" src="@/assets/img/User/logout-icon.svg">
@@ -306,6 +306,12 @@ watch(() => authStore.isLoggedIn, async (newVal) => {
   }
 });
 
+watch(() => route.path, (newPath) => {
+  if (newPath !== '/books') {
+    searchTerm.value = '';
+  }
+});
+
 onMounted(() => {
   window.addEventListener('resize', handleResize);
 });
@@ -368,6 +374,10 @@ onMounted(async () => {
   max-width: 1170px;
   margin: 0 auto;
   overflow-y: hidden;
+
+  @media (min-width: 1439px) {
+    width: 1170px;
+  }
 
   @media (max-width: 430px) {
     max-width: 430px;
@@ -711,6 +721,12 @@ onMounted(async () => {
     padding-bottom: 60px;
     max-width: 1170px;
     margin: 0 auto;
+    flex-wrap: wrap;
+
+    @media (min-width: 768px) and (max-width: 1024px) {
+      justify-content: start;
+      padding-left: 40px;
+    }
   }
 
   h3 {
@@ -855,15 +871,15 @@ onMounted(async () => {
     padding: 113px 35px 70px 35px !important;
   }
 
-  .footer .container {
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  .footer {
-    width: 100% !important;
-    padding: 20px !important;
-  }
+  //.footer .container {
+  //  flex-direction: column;
+  //  gap: 40px;
+  //}
+  //
+  //.footer {
+  //  width: 100% !important;
+  //  padding: 20px !important;
+  //}
 
   .header__announcement {
     display: none;
@@ -978,15 +994,15 @@ onMounted(async () => {
     padding: 113px 35px 70px 35px !important;
   }
 
-  .footer .container {
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  .footer {
-    width: 100% !important;
-    padding: 20px !important;
-  }
+  //.footer .container {
+  //  flex-direction: column;
+  //  gap: 40px;
+  //}
+  //
+  //.footer {
+  //  width: 100% !important;
+  //  padding: 20px !important;
+  //}
 
   .header__announcement {
     display: none;
@@ -1104,15 +1120,15 @@ onMounted(async () => {
   .main {
     padding: 113px 13px 70px 13px !important;
   }
-  .footer .container {
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  .footer {
-    width: 100% !important;
-    padding: 20px !important;
-  }
+  //.footer .container {
+  //  flex-direction: column;
+  //  gap: 40px;
+  //}
+  //
+  //.footer {
+  //  width: 100% !important;
+  //  padding: 20px !important;
+  //}
 
   .header__announcement {
     display: none;
@@ -1327,6 +1343,18 @@ onMounted(async () => {
   &::placeholder {
     color: #FAFAFA;
     opacity: 40%;
+  }
+}
+
+@media (max-width: 430px) {
+  .footer .container {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .footer {
+    width: 100% !important;
+    padding: 20px !important;
   }
 }
 </style>

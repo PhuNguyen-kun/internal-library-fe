@@ -4,7 +4,9 @@
       <!-- Danh mục -->
       <div class="sidebar__item">
         <div class="sidebar__item--title">
-          <el-icon class="sidebar-icon"><Grid /></el-icon>
+          <el-icon class="sidebar-icon">
+            <Grid/>
+          </el-icon>
           <span>Danh mục</span>
         </div>
         <div class="sidebar__item--content">
@@ -16,13 +18,13 @@
                 ref="categoryRefs"
               >
                 <label
-                  :class="{ 'active': selectedCategory === category.slug }"
                   :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+                  :class="{ 'active': selectedCategory === category.slug }"
                 >
                   <input
-                    type="checkbox"
-                    :value="category.slug"
                     :checked="selectedCategory === category.slug"
+                    :value="category.slug"
+                    type="checkbox"
                     @change="toggleFilter('category', category.slug)"
                   />
                   {{ category.name }}
@@ -36,7 +38,9 @@
       <!-- Tác giả -->
       <div class="sidebar__item">
         <div class="sidebar__item--title">
-          <el-icon class="sidebar-icon"><StarFilled /></el-icon>
+          <el-icon class="sidebar-icon">
+            <StarFilled/>
+          </el-icon>
           <span>Tác giả</span>
         </div>
         <div class="sidebar__item--content">
@@ -45,9 +49,9 @@
               <li v-for="author in bookStore.authors" :key="author.id">
                 <label :class="{ 'active': selectedAuthor === author.slug }">
                   <input
-                    type="checkbox"
-                    :value="author.slug"
                     :checked="selectedAuthor === author.slug"
+                    :value="author.slug"
+                    type="checkbox"
                     @change="toggleFilter('author', author.slug)"
                   />
                   {{ author.name }}
@@ -61,7 +65,9 @@
       <!-- Nhà xuất bản -->
       <div class="sidebar__item">
         <div class="sidebar__item--title">
-          <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
+          <el-icon class="sidebar-icon">
+            <HomeFilled/>
+          </el-icon>
           <span>Nhà xuất bản</span>
         </div>
         <div class="sidebar__item--content">
@@ -70,9 +76,9 @@
               <li v-for="publisher in bookStore.publishers" :key="publisher.id">
                 <label :class="{ 'active': selectedPublisher === publisher.slug }">
                   <input
-                    type="checkbox"
-                    :value="publisher.slug"
                     :checked="selectedPublisher === publisher.slug"
+                    :value="publisher.slug"
+                    type="checkbox"
                     @change="toggleFilter('publisher', publisher.slug)"
                   />
                   {{ publisher.name }}
@@ -89,10 +95,14 @@
       <div class="sidebar__item">
         <div class="sidebar__item--header" @click="toggleContent('category')">
           <div class="sidebar__item--title">
-            <el-icon class="sidebar-icon"><Grid /></el-icon>
+            <el-icon class="sidebar-icon">
+              <Grid/>
+            </el-icon>
             <span class="sidebar__item--name">Danh mục</span>
           </div>
-          <el-icon :class="{'rotate-180': isContentVisible.category}" class="arrow-down" size="large"><ArrowDown /></el-icon>
+          <el-icon :class="{'rotate-180': isContentVisible.category}" class="arrow-down" size="large">
+            <ArrowDown/>
+          </el-icon>
         </div>
         <transition name="slide">
           <div v-show="isContentVisible.category" class="sidebar__item--content">
@@ -104,13 +114,13 @@
                   ref="categoryRefs"
                 >
                   <label
-                    :class="{ 'active': selectedCategory === category.slug }"
                     :ref="el => category.slug === selectedCategory ? activeCategoryRef = el : null"
+                    :class="{ 'active': selectedCategory === category.slug }"
                   >
                     <input
-                      type="checkbox"
-                      :value="category.slug"
                       :checked="selectedCategory === category.slug"
+                      :value="category.slug"
+                      type="checkbox"
                       @change="toggleFilter('category', category.slug)"
                     />
                     {{ category.name }}
@@ -126,65 +136,77 @@
       <div class="sidebar__item">
         <div class="sidebar__item--header" @click="toggleContent('author')">
           <div class="sidebar__item--title">
-            <el-icon class="sidebar-icon"><StarFilled /></el-icon>
+            <el-icon class="sidebar-icon">
+              <StarFilled/>
+            </el-icon>
             <span class="sidebar__item--name">Tác giả</span>
           </div>
-          <el-icon :class="{'rotate-180': isContentVisible.author}" class="arrow-down" size="large"><ArrowDown /></el-icon>
+          <el-icon :class="{'rotate-180': isContentVisible.author}" class="arrow-down" size="large">
+            <ArrowDown/>
+          </el-icon>
         </div>
-        <div v-show="isContentVisible.author" class="sidebar__item--content">
-          <el-scrollbar>
-            <ul>
-              <li v-for="author in bookStore.authors" :key="author.id">
-                <label :class="{ 'active': selectedAuthor === author.slug }">
-                  <input
-                    type="checkbox"
-                    :value="author.slug"
-                    :checked="selectedAuthor === author.slug"
-                    @change="toggleFilter('author', author.slug)"
-                  />
-                  {{ author.name }}
-                </label>
-              </li>
-            </ul>
-          </el-scrollbar>
-        </div>
+        <transition name="slide">
+          <div v-show="isContentVisible.author" class="sidebar__item--content">
+            <el-scrollbar>
+              <ul>
+                <li v-for="author in bookStore.authors" :key="author.id">
+                  <label :class="{ 'active': selectedAuthor === author.slug }">
+                    <input
+                      :checked="selectedAuthor === author.slug"
+                      :value="author.slug"
+                      type="checkbox"
+                      @change="toggleFilter('author', author.slug)"
+                    />
+                    {{ author.name }}
+                  </label>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </transition>
       </div>
 
       <!-- Nhà xuất bản -->
       <div class="sidebar__item">
         <div class="sidebar__item--header" @click="toggleContent('publisher')">
           <div class="sidebar__item--title">
-            <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
+            <el-icon class="sidebar-icon">
+              <HomeFilled/>
+            </el-icon>
             <span class="sidebar__item--name">Nhà xuất bản</span>
           </div>
-          <el-icon :class="{'rotate-180': isContentVisible.publisher}" class="arrow-down" size="large"><ArrowDown /></el-icon>
+          <el-icon :class="{'rotate-180': isContentVisible.publisher}" class="arrow-down" size="large">
+            <ArrowDown/>
+          </el-icon>
         </div>
-        <div v-show="isContentVisible.publisher" class="sidebar__item--content">
-          <el-scrollbar>
-            <ul>
-              <li v-for="publisher in bookStore.publishers" :key="publisher.id">
-                <label :class="{ 'active': selectedPublisher === publisher.slug }">
-                  <input
-                    type="checkbox"
-                    :value="publisher.slug"
-                    :checked="selectedPublisher === publisher.slug"
-                    @change="toggleFilter('publisher', publisher.slug)"
-                  />
-                  {{ publisher.name }}
-                </label>
-              </li>
-            </ul>
-          </el-scrollbar>
-        </div>
+        <transition name="slide">
+          <div v-show="isContentVisible.publisher" class="sidebar__item--content">
+            <el-scrollbar>
+              <ul>
+                <li v-for="publisher in bookStore.publishers" :key="publisher.id">
+                  <label :class="{ 'active': selectedPublisher === publisher.slug }">
+                    <input
+                      :checked="selectedPublisher === publisher.slug"
+                      :value="publisher.slug"
+                      type="checkbox"
+                      @change="toggleFilter('publisher', publisher.slug)"
+                    />
+                    {{ publisher.name }}
+                  </label>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, watchEffect, onMounted, nextTick, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useBookStore } from "@/stores/User/book.store";
+<script lang="ts" setup>
+import {nextTick, onMounted, ref, watch, watchEffect} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import {useBookStore} from "@/stores/User/book.store";
 
 const route = useRoute();
 const router = useRouter();
@@ -207,7 +229,7 @@ const activeCategoryRef = ref<HTMLElement | null>(null);
 const firstLoad = ref(true);
 
 const toggleFilter = (type: string, value: string) => {
-  const newQuery = { ...route.query };
+  const newQuery = {...route.query};
 
   if (newQuery[type] === value) {
     delete newQuery[type];
@@ -215,7 +237,7 @@ const toggleFilter = (type: string, value: string) => {
     newQuery[type] = value;
   }
 
-  router.push({ query: newQuery });
+  router.push({query: newQuery});
 };
 
 watchEffect(() => {
@@ -264,6 +286,7 @@ watch(selectedCategory, () => {
       display: flex;
       justify-content: space-between;
       padding-right: 10px;
+
       .arrow-down {
         margin-top: 8px;
         margin-left: 8px;
@@ -307,6 +330,7 @@ watch(selectedCategory, () => {
             cursor: pointer;
             display: flex;
             align-items: center;
+            line-height: 20px;
             gap: 10px;
             font-size: 14px;
             padding: 5px;
@@ -317,7 +341,9 @@ watch(selectedCategory, () => {
               cursor: pointer;
               appearance: none;
               min-width: 17px;
+              width: 17px;
               height: 17px;
+              flex-shrink: 0;
               border: 2px solid #999;
               border-radius: 99999px;
               display: flex;
@@ -363,16 +389,20 @@ watch(selectedCategory, () => {
 }
 
 .slide-enter-active, .slide-leave-active {
-  transition: max-height 0.5s ease-in-out;
-}
-
-.slide-enter, .slide-leave-to {
-  max-height: 0;
+  transition: max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s ease;
   overflow: hidden;
 }
 
-.slide-enter-to, .slide-leave {
-  max-height: 500px;
+.slide-enter-from, .slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.slide-enter-to, .slide-leave-from {
+  max-height: 1000px; /* Set closer to actual content height */
+  opacity: 1;
+  overflow: hidden;
 }
 
 @media (max-width: 1200px) {
